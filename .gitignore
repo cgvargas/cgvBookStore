@@ -1,0 +1,34 @@
+# Python
+*.pyc
+*.pyo
+__pycache__/
+
+# Ambiente virtual
+venv/
+env/
+.env
+
+# Arquivos de configurações do Django
+*.sqlite3
+db.sqlite3
+
+# Pastas de mídia e arquivos estáticos
+media/
+staticfiles/
+
+# Arquivos de configuração do sistema
+.DS_Store
+Thumbs.db
+
+# Arquivo de configuração do IDE (se aplicável)
+.idea/
+.vscode/
+
+# Outros
+*.log
+*.pot
+*.py[cod]
+*.DS_Store
+*.coverage
+coverage.xml
+*.egg-info/

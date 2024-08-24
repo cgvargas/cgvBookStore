@@ -1,0 +1,13 @@
+<!-- core/templates/index.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Livros Disponíveis</h2>
+<ul>
+    {% for livro in livros %}
+        <li>
+            <a href="{% url 'livro_detail' livro.id %}">{{ livro.titulo }} - {{ livro.autor }}</a>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}
