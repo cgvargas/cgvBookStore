@@ -1,0 +1,5 @@
+<!-- core/templates/bootstrap4/uni_form.html -->
+<form class="form" method="post">
+    {% csrf_token %}
+    {{ super|safe }}  <!-- Renderiza os campos do formulário -->
+</form>

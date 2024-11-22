@@ -1,0 +1,14 @@
+<!-- templates/livro_detail.html -->
+{% extends 'base.html' %}
+
+{% block title %}{{ livro.titulo }}{% endblock %}
+
+{% block content %}
+    <h1>{{ livro.titulo }}</h1>
+    <img src="{{ livro.imagem.url }}" class="img-fluid" alt="Capa de {{ livro.titulo }}">
+    <p><strong>Autor:</strong> {{ livro.autor }}</p>
+    <p><strong>Descrição:</strong> {{ livro.descricao }}</p>
+    <p><strong>Downloads:</strong> {{ livro.downloads }}</p>
+    <a href="#" class="btn btn-primary">Mais detalhes</a>
+    <a href="{% url 'index' %}" class="btn btn-secondary">Voltar</a>
+{% endblock %}

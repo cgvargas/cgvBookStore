@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
 
-from decouple import config  # Se estiver usando python-decouple para gerenciar configurações
+from decouple import config  # Se estiver a usar python-decouple para gerenciar configurações
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,6 +26,10 @@ SECRET_KEY = 'django-insecure-=&+e$)$-ri&-n^q2=4gz+shsen^gn^^$@m6iww+9w5(t3&a)@&
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+
+# API KEY do Google Books
+GOOGLE_BOOKS_API_KEY = config('GOOGLE_BOOKS_API_KEY')
+
 
 ALLOWED_HOSTS = ['*']
 
@@ -42,11 +46,12 @@ INSTALLED_APPS = [
     'core',
     'bootstrap4',
     'stdimage',
+    'crispy_forms',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-  # 'whitenoise.middleware.WhiteNoiseMiddleware',
+    # 'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -60,7 +65,7 @@ ROOT_URLCONF = 'bookstore.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates'],
+        'DIRS': [os.path.join(BASE_DIR, 'core', 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -68,6 +73,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.csrf',
             ],
         },
     },
@@ -121,8 +127,38 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT=os.path.join(BASE_DIR,'staticfiles')
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Outras configurações...
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'index'  # Ou o nome da URL para onde deseja redirecionar após o login
+LOGOUT_REDIRECT_URL = 'index'  # Redireciona para a página inicial após o logout
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+
+# Configurações de e-mail (para enviar e-mails usando o Gmail)
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')  # Seu e-mail do Gmail
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')  # Sua senha do Gmail ou app password
+
+# Remetente padrão para e-mails enviados pelo sistema
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+ADMINS = [
+    ('Claudio Vargas', 'claudio.g.vargas@gmail.com'),
+    ('Anna Clara S. Vargas', 'anna.cs.vargas@outlook.com')
+]
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

@@ -16,10 +16,15 @@ Including another URLconf
 """
 # bookstore/urls.py
 
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+
+from core.views import CustomLoginView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),  # Incluindo as URLs do app core
-]
+    path('login/', CustomLoginView.as_view(), name='login'),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

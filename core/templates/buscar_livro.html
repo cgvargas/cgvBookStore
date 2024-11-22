@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Buscar Livros{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Buscar Livros</h1>
+    <form method="get" action="{% url 'buscar_livro' %}" class="d-flex justify-content-center">
+        {% csrf_token %}
+        <div class="input-group w-75">
+            <select name="tipo_busca" class="form-select" aria-label="Tipo de busca">
+                <option value="titulo">Título</option>
+                <option value="autor">Autor</option>
+            </select>
+            <input type="text" name="query" class="form-control" placeholder="Digite sua busca" required>
+            <button type="submit" class="btn btn-primary">Buscar</button>
+        </div>
+    </form>
+
+    <div class="mt-5">
+        {% if livros %}
+            <h2 class="mb-4">Resultados da Busca:</h2>
+            <ul class="list-group">
+                {% for livro in livros %}
+                    <li class="list-group-item mb-3">
+                        <div class="row">
+                            <div class="col-md-3">
+                                {% if livro.volumeInfo.imageLinks %}
+                                    <img src="{{ livro.volumeInfo.imageLinks.thumbnail }}" class="img-fluid rounded" alt="Capa de {{ livro.volumeInfo.title }}">
+                                {% else %}
+                                    <img src="https://via.placeholder.com/150" class="img-fluid rounded" alt="Imagem não disponível">
+                                {% endif %}
+                            </div>
+                            <div class="col-md-9">
+                                <h5>{{ livro.volumeInfo.title }}</h5>
+                                <p><strong>Autor(es):</strong> {{ livro.volumeInfo.authors|join:", " }}</p>
+                                <p>{{ livro.volumeInfo.description|truncatechars:200 }}</p>
+                                <p><a href="{% url 'detalhe_livro' livro.id %}" class="btn btn-secondary btn-sm">Ver Detalhes</a></p>
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-muted text-center">Nenhum livro encontrado.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

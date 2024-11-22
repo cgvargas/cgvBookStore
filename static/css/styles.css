@@ -1,0 +1,145 @@
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Corpo da página */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #F9F9F9;
+    color: #333;
+}
+
+/* Navbar */
+.navbar {
+    background-color: #343a40;
+    padding: 10px 20px;
+}
+
+.navbar-nav .nav-link {
+    color: white;
+    margin-right: 15px;
+    font-size: 1rem;
+    transition: color 0.3s;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #ffcc00;
+}
+
+.nav-link.active {
+    color: orange !important;
+}
+
+/* Linha decorativa */
+.line {
+    height: 3px;
+    background-color: orange;
+    transition: background-color 0.3s ease;
+}
+
+.line:hover {
+    background-color: #ff6600;
+}
+
+/* Conteúdo principal */
+.container {
+    max-width: 1100px;
+    margin: 20px auto;
+    padding: 15px;
+}
+
+/* Footer */
+.footer {
+    background-color: #343a40;
+    color: #ffffff;
+    padding: 20px 0;
+}
+
+.footer .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.footer-link {
+    color: #ffcc00;
+    text-decoration: none;
+    margin: 0 5px;
+    font-size: 1.05rem; /* Diminuindo o tamanho da fonte */
+    transition: color 0.3s;
+}
+
+.footer-link:hover {
+    color: #ff6600;
+}
+
+.footer-separator {
+    margin: 0 5px;
+    color: #ffffff;
+}
+
+.footer-link-nowrap {
+    white-space: nowrap;
+}
+
+.footer .bi {
+    color: #ffffff;
+    transition: color 0.2s;
+}
+
+.footer .bi:hover {
+    color: #ffd700;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .navbar-nav {
+        text-align: center;
+    }
+
+    .navbar-nav .nav-link {
+        margin: 5px 0;
+    }
+
+    .footer .container {
+        flex-direction: column;
+    }
+
+    .footer .col-md-4 {
+        margin-bottom: 10px;
+    }
+}
+
+/* Define o tamanho da logo */
+.navbar-brand .logo {
+    height: 60px;
+    width: auto;
+}
+
+/* Estilo do nome CG BookStore */
+.navbar-brand .store-name {
+    font-size: 1.5rem; /* Tamanho maior */
+    color: orange;     /* Cor laranja */
+    font-weight: bold; /* Deixa o texto mais marcante */
+}
+
+/* Estilo adicional para o formulário */
+.form-control {
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Botão de envio */
+.btn-primary {
+    padding: 10px 20px;
+    border-radius: 5px;
+}
+
+/* Layout para a área de redes sociais */
+ul.list-unstyled li {
+    margin-bottom: 10px;
+}

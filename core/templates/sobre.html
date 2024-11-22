@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Cadastro de Cliente{% endblock %}
+
+{% block content %}
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'index' %}">Início</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'sobre' %}">Sobre</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'contato' %}">Contato</a>
+                </li>
+            </ul>
+        </div>
+
+    <div class="container text-center my-4">
+        <img src="{% static 'images/storeBook.png' %}" alt="Logo da CGV Book Store" class="img-fluid" style="max-width: 100%; height: auto;">
+    </div>
+
+    <div class="container mt-4">
+        <h1 class="text-center">CG BookStore</h1>
+        <p class="lead text-center">A sua livraria virtual favorita, onde o amor pelos livros encontra a tecnologia.</p>
+
+        <div class="row mt-5">
+            <div class="col-md-6">
+                <h3>A Nossa História</h3>
+                    <p>
+                        A CG BookStore foi fundada em 2023 com a missão de conectar leitores ao vasto universo literário.
+                        Nossa equipe apaixonada por livros identificou uma oportunidade única de combinar o mundo literário
+                        com a tecnologia, criando uma plataforma onde leitores podem explorar informações detalhadas sobre
+                        suas obras favoritas, diretamente do acervo do Google Books.
+                    </p>
+            </div>
+            <div class="col-md-6">
+                <h3>O que Oferecemos</h3>
+                    <p>
+                        Na CG BookStore, você encontrará uma extensa coleção de informações sobre livros em diversas
+                        categorias. Desde os bestsellers mais recentes até os clássicos intemporais, a nossa plataforma
+                        é o lugar ideal para pesquisar e localizar informações sobre o seu próximo grande livro.
+                    </p>
+                    <ul>
+                        <li>Informações detalhadas de livros físicos e eBooks</li>
+                        <li>Recomendações baseadas em tendências e preferências</li>
+                        <li>Links para aquisição em livrarias confiáveis</li>
+                        <li>Navegação rápida e intuitiva para facilitar sua busca</li>
+                    </ul>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-md-6">
+                <h3>O Nosso Compromisso</h3>
+                    <p>
+                        Estamos comprometidos em oferecer uma experiência simples e eficiente. Nosso objetivo é facilitar
+                        o acesso a informações precisas sobre livros, ajudando os usuários a fazer escolhas informadas
+                        para suas possíveis compras em livrarias físicas ou digitais.
+                    </p>
+            </div>
+            <div class="col-md-6">
+                <h3>Visão para o Futuro</h3>
+                    <p>
+                        A CG BookStore está sempre inovando. Planejamos expandir nossa plataforma com novos recursos,
+                        como resenhas de leitores, listas personalizadas e eventos virtuais com autores. Nosso objetivo
+                        é nos consolidar como a principal fonte de informações literárias, conectando leitores ao redor
+                        do mundo ao maravilhoso universo da leitura.
+                    </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contato{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h2>Entre em contato conosco</h2>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" autocomplete="off">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="id_nome">Nome</label>
+                        <input type="text" class="form-control" id="id_nome" name="nome" required>
+                        {% if form.nome.errors %}
+                            <div class="text-danger">{{ form.nome.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="id_email">Email</label>
+                        <input type="email" class="form-control" id="id_email" name="email" required>
+                        {% if form.email.errors %}
+                            <div class="text-danger">{{ form.email.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="id_assunto">Assunto</label>
+                        <input type="text" class="form-control" id="id_assunto" name="assunto" required>
+                        {% if form.assunto.errors %}
+                            <div class="text-danger">{{ form.assunto.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="id_mensagem">Mensagem</label>
+                        <textarea class="form-control" id="id_mensagem" name="mensagem" rows="5" required></textarea>
+                        {% if form.mensagem.errors %}
+                            <div class="text-danger">{{ form.mensagem.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-primary">Enviar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
