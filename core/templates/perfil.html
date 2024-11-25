@@ -3,9 +3,134 @@
 {% block title %}Perfil{% endblock %}
 
 {% block content %}
-    <div class="container mt-5">
-        <h2>Bem-vindo, {{ user.username }}</h2>
-        <p>Email: {{ user.email }}</p>
-        <p><a href="{% url 'logout' %}" class="btn btn-primary">Logout</a></p>
+<div class="container mt-5">
+    <div class="row">
+        <!-- Coluna para "Minha Biblioteca" e pesquisa -->
+        <div class="col-md-3">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-4">
+                    <h4 class="fw-bold">Minha Biblioteca</h4>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="searchLibrary" placeholder="Pesquisar na biblioteca...">
+                    </div>
+
+                    <!-- Botão Nova Estante -->
+                    <div class="mb-3">
+                        <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#newShelfModal">Nova Estante</button>
+                    </div>
+
+                    <!-- Links com contadores dinâmicos -->
+                    <ul class="list-unstyled" id="shelfLinks">
+                        <li><a href="#" class="text-decoration-none" id="favoritesLink">Favoritos <span id="favoritesCount">(0)</span></a></li>
+                        <li><a href="#" class="text-decoration-none" id="readingLink">Lendo também <span id="readingCount">(0)</span></a></li>
+                        <li><a href="#" class="text-decoration-none" id="toReadLink">Vou ler <span id="toReadCount">(0)</span></a></li>
+                        <li><a href="#" class="text-decoration-none" id="readLink">Lidos <span id="readCount">(0)</span></a></li>
+                        <li><a href="#" class="text-decoration-none" id="recommendedLink">Livros Indicados <span id="recommendedCount">(0)</span></a></li>
+                        <li><a href="#" class="text-decoration-none" id="historyLink">Meu Histórico <span id="historyCount">(0)</span></a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coluna para o perfil do usuário -->
+        <div class="col-md-9">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-4 text-center">
+                    <h1 class="display-5 fw-bold" id="userGreeting">Bem-vindo, {{ user.username }} 👋</h1>
+                    <p class="text-muted">Aproveite ao máximo sua experiência!</p>
+                    <hr>
+                    <div class="py-3">
+                        <h5 class="mb-3"><i class="bi bi-envelope"></i> Email:</h5>
+                        <p class="text-muted">{{ user.email }}</p>
+                    </div>
+                    <a href="{% url 'logout' %}" class="btn btn-danger btn-lg rounded-pill">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
+
+<!-- Modal para Nova Estante -->
+<div class="modal fade" id="newShelfModal" tabindex="-1" aria-labelledby="newShelfModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newShelfModalLabel"><strong>Criar Nova Estante</strong></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Formulário para criar nova estante -->
+                <div class="mb-3">
+                    <label for="shelfName" class="form-label"><strong>Nome</strong></label>
+                    <input type="text" class="form-control" id="shelfName" placeholder="Digite o nome da estante">
+                </div>
+                <div class="mb-3">
+                    <label for="shelfDescription" class="form-label"><strong>Descrição (opcional)</strong></label>
+                    <textarea class="form-control" id="shelfDescription" rows="5" placeholder="Escreva uma descrição para a estante (máximo 5 linhas)"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="createShelfBtn">Criar Estante</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const title = document.querySelector('h1');
+        title.style.transition = 'transform 0.5s ease';
+        setTimeout(() => {
+            title.style.transform = 'scale(1.1)';
+            setTimeout(() => title.style.transform = 'scale(1)', 500);
+        }, 300);
+
+        // Função para alterar a cor do link e mostrar lista de livros no perfil
+        function updateLinkAndBooksCount(linkId, countId, sectionId, newGreeting) {
+            const link = document.getElementById(linkId);
+            const count = document.getElementById(countId);
+            const userGreeting = document.getElementById('userGreeting');
+            link.addEventListener("click", (e) => {
+                e.preventDefault();
+                link.classList.toggle("text-primary");  // Altera a cor do link
+                count.classList.toggle("fw-bold");
+                userGreeting.textContent = newGreeting;  // Atualiza o nome de usuário na saudação
+                document.getElementById(sectionId).style.display = 'block';  // Exibe a lista de livros
+            });
+        }
+
+        // Atualizando os links para os livros
+        updateLinkAndBooksCount('favoritesLink', 'favoritesCount', 'favoritesSection', 'Favoritos de {{ user.username }}');
+        updateLinkAndBooksCount('readingLink', 'readingCount', 'readingSection', 'Lendo de {{ user.username }}');
+        updateLinkAndBooksCount('toReadLink', 'toReadCount', 'toReadSection', 'Vou ler de {{ user.username }}');
+        updateLinkAndBooksCount('readLink', 'readCount', 'readSection', 'Lidos de {{ user.username }}');
+        updateLinkAndBooksCount('recommendedLink', 'recommendedCount', 'recommendedSection', 'Livros indicados por {{ user.username }}');
+        updateLinkAndBooksCount('historyLink', 'historyCount', 'historySection', 'Histórico de {{ user.username }}');
+
+        // Lógica do botão "Criar Estante"
+        const createShelfBtn = document.getElementById('createShelfBtn');
+        createShelfBtn.addEventListener("click", () => {
+            const shelfName = document.getElementById('shelfName').value;
+            const shelfDescription = document.getElementById('shelfDescription').value;
+
+            if (shelfName) {
+                // Criando o novo link para a estante
+                const shelfLinks = document.getElementById('shelfLinks');
+                const newLink = document.createElement("li");
+                newLink.innerHTML = `<a href="#" class="text-decoration-none">${shelfName} <span>(0)</span></a>`;
+                shelfLinks.insertBefore(newLink, document.getElementById('historyLink')); // Inserindo o novo link acima do link "Meu Histórico"
+
+                // Limpa os campos do formulário e fecha o modal
+                document.getElementById('shelfName').value = '';
+                document.getElementById('shelfDescription').value = '';
+                $('#newShelfModal').modal('hide');
+            } else {
+                alert("Por favor, digite o nome da estante.");
+            }
+        });
+    });
+</script>
 {% endblock %}

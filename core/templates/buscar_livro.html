@@ -3,47 +3,202 @@
 {% block title %}Buscar Livros{% endblock %}
 
 {% block content %}
+<style>
+.google-search-box {
+    height: 55px !important;  /* Aumentei a altura */
+}
+
+.google-search-box select {
+    width: 120px !important;  /* Aumentei de 90px para 120px */
+    flex: 0 0 120px !important;  /* Aumentei junto com o width */
+    height: 55px !important;  /* Mesma altura do container */
+}
+
+.google-search-box input {
+    height: 55px !important;  /* Mesma altura do container */
+}
+
+.google-search-box .btn-search {
+    height: 55px !important;  /* Mesma altura do container */
+}
+
+@media (max-width: 768px) {
+    .google-search-box,
+    .google-search-box select,
+    .google-search-box input,
+    .google-search-box .btn-search {
+        height: 48px !important;  /* Altura para mobile */
+    }
+
+    .google-search-box select {
+        width: 100px !important;  /* Aumentei de 80px para 100px no mobile */
+        flex: 0 0 100px !important;
+    }
+}
+</style>
+
 <div class="container mt-5">
-    <h1 class="text-center mb-4">Buscar Livros</h1>
-    <form method="get" action="{% url 'buscar_livro' %}" class="d-flex justify-content-center">
-        {% csrf_token %}
-        <div class="input-group w-75">
-            <select name="tipo_busca" class="form-select" aria-label="Tipo de busca">
-                <option value="titulo">Título</option>
-                <option value="autor">Autor</option>
-            </select>
-            <input type="text" name="query" class="form-control" placeholder="Digite sua busca" required>
-            <button type="submit" class="btn btn-primary">Buscar</button>
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="text-center">Buscar Livros</h1>
+            <p class="text-center text-muted">Encontre seus próximos livros favoritos</p>
+        </div>
+    </div>
+
+    <!-- Formulário de Busca -->
+    <form method="get" action="{% url 'buscar_livro' %}" class="mb-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10"> <!-- Aumentei de col-md-8 para col-md-10 -->
+                <div class="input-group input-group-lg google-search-box">
+                    <select name="tipo_busca" class="form-control">
+                        <option value="titulo" {% if tipo_busca == 'titulo' %}selected{% endif %}>Título</option>
+                        <option value="autor" {% if tipo_busca == 'autor' %}selected{% endif %}>Autor</option>
+                    </select>
+                    <input type="text"
+                           name="query"
+                           class="form-control"
+                           placeholder="Digite sua busca..."
+                           value="{{ query }}"
+                           required>
+                    <div class="input-group-append">
+                        <button class="btn btn-search" type="submit">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </form>
-
-    <div class="mt-5">
+    <!-- Resultados e Filtros -->
+    {% if query %}
         {% if livros %}
-            <h2 class="mb-4">Resultados da Busca:</h2>
-            <ul class="list-group">
+            <!-- Contador de Resultados -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="mb-0">{{ livros|length }} resultado(s) encontrado(s)</h5>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown">
+                        Ordenar por
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <a class="dropdown-item" href="?query={{ query }}&tipo_busca={{ tipo_busca }}&order=title">Título</a>
+                        <a class="dropdown-item" href="?query={{ query }}&tipo_busca={{ tipo_busca }}&order=date">Data de Publicação</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid de Livros -->
+            <div class="row">
                 {% for livro in livros %}
-                    <li class="list-group-item mb-3">
-                        <div class="row">
-                            <div class="col-md-3">
-                                {% if livro.volumeInfo.imageLinks %}
-                                    <img src="{{ livro.volumeInfo.imageLinks.thumbnail }}" class="img-fluid rounded" alt="Capa de {{ livro.volumeInfo.title }}">
-                                {% else %}
-                                    <img src="https://via.placeholder.com/150" class="img-fluid rounded" alt="Imagem não disponível">
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 shadow-sm hover-shadow transition-all">
+                            <div class="card-header text-center bg-white border-0 pt-3">
+                                <img src="{{ livro.imagem }}"
+                                     class="img-fluid rounded"
+                                     alt="Capa de {{ livro.titulo }}"
+                                     style="height: 250px; object-fit: contain;">
+                            </div>
+
+                            <div class="card-body">
+                                <h5 class="card-title text-primary mb-2">{{ livro.titulo }}</h5>
+                                <p class="card-text mb-1"><strong>Autor:</strong> {{ livro.autor }}</p>
+
+                                {% if livro.editora %}
+                                    <p class="card-text mb-1 text-muted small">
+                                        <i class="bi bi-building"></i> {{ livro.editora }}
+                                    </p>
+                                {% endif %}
+
+                                {% if livro.data_publicacao %}
+                                    <p class="card-text mb-1 text-muted small">
+                                        <i class="bi bi-calendar3"></i> {{ livro.data_publicacao }}
+                                    </p>
+                                {% endif %}
+
+                                {% if livro.paginas %}
+                                    <p class="card-text mb-1 text-muted small">
+                                        <i class="bi bi-book"></i> {{ livro.paginas }} páginas
+                                    </p>
+                                {% endif %}
+
+                                {% if livro.descricao %}
+                                    <p class="card-text mt-3">
+                                        {{ livro.descricao|truncatewords:30 }}
+                                    </p>
                                 {% endif %}
                             </div>
-                            <div class="col-md-9">
-                                <h5>{{ livro.volumeInfo.title }}</h5>
-                                <p><strong>Autor(es):</strong> {{ livro.volumeInfo.authors|join:", " }}</p>
-                                <p>{{ livro.volumeInfo.description|truncatechars:200 }}</p>
-                                <p><a href="{% url 'detalhe_livro' livro.id %}" class="btn btn-secondary btn-sm">Ver Detalhes</a></p>
+
+                            <div class="card-footer bg-white border-top-0 pb-3">
+                                <div class="d-flex justify-content-between">
+                                    <a href="{% url 'detalhe_livro' livro.id %}"
+                                       class="btn btn-primary">
+                                       <i class="bi bi-info-circle"></i> Detalhes
+                                    </a>
+                                    {% if livro.link %}
+                                        <a href="{{ livro.link }}"
+                                           class="btn btn-outline-secondary"
+                                           target="_blank">
+                                           <i class="bi bi-google"></i> Google Books
+                                        </a>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
-                    </li>
+                    </div>
                 {% endfor %}
-            </ul>
+            </div>
+
+            <!-- Paginação -->
+            {% if page_obj.has_other_pages %}
+            <nav aria-label="Navegação de página" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?query={{ query }}&tipo_busca={{ tipo_busca }}&page={{ page_obj.previous_page_number }}">
+                                <i class="bi bi-chevron-left"></i> Anterior
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?query={{ query }}&tipo_busca={{ tipo_busca }}&page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?query={{ query }}&tipo_busca={{ tipo_busca }}&page={{ page_obj.next_page_number }}">
+                                Próxima <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
         {% else %}
-            <p class="text-muted text-center">Nenhum livro encontrado.</p>
+            <div class="alert alert-info text-center">
+                <i class="bi bi-info-circle me-2"></i>
+                Nenhum livro encontrado para "{{ query }}". Tente uma busca diferente.
+            </div>
         {% endif %}
-    </div>
+    {% endif %}
 </div>
+
+<!-- Adicione isso ao seu CSS -->
+<style>
+    .hover-shadow:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    }
+    .transition-all {
+        transition: all 0.3s ease-in-out;
+    }
+</style>
 {% endblock %}

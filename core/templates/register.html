@@ -1,44 +1,133 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-    <div class="container d-flex justify-content-center align-items-center" style="height: 100vh;">
-        <div class="card p-4" style="max-width: 350px; width: 100%; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 10px;">
-            <h2 class="text-center mb-4">Registrar</h2>
-            <form method="post" action="{% url 'register' %}">
-                {% csrf_token %}
-                <div class="form-group mb-3">
-                    <label for="id_username">Usuário</label>
-                    <input type="text" name="username" id="id_username" class="form-control" required style="border-radius: 5px; padding: 10px;">
-                    {% if form.username.errors %}
-                        <div class="text-danger">{{ form.username.errors }}</div>
-                    {% endif %}
+<div class="container d-flex justify-content-center align-items-center min-vh-100 py-5">
+    <div class="card p-4" style="max-width: 400px; width: 100%; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); border-radius: 15px;">
+        <div class="text-center mb-4">
+            <img src="{% static 'images/logo.png' %}" alt="Logo" class="mb-3" style="max-width: 100px;">
+            <h2 class="fw-bold">Criar Conta</h2>
+            <p class="text-muted">Junte-se à nossa comunidade de leitores</p>
+        </div>
+
+        <form method="post" action="{% url 'register' %}" class="needs-validation" novalidate id="registrationForm" autocomplete="off">
+            {% csrf_token %}
+
+            <!-- Username field -->
+            <div class="form-group mb-3">
+                <label for="id_username" class="form-label">Usuário *</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light">
+                        <i class="bi bi-person"></i>
+                    </span>
+                    <input type="text" name="username" id="id_username"
+                           class="form-control {% if form.username.errors %}is-invalid{% endif %}"
+                           required minlength="3"
+                           pattern="^[a-zA-Z0-9_]*$"
+                           autocomplete="new-username"
+                           title="Apenas letras, números e underscore são permitidos">
+                    <div class="invalid-feedback">
+                        {% if form.username.errors %}
+                            {{ form.username.errors|join:", " }}
+                        {% else %}
+                            Por favor, escolha um nome de usuário válido
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="form-group mb-3">
-                    <label for="id_email">Email</label>
-                    <input type="email" name="email" id="id_email" class="form-control" required style="border-radius: 5px; padding: 10px;">
-                    {% if form.email.errors %}
-                        <div class="text-danger">{{ form.email.errors }}</div>
-                    {% endif %}
+                <small class="text-muted">Mínimo de 3 caracteres, sem espaços</small>
+            </div>
+
+            <!-- Email field -->
+            <div class="form-group mb-3">
+                <label for="id_email" class="form-label">Email *</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light">
+                        <i class="bi bi-envelope"></i>
+                    </span>
+                    <input type="email" name="email" id="id_email"
+                           class="form-control {% if form.email.errors %}is-invalid{% endif %}"
+                           required
+                           autocomplete="new-email">
+                    <div class="invalid-feedback">
+                        {% if form.email.errors %}
+                            {{ form.email.errors|join:", " }}
+                        {% else %}
+                            Por favor, forneça um email válido
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="form-group mb-3">
-                    <label for="id_password1">Senha</label>
-                    <input type="password" name="password1" id="id_password1" class="form-control" required style="border-radius: 5px; padding: 10px;">
-                    {% if form.password1.errors %}
-                        <div class="text-danger">{{ form.password1.errors }}</div>
-                    {% endif %}
+            </div>
+
+            <!-- Password field -->
+            <div class="form-group mb-3">
+                <label for="id_password1" class="form-label">Senha *</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light">
+                        <i class="bi bi-lock"></i>
+                    </span>
+                    <input type="password" name="password1" id="id_password1"
+                           class="form-control {% if form.password1.errors %}is-invalid{% endif %}"
+                           required minlength="8"
+                           autocomplete="new-password">
+                    <button class="btn btn-outline-secondary" type="button" id="togglePassword1">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                    <div class="invalid-feedback">
+                        {% if form.password1.errors %}
+                            {{ form.password1.errors|join:", " }}
+                        {% else %}
+                            A senha deve ter pelo menos 8 caracteres
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="form-group mb-4">
-                    <label for="id_password2">Confirme a Senha</label>
-                    <input type="password" name="password2" id="id_password2" class="form-control" required style="border-radius: 5px; padding: 10px;">
-                    {% if form.password2.errors %}
-                        <div class="text-danger">{{ form.password2.errors }}</div>
-                    {% endif %}
+                <div class="password-strength mt-2" id="password-strength"></div>
+            </div>
+
+            <!-- Confirm Password field -->
+            <div class="form-group mb-4">
+                <label for="id_password2" class="form-label">Confirme a Senha *</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light">
+                        <i class="bi bi-lock-check"></i>
+                    </span>
+                    <input type="password" name="password2" id="id_password2"
+                           class="form-control {% if form.password2.errors %}is-invalid{% endif %}"
+                           required
+                           autocomplete="new-password">
+                    <button class="btn btn-outline-secondary" type="button" id="togglePassword2">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                    <div class="invalid-feedback">
+                        {% if form.password2.errors %}
+                            {{ form.password2.errors|join:", " }}
+                        {% else %}
+                            As senhas devem coincidir
+                        {% endif %}
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary w-100" style="border-radius: 5px; padding: 10px;">Registrar</button>
-            </form>
-            {% if form.non_field_errors %}
-                <div class="text-danger mt-3">{{ form.non_field_errors }}</div>
-            {% endif %}
+            </div>
+
+            <!-- Terms and conditions -->
+            <div class="form-check mb-4">
+                <input class="form-check-input" type="checkbox" id="termsCheck" required>
+                <label class="form-check-label" for="termsCheck">
+                    Eu concordo com os <a href="{% url 'termos_uso' %}" target="_blank">Termos de Uso</a> e
+                    <a href="{% url 'politica_privacidade' %}" target="_blank">Política de Privacidade</a>
+                </label>
+                <div class="invalid-feedback">
+                    Você deve concordar com os termos para continuar
+                </div>
+            </div>
+
+            <!-- Submit button -->
+            <button type="submit" class="btn btn-primary btn-block w-100">Registrar</button>
+        </form>
+
+        <div class="text-center mt-3">
+            <p class="text-muted">
+                Já possui uma conta? <a href="{% url 'login' %}">Entrar</a>
+            </p>
         </div>
     </div>
+</div>
 {% endblock %}

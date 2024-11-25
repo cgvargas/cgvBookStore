@@ -51,6 +51,64 @@ body {
     padding: 15px;
 }
 
+/* Estilos do Buscador Google Books */
+.google-search-box {
+    border-radius: 24px !important;
+    border: 1px solid #dfe1e5 !important;
+    box-shadow: none !important;
+    transition: all 0.3s ease-in-out;
+    background: white;
+}
+
+.google-search-box:hover,
+.google-search-box:focus-within {
+    box-shadow: 0 1px 6px rgba(32,33,36,.28) !important;
+    border-color: rgba(223,225,229,0) !important;
+}
+
+.google-search-box select {
+    border: none !important;
+    border-radius: 24px 0 0 24px !important;
+    background-color: transparent;
+    font-size: 16px;
+    color: #202124;
+    min-width: 120px;
+}
+
+.google-search-box input {
+    border: none !important;
+    border-radius: 0 !important;
+    padding-left: 0;
+    font-size: 16px;
+    color: #202124;
+    height: 48px;
+}
+
+.google-search-box .btn-search {
+    border-radius: 0 24px 24px 0 !important;
+    padding: 0.5rem 1.5rem;
+    background-color: #1a73e8;
+    color: white;
+    border: none;
+    font-size: 16px;
+    height: 48px;
+    transition: background-color 0.2s;
+}
+
+.google-search-box .btn-search:hover {
+    background-color: #1557b0;
+}
+
+.google-search-box select:focus,
+.google-search-box input:focus {
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.google-search-box .input-group-append {
+    margin-left: 0 !important;
+}
+
 /* Footer */
 .footer {
     background-color: #343a40;
@@ -69,7 +127,7 @@ body {
     color: #ffcc00;
     text-decoration: none;
     margin: 0 5px;
-    font-size: 1.05rem; /* Diminuindo o tamanho da fonte */
+    font-size: 1.05rem;
     transition: color 0.3s;
 }
 
@@ -112,6 +170,16 @@ body {
     .footer .col-md-4 {
         margin-bottom: 10px;
     }
+
+    .google-search-box {
+        border-radius: 16px !important;
+    }
+
+    .google-search-box select,
+    .google-search-box input,
+    .google-search-box .btn-search {
+        height: 42px;
+    }
 }
 
 /* Define o tamanho da logo */
@@ -122,9 +190,9 @@ body {
 
 /* Estilo do nome CG BookStore */
 .navbar-brand .store-name {
-    font-size: 1.5rem; /* Tamanho maior */
-    color: orange;     /* Cor laranja */
-    font-weight: bold; /* Deixa o texto mais marcante */
+    font-size: 1.5rem;
+    color: orange;
+    font-weight: bold;
 }
 
 /* Estilo adicional para o formulário */
@@ -142,4 +210,33 @@ body {
 /* Layout para a área de redes sociais */
 ul.list-unstyled li {
     margin-bottom: 10px;
+}
+
+/* Estilização para inputs do login */
+.login-input {
+    width: 100%;
+    max-width: 300px;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+/* Botão de login */
+.login-button {
+    width: 100%;
+    max-width: 300px;
+    padding: 10px;
+    background-color: #ff6600;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.login-button:hover {
+    background-color: #ff4500;
 }

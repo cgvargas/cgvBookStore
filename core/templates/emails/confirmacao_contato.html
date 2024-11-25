@@ -1,0 +1,60 @@
+{# templates/emails/confirmacao_contato.html #}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .content {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .footer {
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <p>Prezado(a) {{ nome }},</p>
+
+        <p>Esta é uma mensagem automática para confirmar que recebemos seu contato sobre "{{ assunto }}".</p>
+
+        <p>Em breve, nossa equipe analisará sua mensagem e retornaremos o contato.</p>
+
+        <div class="warning">
+            <strong>ATENÇÃO:</strong> Este é um e-mail automático.
+            <br>Por favor, não responda esta mensagem.
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Atenciosamente,<br>Equipe CG.BookStore</p>
+    </div>
+</body>
+</html>

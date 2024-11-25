@@ -93,6 +93,16 @@ DATABASES = {
 }
 
 
+# Configuração de cache
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'cache_table',  # Nome da tabela no SQLite
+        'TIMEOUT': 7 * 24 * 60 * 60,  # Cache expira em 7 dias (em segundos)
+    }
+}
+
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -135,9 +145,14 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Outras configurações...
 
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'index'  # Ou o nome da URL para onde deseja redirecionar após o login
-LOGOUT_REDIRECT_URL = 'index'  # Redireciona para a página inicial após o logout
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'  # Ou o nome da URL para onde deseja redirecionar após o login
+LOGOUT_REDIRECT_URL = '/'  # Redireciona para a página inicial após o logout
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 
@@ -164,3 +179,7 @@ ADMINS = [
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# settings.py (adicione ao final do arquivo)
+
+AUTH_USER_MODEL = 'core.CustomUser'
