@@ -1,0 +1,10 @@
+<svg viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        .book-text { font-family: Arial, sans-serif; fill: #d0d0d0; text-anchor: middle; }
+    </style>
+    <rect width="200" height="300" fill="#e8f4ff"/>
+    <path d="M20 40 L180 40 L180 260 L20 260 Z" fill="#a0a0a0" stroke="#a0a0a0" stroke-width="2"/>
+    <text x="100" y="150" class="book-text" font-size="24">Capa não</text>
+    <text x="100" y="170" class="book-text" font-size="24">disponível</text>
+    <text x="100" y="200" class="book-text" font-size="16">CG.BookStore</text>
+</svg>

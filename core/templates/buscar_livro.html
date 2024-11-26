@@ -1,25 +1,27 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
 {% block title %}Buscar Livros{% endblock %}
 
 {% block content %}
 <style>
 .google-search-box {
-    height: 55px !important;  /* Aumentei a altura */
+    height: 55px !important;
 }
 
 .google-search-box select {
-    width: 120px !important;  /* Aumentei de 90px para 120px */
-    flex: 0 0 120px !important;  /* Aumentei junto com o width */
-    height: 55px !important;  /* Mesma altura do container */
+    width: 120px !important;
+    flex: 0 0 120px !important;
+    height: 55px !important;
 }
 
 .google-search-box input {
-    height: 55px !important;  /* Mesma altura do container */
+    height: 55px !important;
 }
 
 .google-search-box .btn-search {
-    height: 55px !important;  /* Mesma altura do container */
+    height: 55px !important;
 }
 
 @media (max-width: 768px) {
@@ -27,11 +29,11 @@
     .google-search-box select,
     .google-search-box input,
     .google-search-box .btn-search {
-        height: 48px !important;  /* Altura para mobile */
+        height: 48px !important;
     }
 
     .google-search-box select {
-        width: 100px !important;  /* Aumentei de 80px para 100px no mobile */
+        width: 100px !important;
         flex: 0 0 100px !important;
     }
 }
@@ -48,11 +50,16 @@
     <!-- Formulário de Busca -->
     <form method="get" action="{% url 'buscar_livro' %}" class="mb-5">
         <div class="row justify-content-center">
-            <div class="col-md-10"> <!-- Aumentei de col-md-8 para col-md-10 -->
+            <div class="col-md-10">
                 <div class="input-group input-group-lg google-search-box">
                     <select name="tipo_busca" class="form-control">
                         <option value="titulo" {% if tipo_busca == 'titulo' %}selected{% endif %}>Título</option>
                         <option value="autor" {% if tipo_busca == 'autor' %}selected{% endif %}>Autor</option>
+                        <option value="editora" {% if tipo_busca == 'editora' %}selected{% endif %}>Editora</option>
+                        <option value="isbn" {% if tipo_busca == 'isbn' %}selected{% endif %}>ISBN</option>
+                        <option value="categoria" {% if tipo_busca == 'categoria' %}selected{% endif %}>Categoria/Assunto</option>
+                        <option value="idioma" {% if tipo_busca == 'idioma' %}selected{% endif %}>Idioma</option>
+                        <option value="texto_livre" {% if tipo_busca == 'texto_livre' %}selected{% endif %}>Texto Livre</option>
                     </select>
                     <input type="text"
                            name="query"
@@ -69,124 +76,129 @@
             </div>
         </div>
     </form>
+
     <!-- Resultados e Filtros -->
-    {% if query %}
-        {% if livros %}
-            <!-- Contador de Resultados -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="mb-0">{{ livros|length }} resultado(s) encontrado(s)</h5>
-                <div class="btn-group">
-                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown">
-                        Ordenar por
-                    </button>
-                    <div class="dropdown-menu dropdown-menu-right">
-                        <a class="dropdown-item" href="?query={{ query }}&tipo_busca={{ tipo_busca }}&order=title">Título</a>
-                        <a class="dropdown-item" href="?query={{ query }}&tipo_busca={{ tipo_busca }}&order=date">Data de Publicação</a>
+    {% if request.path == '/buscar/' %}  {# Verifica se estamos na página de busca #}
+        {% if query %}
+            {% if livros %}
+                <!-- Contador de Resultados -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="mb-0">{{ livros|length }} resultado(s) encontrado(s)</h5>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown">
+                            Ordenar por
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="?query={{ query }}&tipo_busca={{ tipo_busca }}&order=title">Título</a>
+                            <a class="dropdown-item" href="?query={{ query }}&tipo_busca={{ tipo_busca }}&order=date">Data de Publicação</a>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Grid de Livros -->
-            <div class="row">
-                {% for livro in livros %}
-                    <div class="col-md-4 mb-4">
-                        <div class="card h-100 shadow-sm hover-shadow transition-all">
-                            <div class="card-header text-center bg-white border-0 pt-3">
-                                <img src="{{ livro.imagem }}"
-                                     class="img-fluid rounded"
-                                     alt="Capa de {{ livro.titulo }}"
-                                     style="height: 250px; object-fit: contain;">
-                            </div>
+                <!-- Grid de Livros -->
+                <div class="row">
+                    {% for livro in livros %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100 shadow-sm hover-shadow transition-all">
+                                <!-- No card onde exibe a imagem -->
+                                <div class="card-header text-center bg-white border-0 pt-3">
+                                    <img src="{% if livro.imagem %}{{ livro.imagem }}{% else %}{% static 'images/capa-indisponivel.svg' %}{% endif %}"
+                                         class="img-fluid rounded"
+                                         alt="Capa de {{ livro.titulo }}"
+                                         style="height: 250px; object-fit: contain;"
+                                         onerror="this.onerror=null; this.src='{% static 'images/capa-indisponivel.svg' %}';">
+                                </div>
 
-                            <div class="card-body">
-                                <h5 class="card-title text-primary mb-2">{{ livro.titulo }}</h5>
-                                <p class="card-text mb-1"><strong>Autor:</strong> {{ livro.autor }}</p>
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary mb-2">{{ livro.titulo }}</h5>
+                                    <p class="card-text mb-1"><strong>Autor:</strong> {{ livro.autor }}</p>
 
-                                {% if livro.editora %}
-                                    <p class="card-text mb-1 text-muted small">
-                                        <i class="bi bi-building"></i> {{ livro.editora }}
-                                    </p>
-                                {% endif %}
-
-                                {% if livro.data_publicacao %}
-                                    <p class="card-text mb-1 text-muted small">
-                                        <i class="bi bi-calendar3"></i> {{ livro.data_publicacao }}
-                                    </p>
-                                {% endif %}
-
-                                {% if livro.paginas %}
-                                    <p class="card-text mb-1 text-muted small">
-                                        <i class="bi bi-book"></i> {{ livro.paginas }} páginas
-                                    </p>
-                                {% endif %}
-
-                                {% if livro.descricao %}
-                                    <p class="card-text mt-3">
-                                        {{ livro.descricao|truncatewords:30 }}
-                                    </p>
-                                {% endif %}
-                            </div>
-
-                            <div class="card-footer bg-white border-top-0 pb-3">
-                                <div class="d-flex justify-content-between">
-                                    <a href="{% url 'detalhe_livro' livro.id %}"
-                                       class="btn btn-primary">
-                                       <i class="bi bi-info-circle"></i> Detalhes
-                                    </a>
-                                    {% if livro.link %}
-                                        <a href="{{ livro.link }}"
-                                           class="btn btn-outline-secondary"
-                                           target="_blank">
-                                           <i class="bi bi-google"></i> Google Books
-                                        </a>
+                                    {% if livro.editora %}
+                                        <p class="card-text mb-1 text-muted small">
+                                            <i class="bi bi-building"></i> {{ livro.editora }}
+                                        </p>
                                     {% endif %}
+
+                                    {% if livro.data_publicacao %}
+                                        <p class="card-text mb-1 text-muted small">
+                                            <i class="bi bi-calendar3"></i> {{ livro.data_publicacao }}
+                                        </p>
+                                    {% endif %}
+
+                                    {% if livro.paginas %}
+                                        <p class="card-text mb-1 text-muted small">
+                                            <i class="bi bi-book"></i> {{ livro.paginas }} páginas
+                                        </p>
+                                    {% endif %}
+
+                                    {% if livro.descricao %}
+                                        <p class="card-text mt-3">
+                                            {{ livro.descricao|truncatewords:30 }}
+                                        </p>
+                                    {% endif %}
+                                </div>
+
+                                <div class="card-footer bg-white border-top-0 pb-3">
+                                    <div class="d-flex justify-content-between">
+                                        <a href="{% url 'detalhe_livro' livro.id %}"
+                                           class="btn btn-primary">
+                                           <i class="bi bi-info-circle"></i> Detalhes
+                                        </a>
+                                        {% if livro.link %}
+                                            <a href="{{ livro.link }}"
+                                               class="btn btn-outline-secondary"
+                                               target="_blank">
+                                               <i class="bi bi-google"></i> Google Books
+                                            </a>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                {% endfor %}
-            </div>
+                    {% endfor %}
+                </div>
 
-            <!-- Paginação -->
-            {% if page_obj.has_other_pages %}
-            <nav aria-label="Navegação de página" class="mt-4">
-                <ul class="pagination justify-content-center">
-                    {% if page_obj.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?query={{ query }}&tipo_busca={{ tipo_busca }}&page={{ page_obj.previous_page_number }}">
-                                <i class="bi bi-chevron-left"></i> Anterior
-                            </a>
-                        </li>
-                    {% endif %}
-
-                    {% for num in page_obj.paginator.page_range %}
-                        {% if page_obj.number == num %}
-                            <li class="page-item active">
-                                <span class="page-link">{{ num }}</span>
-                            </li>
-                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <!-- Paginação -->
+                {% if page_obj.has_other_pages %}
+                <nav aria-label="Navegação de página" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
                             <li class="page-item">
-                                <a class="page-link" href="?query={{ query }}&tipo_busca={{ tipo_busca }}&page={{ num }}">{{ num }}</a>
+                                <a class="page-link" href="?query={{ query }}&tipo_busca={{ tipo_busca }}&page={{ page_obj.previous_page_number }}">
+                                    <i class="bi bi-chevron-left"></i> Anterior
+                                </a>
                             </li>
                         {% endif %}
-                    {% endfor %}
 
-                    {% if page_obj.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?query={{ query }}&tipo_busca={{ tipo_busca }}&page={{ page_obj.next_page_number }}">
-                                Próxima <i class="bi bi-chevron-right"></i>
-                            </a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?query={{ query }}&tipo_busca={{ tipo_busca }}&page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?query={{ query }}&tipo_busca={{ tipo_busca }}&page={{ page_obj.next_page_number }}">
+                                    Próxima <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+
+            {% else %}
+                <div class="alert alert-info text-center">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Nenhum livro encontrado para "{{ query }}". Tente uma busca diferente.
+                </div>
             {% endif %}
-
-        {% else %}
-            <div class="alert alert-info text-center">
-                <i class="bi bi-info-circle me-2"></i>
-                Nenhum livro encontrado para "{{ query }}". Tente uma busca diferente.
-            </div>
         {% endif %}
     {% endif %}
 </div>
