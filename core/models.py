@@ -213,3 +213,25 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return self.username
 
+
+class EstanteLivro(models.Model):
+    TIPO_CHOICES = [
+        ('favorito', 'Favorito'),
+        ('lendo', 'Lendo'),
+        ('vou_ler', 'Vou ler'),
+        ('lido', 'Lido'),
+    ]
+
+    usuario = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    livro_id = models.CharField(max_length=100)  # ID do Google Books
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
+    titulo = models.CharField(max_length=255)
+    autor = models.CharField(max_length=255)
+    capa = models.URLField()
+    data_lancamento = models.CharField(max_length=50)
+    sinopse = models.TextField()
+    data_adicao = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['titulo']
+

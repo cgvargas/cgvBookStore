@@ -1,6 +1,6 @@
 # core/urls.py
 from django.urls import path
-from .views import (
+from .views import (  # Já está apontando para o novo local através do __init__.py
     CustomLogoutView,
     CustomLoginView,
     index,
@@ -13,8 +13,10 @@ from .views import (
     politica_privacidade,
     termos_uso,
     register,
-    check_username
+    check_username,
+    adicionar_estante
 )
+
 
 urlpatterns = [
     # Páginas principais
@@ -34,9 +36,12 @@ urlpatterns = [
 
     # Google Books
     path('buscar/', buscar_livro, name='buscar_livro'),
-    path('livros/google/<str:livro_id>/', google_book_detail, name='detalhe_livro'),
+    path('livros/google/<str:livro_id>/', google_book_detail, name='google_book_detail'),
 
     # Páginas legais
     path('politica-privacidade/', politica_privacidade, name='politica_privacidade'),
     path('termos-uso/', termos_uso, name='termos_uso'),
+
+    # Adicionar livros nas estantes
+    path('adicionar-estante/<str:livro_id>/', adicionar_estante, name='adicionar_estante'),
 ]

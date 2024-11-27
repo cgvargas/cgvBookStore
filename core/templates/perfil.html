@@ -1,136 +1,261 @@
 {% extends 'base.html' %}
 
-{% block title %}Perfil{% endblock %}
+{% block title %}Perfil - {{ user.nome_completo }}{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<style>
+.book-slider {
+    position: relative;
+    padding: 0 40px;
+    margin: 1rem 0;
+}
+
+.book-container {
+    display: flex;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    gap: 1rem;
+    padding: 1rem 0;
+}
+
+.book-card {
+    min-width: 150px;
+    flex: 0 0 150px;
+}
+
+.book-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: contain;
+}
+
+.slider-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.5);
+    border: none;
+    color: white;
+    width: 30px;
+    height: 60px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s;
+    border-radius: 4px;
+}
+
+.slider-btn:hover {
+    background: rgba(0,0,0,0.7);
+}
+
+.slider-btn.prev {
+    left: 0;
+}
+
+.slider-btn.next {
+    right: 0;
+}
+
+.slider-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.section-title {
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+}
+
+.section-favoritos {
+    background-color: rgba(13, 110, 253, 0.1);
+}
+
+.section-lendo {
+    background-color: rgba(25, 135, 84, 0.1);
+}
+
+.section-vou-ler {
+    background-color: rgba(13, 202, 240, 0.1);
+}
+
+.section-lidos {
+    background-color: rgba(108, 117, 125, 0.1);
+}
+</style>
+
+<div class="container mt-4">
     <div class="row">
-        <!-- Coluna para "Minha Biblioteca" e pesquisa -->
+        <!-- Sidebar com informações do usuário -->
         <div class="col-md-3">
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-body p-4">
-                    <h4 class="fw-bold">Minha Biblioteca</h4>
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
                     <div class="mb-3">
-                        <input type="text" class="form-control" id="searchLibrary" placeholder="Pesquisar na biblioteca...">
+                        <i class="bi bi-person-circle" style="font-size: 4rem;"></i>
                     </div>
-
-                    <!-- Botão Nova Estante -->
-                    <div class="mb-3">
-                        <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#newShelfModal">Nova Estante</button>
-                    </div>
-
-                    <!-- Links com contadores dinâmicos -->
-                    <ul class="list-unstyled" id="shelfLinks">
-                        <li><a href="#" class="text-decoration-none" id="favoritesLink">Favoritos <span id="favoritesCount">(0)</span></a></li>
-                        <li><a href="#" class="text-decoration-none" id="readingLink">Lendo também <span id="readingCount">(0)</span></a></li>
-                        <li><a href="#" class="text-decoration-none" id="toReadLink">Vou ler <span id="toReadCount">(0)</span></a></li>
-                        <li><a href="#" class="text-decoration-none" id="readLink">Lidos <span id="readCount">(0)</span></a></li>
-                        <li><a href="#" class="text-decoration-none" id="recommendedLink">Livros Indicados <span id="recommendedCount">(0)</span></a></li>
-                        <li><a href="#" class="text-decoration-none" id="historyLink">Meu Histórico <span id="historyCount">(0)</span></a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <!-- Coluna para o perfil do usuário -->
-        <div class="col-md-9">
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-body p-4 text-center">
-                    <h1 class="display-5 fw-bold" id="userGreeting">Bem-vindo, {{ user.username }} 👋</h1>
-                    <p class="text-muted">Aproveite ao máximo sua experiência!</p>
+                    <h5 class="card-title">{{ user.nome_completo }}</h5>
+                    <p class="text-muted">@{{ user.username }}</p>
+                    <p class="text-muted">
+                        <i class="bi bi-book"></i> {{ total_livros }} livros
+                    </p>
                     <hr>
-                    <div class="py-3">
-                        <h5 class="mb-3"><i class="bi bi-envelope"></i> Email:</h5>
-                        <p class="text-muted">{{ user.email }}</p>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'buscar_livro' %}" class="btn btn-primary">
+                            <i class="bi bi-search"></i> Buscar Livros
+                        </a>
+                        <a href="{% url 'logout' %}" class="btn btn-outline-danger">
+                            <i class="bi bi-box-arrow-right"></i> Sair
+                        </a>
                     </div>
-                    <a href="{% url 'logout' %}" class="btn btn-danger btn-lg rounded-pill">
-                        <i class="bi bi-box-arrow-right"></i> Logout
-                    </a>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<!-- Modal para Nova Estante -->
-<div class="modal fade" id="newShelfModal" tabindex="-1" aria-labelledby="newShelfModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="newShelfModalLabel"><strong>Criar Nova Estante</strong></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <!-- Conteúdo principal com as estantes -->
+        <div class="col-md-9">
+            <!-- Favoritos -->
+            <div class="section-title section-favoritos">
+                <h4 class="d-flex justify-content-between align-items-center m-0">
+                    <span><i class="bi bi-star"></i> Favoritos</span>
+                    <span class="badge bg-primary rounded-pill">{{ favoritos.count }}</span>
+                </h4>
             </div>
-            <div class="modal-body">
-                <!-- Formulário para criar nova estante -->
-                <div class="mb-3">
-                    <label for="shelfName" class="form-label"><strong>Nome</strong></label>
-                    <input type="text" class="form-control" id="shelfName" placeholder="Digite o nome da estante">
+
+            <div class="book-slider">
+                <button class="slider-btn prev" onclick="slideBooks('favoritos', 'prev')">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="book-container" id="favoritos-container">
+                    {% for livro in favoritos %}
+                        <div class="book-card">
+                            <div class="card border-0 bg-transparent">
+                                <img src="{{ livro.capa }}" alt="{{ livro.titulo }}">
+                                <div class="card-body p-2">
+                                    <h6 class="card-title small mb-0 text-truncate">{{ livro.titulo }}</h6>
+                                    <p class="card-text small text-muted text-truncate">{{ livro.autor }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted">Nenhum livro favorito ainda.</p>
+                    {% endfor %}
                 </div>
-                <div class="mb-3">
-                    <label for="shelfDescription" class="form-label"><strong>Descrição (opcional)</strong></label>
-                    <textarea class="form-control" id="shelfDescription" rows="5" placeholder="Escreva uma descrição para a estante (máximo 5 linhas)"></textarea>
-                </div>
+                <button class="slider-btn next" onclick="slideBooks('favoritos', 'next')">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="createShelfBtn">Criar Estante</button>
+
+            <!-- Lendo -->
+            <div class="section-title section-lendo">
+                <h4 class="d-flex justify-content-between align-items-center m-0">
+                    <span><i class="bi bi-book-half"></i> Lendo</span>
+                    <span class="badge bg-success rounded-pill">{{ lendo.count }}</span>
+                </h4>
+            </div>
+
+            <div class="book-slider">
+                <button class="slider-btn prev" onclick="slideBooks('lendo', 'prev')">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="book-container" id="lendo-container">
+                    {% for livro in lendo %}
+                        <div class="book-card">
+                            <div class="card border-0 bg-transparent">
+                                <img src="{{ livro.capa }}" alt="{{ livro.titulo }}">
+                                <div class="card-body p-2">
+                                    <h6 class="card-title small mb-0 text-truncate">{{ livro.titulo }}</h6>
+                                    <p class="card-text small text-muted text-truncate">{{ livro.autor }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted">Nenhum livro sendo lido atualmente.</p>
+                    {% endfor %}
+                </div>
+                <button class="slider-btn next" onclick="slideBooks('lendo', 'next')">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- Vou Ler -->
+            <div class="section-title section-vou-ler">
+                <h4 class="d-flex justify-content-between align-items-center m-0">
+                    <span><i class="bi bi-bookmark"></i> Vou Ler</span>
+                    <span class="badge bg-info rounded-pill">{{ vou_ler.count }}</span>
+                </h4>
+            </div>
+
+            <div class="book-slider">
+                <button class="slider-btn prev" onclick="slideBooks('vou_ler', 'prev')">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="book-container" id="vou_ler-container">
+                    {% for livro in vou_ler %}
+                        <div class="book-card">
+                            <div class="card border-0 bg-transparent">
+                                <img src="{{ livro.capa }}" alt="{{ livro.titulo }}">
+                                <div class="card-body p-2">
+                                    <h6 class="card-title small mb-0 text-truncate">{{ livro.titulo }}</h6>
+                                    <p class="card-text small text-muted text-truncate">{{ livro.autor }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted">Nenhum livro na lista de leitura futura.</p>
+                    {% endfor %}
+                </div>
+                <button class="slider-btn next" onclick="slideBooks('vou_ler', 'next')">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- Lidos -->
+            <div class="section-title section-lidos">
+                <h4 class="d-flex justify-content-between align-items-center m-0">
+                    <span><i class="bi bi-check2-circle"></i> Lidos</span>
+                    <span class="badge bg-secondary rounded-pill">{{ lidos.count }}</span>
+                </h4>
+            </div>
+
+            <div class="book-slider">
+                <button class="slider-btn prev" onclick="slideBooks('lidos', 'prev')">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="book-container" id="lidos-container">
+                    {% for livro in lidos %}
+                        <div class="book-card">
+                            <div class="card border-0 bg-transparent">
+                                <img src="{{ livro.capa }}" alt="{{ livro.titulo }}">
+                                <div class="card-body p-2">
+                                    <h6 class="card-title small mb-0 text-truncate">{{ livro.titulo }}</h6>
+                                    <p class="card-text small text-muted text-truncate">{{ livro.autor }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted">Nenhum livro lido registrado.</p>
+                    {% endfor %}
+                </div>
+                <button class="slider-btn next" onclick="slideBooks('lidos', 'next')">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const title = document.querySelector('h1');
-        title.style.transition = 'transform 0.5s ease';
-        setTimeout(() => {
-            title.style.transform = 'scale(1.1)';
-            setTimeout(() => title.style.transform = 'scale(1)', 500);
-        }, 300);
+function slideBooks(containerId, direction) {
+    const container = document.getElementById(`${containerId}-container`);
+    const scrollAmount = 150 * 3; // 3 livros por vez
 
-        // Função para alterar a cor do link e mostrar lista de livros no perfil
-        function updateLinkAndBooksCount(linkId, countId, sectionId, newGreeting) {
-            const link = document.getElementById(linkId);
-            const count = document.getElementById(countId);
-            const userGreeting = document.getElementById('userGreeting');
-            link.addEventListener("click", (e) => {
-                e.preventDefault();
-                link.classList.toggle("text-primary");  // Altera a cor do link
-                count.classList.toggle("fw-bold");
-                userGreeting.textContent = newGreeting;  // Atualiza o nome de usuário na saudação
-                document.getElementById(sectionId).style.display = 'block';  // Exibe a lista de livros
-            });
-        }
-
-        // Atualizando os links para os livros
-        updateLinkAndBooksCount('favoritesLink', 'favoritesCount', 'favoritesSection', 'Favoritos de {{ user.username }}');
-        updateLinkAndBooksCount('readingLink', 'readingCount', 'readingSection', 'Lendo de {{ user.username }}');
-        updateLinkAndBooksCount('toReadLink', 'toReadCount', 'toReadSection', 'Vou ler de {{ user.username }}');
-        updateLinkAndBooksCount('readLink', 'readCount', 'readSection', 'Lidos de {{ user.username }}');
-        updateLinkAndBooksCount('recommendedLink', 'recommendedCount', 'recommendedSection', 'Livros indicados por {{ user.username }}');
-        updateLinkAndBooksCount('historyLink', 'historyCount', 'historySection', 'Histórico de {{ user.username }}');
-
-        // Lógica do botão "Criar Estante"
-        const createShelfBtn = document.getElementById('createShelfBtn');
-        createShelfBtn.addEventListener("click", () => {
-            const shelfName = document.getElementById('shelfName').value;
-            const shelfDescription = document.getElementById('shelfDescription').value;
-
-            if (shelfName) {
-                // Criando o novo link para a estante
-                const shelfLinks = document.getElementById('shelfLinks');
-                const newLink = document.createElement("li");
-                newLink.innerHTML = `<a href="#" class="text-decoration-none">${shelfName} <span>(0)</span></a>`;
-                shelfLinks.insertBefore(newLink, document.getElementById('historyLink')); // Inserindo o novo link acima do link "Meu Histórico"
-
-                // Limpa os campos do formulário e fecha o modal
-                document.getElementById('shelfName').value = '';
-                document.getElementById('shelfDescription').value = '';
-                $('#newShelfModal').modal('hide');
-            } else {
-                alert("Por favor, digite o nome da estante.");
-            }
-        });
-    });
+    if (direction === 'next') {
+        container.scrollLeft += scrollAmount;
+    } else {
+        container.scrollLeft -= scrollAmount;
+    }
+}
 </script>
 {% endblock %}

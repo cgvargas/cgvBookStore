@@ -140,7 +140,7 @@
 
                                 <div class="card-footer bg-white border-top-0 pb-3">
                                     <div class="d-flex justify-content-between">
-                                        <a href="{% url 'detalhe_livro' livro.id %}"
+                                        <a href="{% url 'google_book_detail' livro.id %}"
                                            class="btn btn-primary">
                                            <i class="bi bi-info-circle"></i> Detalhes
                                         </a>
@@ -193,12 +193,18 @@
                 </nav>
                 {% endif %}
 
-            {% else %}
-                <div class="alert alert-info text-center">
-                    <i class="bi bi-info-circle me-2"></i>
-                    Nenhum livro encontrado para "{{ query }}". Tente uma busca diferente.
-                </div>
-            {% endif %}
+                {% else %}
+                    {% if messages %}
+                        {% for message in messages %}
+                            {% if 'busca' in message.tags %}
+                                <div class="alert alert-info text-center">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    {{ message }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% endif %}
         {% endif %}
     {% endif %}
 </div>

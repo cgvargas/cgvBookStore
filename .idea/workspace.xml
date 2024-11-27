@@ -5,11 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e53a36a2-09c4-4f9a-adfc-da02e0b05877" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/static/images/capa-indisponivel.svg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/core/views/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/core/views/auth_views.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/core/views/book_views.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/core/views/general_views.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/core/views/profile_views.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/core/views/utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bookstore/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/bookstore/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/templates/buscar_livro.html" beforeDir="false" afterPath="$PROJECT_DIR$/core/templates/buscar_livro.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/templates/detalhe_livro_google.html" beforeDir="false" afterPath="$PROJECT_DIR$/core/templates/detalhe_livro_google.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/templates/perfil.html" beforeDir="false" afterPath="$PROJECT_DIR$/core/templates/perfil.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/views.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,8 +27,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Python Script" />
         <option value="HTML File" />
+        <option value="Python Script" />
       </list>
     </option>
   </component>

@@ -3,114 +3,201 @@
 {% block title %}{{ livro.titulo }} - Detalhes{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'index' %}">Início</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'buscar_livro' %}">Busca</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ livro.titulo }}</li>
-        </ol>
-    </nav>
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'index' %}">Início</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'buscar_livro' %}">Busca</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ livro.titulo }}</li>
+    </ol>
+</nav>
 
-    <div class="row">
-        <!-- Imagem do Livro -->
-        <div class="col-md-4 mb-4">
-            <div class="card border-0">
+<div class="row">
+    <!-- Imagem do Livro -->
+    <div class="col-md-4 mb-4">
+        <div class="card">  <!-- Removido border-0 e adicionado background -->
+            <div class="card-body bg-light">  <!-- Adicionado card-body e bg-light -->
                 <img src="{{ livro.imagem }}"
                      class="card-img-top"
                      alt="Capa de {{ livro.titulo }}"
-                     style="height: 500px; object-fit: contain;">
+                     style="height: 300px; object-fit: contain;">
+
+                <!-- Botão para adicionar à estante -->
+                <div class="mt-3">
+                    <button class="btn btn-primary w-100" id="addToShelfBtn" type="button" data-toggle="modal" data-target="#addToShelfModal">
+                        <i class="bi bi-bookmark-plus"></i> Adicionar à Estante
+                    </button>
+                </div>
             </div>
         </div>
+    </div>
+    <!-- Detalhes do Livro -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title mb-3">{{ livro.titulo }}</h1>
+                <h5 class="text-muted mb-4">por {{ livro.autor }}</h5>
 
-        <!-- Detalhes do Livro -->
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-body">
-                    <h1 class="card-title mb-3">{{ livro.titulo }}</h1>
-                    <h5 class="text-muted mb-4">por {{ livro.autor }}</h5>
-
-                    <!-- Informação do preço (apenas para referência) -->
-                    {% if livro.preco %}
-                    <div class="mb-4">
-                        <h5 class="text-primary">Preço Sugerido</h5>
-                        <p>
-                            {% if livro.moeda == 'BRL' %}
-                                R$ {{ livro.preco|floatformat:2 }}
-                            {% else %}
-                                {{ livro.moeda }} {{ livro.preco|floatformat:2 }}
-                            {% endif %}
-                        </p>
-                    </div>
-                    {% endif %}
-
-                    <div class="mb-4">
-                        <h5 class="text-primary">Sobre o Livro</h5>
-                        <p>{{ livro.descricao }}</p>
-                    </div>
-
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <h5 class="text-primary">Informações</h5>
-                            <ul class="list-unstyled">
-                                {% if livro.editora %}
-                                    <li><strong>Editora:</strong> {{ livro.editora }}</li>
-                                {% endif %}
-                                {% if livro.data_publicacao %}
-                                    <li><strong>Data de Publicação:</strong> {{ livro.data_publicacao }}</li>
-                                {% endif %}
-                                {% if livro.numero_paginas %}
-                                    <li><strong>Páginas:</strong> {{ livro.numero_paginas }}</li>
-                                {% endif %}
-                                {% if livro.isbn %}
-                                    <li><strong>ISBN:</strong> {{ livro.isbn }}</li>
-                                {% endif %}
-                                {% if livro.idioma %}
-                                    <li><strong>Idioma:</strong> {{ livro.idioma }}</li>
-                                {% endif %}
-                            </ul>
-                        </div>
-
-                        <div class="col-md-6">
-                            <h5 class="text-primary">Categorias</h5>
-                            {% if livro.categoria %}
-                                <p>{{ livro.categoria }}</p>
-                            {% else %}
-                                <p>Categoria não disponível</p>
-                            {% endif %}
-
-                            {% if livro.averageRating %}
-                                <h5 class="text-primary mt-3">Avaliação</h5>
-                                <div class="mb-2">
-                                    {% for i in "12345"|make_list %}
-                                        {% if forloop.counter <= livro.averageRating %}
-                                            <i class="bi bi-star-fill text-warning"></i>
-                                        {% else %}
-                                            <i class="bi bi-star text-muted"></i>
-                                        {% endif %}
-                                    {% endfor %}
-                                    <span class="ms-2">({{ livro.averageRating }}/5)</span>
-                                </div>
-                                <p>{{ livro.ratingsCount }} avaliações</p>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <!-- Botões de Ação simplificados -->
-                    <div class="d-flex gap-2">
-                        {% if livro.link %}
-                            <a href="{{ livro.link }}" class="btn btn-primary" target="_blank">
-                                <i class="bi bi-google"></i> Ver no Google Books
-                            </a>
+                {% if livro.preco %}
+                <div class="mb-4">
+                    <h5 class="text-primary">Preço Sugerido</h5>
+                    <p>
+                        {% if livro.moeda == 'BRL' %}
+                            R$ {{ livro.preco|floatformat:2 }}
+                        {% else %}
+                            {{ livro.moeda }} {{ livro.preco|floatformat:2 }}
                         {% endif %}
-                        <a href="{% url 'buscar_livro' %}" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left"></i> Voltar para Busca
-                        </a>
+                    </p>
+                </div>
+                {% endif %}
+
+                <div class="mb-4">
+                    <h5 class="text-primary">Sobre o Livro</h5>
+                    <p>{{ livro.descricao }}</p>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5 class="text-primary">Informações</h5>
+                        <ul class="list-unstyled">
+                            {% if livro.editora %}
+                                <li><strong>Editora:</strong> {{ livro.editora }}</li>
+                            {% endif %}
+                            {% if livro.data_publicacao %}
+                                <li><strong>Data de Publicação:</strong> {{ livro.data_publicacao }}</li>
+                            {% endif %}
+                            {% if livro.numero_paginas %}
+                                <li><strong>Páginas:</strong> {{ livro.numero_paginas }}</li>
+                            {% endif %}
+                            {% if livro.isbn %}
+                                <li><strong>ISBN:</strong> {{ livro.isbn }}</li>
+                            {% endif %}
+                            {% if livro.idioma %}
+                                <li><strong>Idioma:</strong> {{ livro.idioma }}</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+
+                    <div class="col-md-6">
+                        <h5 class="text-primary">Categorias</h5>
+                        {% if livro.categoria %}
+                            <p>{{ livro.categoria }}</p>
+                        {% else %}
+                            <p>Categoria não disponível</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Modal -->
+<div class="modal fade" id="addToShelfModal" tabindex="-1" role="dialog" aria-labelledby="addToShelfModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="addToShelfModalLabel">
+                    <i class="bi bi-bookmark-plus"></i> Adicionar à Estante
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Informações do Livro -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <img src="{{ livro.imagem }}"
+                             alt="{{ livro.titulo }}"
+                             class="img-fluid rounded shadow-sm">
+                    </div>
+                    <div class="col-md-8">
+                        <h4 class="text-primary mb-2">{{ livro.titulo }}</h4>
+                        <p class="text-muted mb-2">
+                            <i class="bi bi-person"></i> {{ livro.autor }}
+                        </p>
+                        <p class="small mb-2">
+                            <i class="bi bi-calendar3"></i> Lançamento: {{ livro.data_publicacao }}
+                        </p>
+                        <div class="mt-3">
+                            <h6 class="text-secondary">Sinopse:</h6>
+                            <p class="small">{{ livro.descricao|truncatewords:50 }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- Formulário -->
+                <form method="post" action="{% url 'adicionar_estante' livro.id %}" id="addToShelfForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="livro_id" value="{{ livro.id }}">
+                    <input type="hidden" name="titulo" value="{{ livro.titulo }}">
+                    <input type="hidden" name="autor" value="{{ livro.autor }}">
+                    <input type="hidden" name="capa" value="{{ livro.imagem }}">
+                    <input type="hidden" name="data_lancamento" value="{{ livro.data_publicacao }}">
+                    <input type="hidden" name="sinopse" value="{{ livro.descricao }}">
+
+                    <h6 class="text-center mb-4">Escolha uma estante para adicionar este livro:</h6>
+
+                    <div class="row justify-content-center">
+                        <div class="col-md-3 col-6 mb-3">
+                            <button type="submit" name="tipo" value="favorito" class="btn btn-outline-primary btn-block p-3">
+                                <i class="bi bi-star h4 d-block"></i>
+                                Favoritos
+                            </button>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <button type="submit" name="tipo" value="lendo" class="btn btn-outline-success btn-block p-3">
+                                <i class="bi bi-book-half h4 d-block"></i>
+                                Lendo
+                            </button>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <button type="submit" name="tipo" value="vou_ler" class="btn btn-outline-info btn-block p-3">
+                                <i class="bi bi-bookmark h4 d-block"></i>
+                                Vou Ler
+                            </button>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <button type="submit" name="tipo" value="lido" class="btn btn-outline-secondary btn-block p-3">
+                                <i class="bi bi-check2-circle h4 d-block"></i>
+                                Lido
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="bi bi-x"></i> Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Script carregado');
+
+    // Log para verificar se o botão existe
+    const addButton = document.getElementById('addToShelfBtn');
+    console.log('Botão encontrado:', addButton);
+
+    // Log para verificar se o modal existe
+    const modal = document.getElementById('addToShelfModal');
+    console.log('Modal encontrado:', modal);
+
+    // Verificar os cliques nos botões do formulário
+    const form = document.getElementById('addToShelfForm');
+    if(form) {
+        form.addEventListener('submit', function(e) {
+            console.log('Formulário sendo enviado');
+            // Opcional: adicionar lógica adicional antes do envio
+        });
+    });
+});
+</script>
 {% endblock %}
