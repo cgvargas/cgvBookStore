@@ -1,63 +1,587 @@
-/* Reset básico */
+/*
+* CG BookStore - Estilos principais
+* Última atualização: 2024
+*/
+
+/* ==========================================================================
+   1. Variáveis CSS (Custom Properties)
+   ========================================================================== */
+:root {
+    /* Cores */
+    --primary-color: #ff6600;
+    --primary-hover: #ff4500;
+    --dark-bg: #343a40;
+    --text-dark: #333;
+    --text-muted: #6c757d;
+    --white: #ffffff;
+    --orange: orange;
+    --yellow: #ffcc00;
+    --gold: #ffd700;
+    --google-blue: #1a73e8;
+    --google-blue-hover: #1557b0;
+
+    /* Sombras */
+    --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 15px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 6px 20px rgba(0, 0, 0, 0.08);
+
+    /* Transições */
+    --transition-default: 0.3s ease;
+    --transition-fast: 0.2s ease;
+
+    /* Dimensões */
+    --input-height: 48px;
+    --input-height-mobile: 42px;
+    --container-max-width: 1100px;
+    --avatar-size: 150px;
+    --avatar-size-mobile: 120px;
+
+    /* Border Radius */
+    --radius-sm: 5px;
+    --radius-md: 8px;
+    --radius-lg: 15px;
+    --radius-full: 24px;
+    --radius-circle: 50%;
+}
+
+/* ==========================================================================
+   2. Reset e Configurações Básicas
+   ========================================================================== */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* Corpo da página */
 body {
     font-family: 'Arial', sans-serif;
     background-color: #F9F9F9;
-    color: #333;
+    color: var(--text-dark);
 }
 
-/* Navbar */
+/* ==========================================================================
+   3. Layout e Containers
+   ========================================================================== */
+.container {
+    max-width: none;
+    width: 100%;
+    margin: 0; /* Opcional: remove centralização */
+}
+
+.profile-container {
+    padding: 10px;
+}
+
+.card {
+    border: none;
+    background-color: transparent; /* Remove bordas e ajusta o fundo */
+}
+
+.card-body {
+    text-align: center; /* Centraliza o texto dentro da card */
+    padding: 10px 15px;
+}
+
+.card-title {
+    font-size: 1.2rem; /* Tamanho de fonte menor para o título */
+}
+
+.card-text {
+    font-size: 0.9rem; /* Tamanho de fonte ajustado para autor */
+}
+
+.card-text:last-child {
+    font-size: 0.8rem; /* Tamanho de fonte ajustado para descrição */
+}
+
+.row {
+    background-color: #F9F9F9; /* Ou o valor do fundo da tela principal */
+    padding: 20px 0; /* Ajusta o padding para que as colunas não fiquem muito próximas */
+}
+
+/* Exceção específica para .row dentro do footer */
+.footer .row {
+    background-color: transparent;
+    padding: 0;
+}
+
+.col-md-3 {
+    /* Ajustando a largura das colunas para que fiquem mais estreitas */
+    width: 25%;  /* Isso reduz as colunas para 1/4 da largura total */
+}
+
+/* ==========================================================================
+   4. Navbar e Navegação
+   ========================================================================== */
 .navbar {
-    background-color: #343a40;
+    background-color: var(--dark-bg);
     padding: 10px 20px;
 }
 
 .navbar-nav .nav-link {
-    color: white;
+    color: var(--white);
     margin-right: 15px;
     font-size: 1rem;
-    transition: color 0.3s;
+    transition: color var(--transition-default);
 }
 
 .navbar-nav .nav-link:hover {
-    color: #ffcc00;
+    color: var(--yellow);
 }
 
 .nav-link.active {
-    color: orange !important;
+    color: var(--orange) !important;
+}
+
+.navbar-brand .logo {
+    height: 60px;
+    width: auto;
+}
+
+.navbar-brand .store-name {
+    font-size: 1.5rem;
+    color: var(--orange);
+    font-weight: bold;
 }
 
 /* Linha decorativa */
 .line {
     height: 3px;
-    background-color: orange;
-    transition: background-color 0.3s ease;
+    background-color: var(--orange);
+    transition: background-color var(--transition-default);
 }
 
 .line:hover {
-    background-color: #ff6600;
+    background-color: var(--primary-color);
 }
 
-/* Conteúdo principal */
-.container {
-    max-width: 1100px;
-    margin: 20px auto;
-    padding: 15px;
+/* ==========================================================================
+   5. Componentes do Perfil do Usuário
+   ========================================================================== */
+/* Card de Perfil */
+.user-profile-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 25px;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 20px;
+    position: sticky;
+    top: 20px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: box-shadow var(--transition-default);
 }
 
-/* Estilos do Buscador Google Books */
+.user-profile-card:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+/* Avatar e Área de Foto */
+.profile-avatar {
+    position: relative;
+    width: var(--avatar-size);
+    height: var(--avatar-size);
+    margin: -75px auto 15px;
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius-circle);
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid var(--white);
+    box-shadow: var(--shadow-sm);
+}
+
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius-circle);
+    object-fit: cover;
+    border: 4px solid var(--white);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Botões e Controles do Avatar */
+.change-avatar-btn {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-circle);
+    background-color: var(--primary-color);
+    border: 2px solid var(--white);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-default);
+    box-shadow: var(--shadow-sm);
+    padding: 0;
+}
+
+.change-avatar-btn:hover {
+    background-color: var(--primary-hover);
+    transform: scale(1.1);
+}
+
+.change-avatar-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Informações do Perfil */
+.profile-info {
+    text-align: center;
+    padding: 20px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+.profile-name {
+    color: var(--dark-bg);
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.profile-username {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+}
+
+/* Estatísticas do Perfil */
+.profile-stats {
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 0 25px;
+}
+
+.stat-value {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--dark-bg);
+    display: block;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* ==========================================================================
+   6. Componentes de Livros e Prateleiras
+   ========================================================================== */
+/* Slider de Livros */
+.book-slider {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.book-container {
+    display: grid; /* Use grid para organização em linhas e colunas */
+    grid-template-columns: repeat(4, 1fr); /* 4 colunas iguais */
+    gap: 20px; /* Espaço entre as capas */
+    justify-items: center; /* Centraliza as capas em cada célula */
+    margin: 20px auto; /* Espaço ao redor do container */
+}
+
+.book-item {
+    width: 100%; /* Cada capa ocupa a largura da célula */
+    max-width: 150px; /* Limita o tamanho máximo */
+    text-align: center; /* Centraliza o conteúdo da capa */
+}
+
+.book-item img {
+    width: 100%; /* Imagem preenche o espaço */
+    height: auto; /* Mantém a proporção */
+    border-radius: 5px; /* Cantos arredondados, opcional */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Sombra, opcional */
+}
+
+@media (max-width: 768px) {
+    .book-container {
+        grid-template-columns: repeat(2, 1fr); /* 2 colunas em telas menores */
+    }
+}
+
+.book-card {
+    flex: 0 0 auto;
+    width: clamp(90px, 10vw, 120px);
+}
+
+.book-card img {
+    width: 100%;
+    height: clamp(130px, 15vw, 180px);
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Botões de Navegação */
+.slider-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: var(--radius-circle);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    z-index: 2;
+}
+
+.slider-btn.prev {
+    left: -16px;
+}
+
+.slider-btn.next {
+    right: -16px;
+}
+
+/* Seção Títulos */
+.section-title {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: var(--white);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+/* ==========================================================================
+   7. Footer Styling
+   ========================================================================== */
+.footer {
+    background-color: var(--dark-bg);
+    color: #fff;
+    position: relative;
+    margin-top: 100px;
+}
+
+/* Ajuste do container e alinhamento central */
+.footer .container {
+    max-width: 900px; /* Reduz a largura máxima para melhor centralização */
+    margin: 0 auto;
+}
+
+.footer .row {
+    background-color: transparent;
+    padding: 0;
+    justify-content: center;
+    text-align: center;
+}
+
+/* Centralização das colunas */
+.footer .col-lg-4 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Marca e Logo */
+.footer-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.footer-logo {
+    height: 60px;
+    width: auto;
+}
+
+.brand-name {
+    color: var(--orange);
+    font-weight: 600;
+    margin: 0;
+}
+
+.footer-about {
+    text-align: center;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+/* Links Sociais */
+.social-links {
+    display: flex;
+    justify-content: center;
+    gap: 20px;  /* Espaço entre os ícones */
+    margin-top: 15px;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    color: #fff;
+    transition: all 0.3s ease;
+}
+
+.social-link:hover {
+    background-color: var(--orange);
+    color: #fff;
+    transform: translateY(-3px);
+}
+
+/* Ajuste dos ícones */
+.social-link i {
+    font-size: 1.2rem;
+}
+
+/* Títulos das Seções */
+.footer-heading {
+    color: #fff;
+    font-weight: 600;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+}
+
+/* Links do Footer */
+.footer-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.footer-links li {
+    margin-bottom: 12px;
+}
+
+.footer-links a {
+    color: #adb5bd;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.footer-links a:hover {
+    color: var(--orange);
+    padding-left: 5px;
+}
+
+/* Divisor */
+.footer-divider {
+    width: 60%;
+    margin: 30px auto;
+}
+
+/* Parte inferior do Footer */
+.footer-bottom {
+    justify-content: center;
+    text-align: center;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.copyright, .credits {
+    color: #adb5bd;
+    font-size: 0.9rem;
+}
+
+.credits i {
+    margin: 0 3px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .footer-heading {
+        margin-top: 20px;
+    }
+
+    .footer .col-lg-4:not(:first-child) {
+        margin-top: 30px;
+    }
+
+    .footer {
+        padding-bottom: 30px;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .footer-brand {
+        justify-content: center;
+    }
+
+    .social-links {
+        justify-content: center;
+    }
+
+    .footer-heading {
+        margin-top: 30px;
+    }
+}
+
+@media (max-width: 576px) {
+    .footer-logo {
+        height: 50px;
+    }
+}
+/* ==========================================================================
+   8. Formulários e Inputs
+   ========================================================================== */
+.form-control {
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.login-input {
+    width: 100%;
+    max-width: 300px;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+}
+
+.login-button {
+    width: 100%;
+    max-width: 300px;
+    padding: 10px;
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color var(--transition-default);
+}
+
+.login-button:hover {
+    background-color: var(--primary-hover);
+}
+
+/* Buscador Google Books */
 .google-search-box {
-    border-radius: 24px !important;
+    border-radius: var(--radius-full) !important;
     border: 1px solid #dfe1e5 !important;
     box-shadow: none !important;
-    transition: all 0.3s ease-in-out;
-    background: white;
+    transition: all var(--transition-default);
+    background: var(--white);
 }
 
 .google-search-box:hover,
@@ -66,95 +590,201 @@ body {
     border-color: rgba(223,225,229,0) !important;
 }
 
-.google-search-box select {
+.google-search-box select,
+.google-search-box input,
+.google-search-box .btn-search {
     border: none !important;
-    border-radius: 24px 0 0 24px !important;
-    background-color: transparent;
+    height: var(--input-height);
     font-size: 16px;
     color: #202124;
+}
+
+.google-search-box select {
+    border-radius: var(--radius-full) 0 0 var(--radius-full) !important;
+    background-color: transparent;
     min-width: 120px;
 }
 
 .google-search-box input {
-    border: none !important;
     border-radius: 0 !important;
     padding-left: 0;
-    font-size: 16px;
-    color: #202124;
-    height: 48px;
 }
 
 .google-search-box .btn-search {
-    border-radius: 0 24px 24px 0 !important;
+    border-radius: 0 var(--radius-full) var(--radius-full) 0 !important;
     padding: 0.5rem 1.5rem;
-    background-color: #1a73e8;
-    color: white;
-    border: none;
-    font-size: 16px;
-    height: 48px;
-    transition: background-color 0.2s;
+    background-color: var(--google-blue);
+    color: var(--white);
+    transition: background-color var(--transition-fast);
 }
 
 .google-search-box .btn-search:hover {
-    background-color: #1557b0;
+    background-color: var(--google-blue-hover);
 }
 
-.google-search-box select:focus,
-.google-search-box input:focus {
-    box-shadow: none !important;
-    outline: none !important;
+/* Botão de fechar do modal */
+.btn-close {
+    box-sizing: content-box;
+    width: 1em;
+    height: 1em;
+    padding: 0.25em;
+    color: #ff0000; /* Cor vermelha */
+    /* SVG modificado para ter traços mais grossos */
+    background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ff0000'%3e%3cpath stroke='%23ff0000' stroke-width='2' d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
+    border: 0;
+    border-radius: 0.25rem;
+    opacity: .75; /* Aumentei a opacidade para ficar mais visível */
+    transition: opacity var(--transition-default);
+    transform: scale(1.2); /* Aumenta levemente o tamanho */
 }
 
-.google-search-box .input-group-append {
-    margin-left: 0 !important;
+.btn-close:hover {
+    opacity: 1; /* Opacidade total no hover */
+    cursor: pointer;
 }
 
-/* Footer */
-.footer {
-    background-color: #343a40;
-    color: #ffffff;
-    padding: 20px 0;
+/* ==========================================================================
+   9. Modal de adição manual de livro
+   ========================================================================== */
+
+/* Modal de Adição Manual de Livro */
+.book-not-found-modal .modal-content {
+    border-radius: var(--radius-lg);
+    border: none;
+    box-shadow: var(--shadow-md);
 }
 
-.footer .container {
+.book-not-found-modal .modal-header {
+    background-color: var(--dark-bg);
+    color: var(--white);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding: 1rem 1.5rem;
+}
+
+.book-not-found-modal .modal-title {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 1.25rem;
 }
 
-.footer-link {
-    color: #ffcc00;
-    text-decoration: none;
-    margin: 0 5px;
-    font-size: 1.05rem;
-    transition: color 0.3s;
+.book-not-found-modal .modal-body {
+    padding: 1.5rem;
 }
 
-.footer-link:hover {
-    color: #ff6600;
+/* Formulário de edição de livro */
+.book-edit-form {
+    display: grid;
+    gap: 1.25rem;
 }
 
-.footer-separator {
-    margin: 0 5px;
-    color: #ffffff;
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
-.footer-link-nowrap {
-    white-space: nowrap;
+.form-group label {
+    font-weight: 500;
+    color: var(--text-dark);
 }
 
-.footer .bi {
-    color: #ffffff;
-    transition: color 0.2s;
+/* Preview da capa do livro */
+.cover-preview-container {
+    width: 150px;
+    height: 200px;
+    margin: 1rem auto;
+    position: relative;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
 }
 
-.footer .bi:hover {
-    color: #ffd700;
+.cover-preview-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cover-preview-placeholder {
+    width: 100%;
+    height: 100%;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.cover-preview-placeholder i {
+    font-size: 2rem;
+    color: var(--text-muted);
+}
+
+/* Botões de ação */
+.book-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.btn-add-book {
+    background-color: var(--primary-color);
+    color: var(--white);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-sm);
+    border: none;
+    transition: background-color var(--transition-default);
+}
+
+.btn-add-book:hover {
+    background-color: var(--primary-hover);
 }
 
 /* Responsividade */
 @media (max-width: 768px) {
+    .book-not-found-modal .modal-body {
+        padding: 1rem;
+    }
+
+    .cover-preview-container {
+        width: 120px;
+        height: 160px;
+    }
+}
+
+/* ==========================================================================
+   10. Animações
+   ========================================================================== */
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   11. Media Queries
+   ========================================================================== */
+/* Tablets e dispositivos médios */
+@media (max-width: 768px) {
+    /* Layout */
+    .profile-container {
+        padding: 10px;
+    }
+
+    .col-md-3, .col-md-9 {
+        padding: 0;
+    }
+
+    .col-md-9 {
+        margin-top: 20px;
+    }
+
+    /* Navbar */
     .navbar-nav {
         text-align: center;
     }
@@ -163,80 +793,46 @@ body {
         margin: 5px 0;
     }
 
-    .footer .container {
-        flex-direction: column;
+    /* Profile */
+    .profile-avatar {
+        width: var(--avatar-size-mobile);
+        height: var(--avatar-size-mobile);
     }
 
-    .footer .col-md-4 {
-        margin-bottom: 10px;
-    }
-
+    /* Search */
     .google-search-box {
-        border-radius: 16px !important;
+        border-radius: var(--radius-lg) !important;
     }
 
     .google-search-box select,
     .google-search-box input,
     .google-search-box .btn-search {
-        height: 42px;
+        height: var(--input-height-mobile);
     }
 }
 
-/* Define o tamanho da logo */
-.navbar-brand .logo {
-    height: 60px;
-    width: auto;
+/* Dispositivos muito pequenos */
+@media (max-width: 360px) {
+    .books-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .section-title h4 {
+        flex-direction: column;
+        gap: 5px;
+        align-items: stretch;
+        text-align: center;
+    }
 }
 
-/* Estilo do nome CG BookStore */
-.navbar-brand .store-name {
-    font-size: 1.5rem;
-    color: orange;
-    font-weight: bold;
+/* Tablets e laptops */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .col-md-9 {
+        padding-left: 20px;
+    }
+
+    .books-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
-/* Estilo adicional para o formulário */
-.form-control {
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-/* Botão de envio */
-.btn-primary {
-    padding: 10px 20px;
-    border-radius: 5px;
-}
-
-/* Layout para a área de redes sociais */
-ul.list-unstyled li {
-    margin-bottom: 10px;
-}
-
-/* Estilização para inputs do login */
-.login-input {
-    width: 100%;
-    max-width: 300px;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 1rem;
-}
-
-/* Botão de login */
-.login-button {
-    width: 100%;
-    max-width: 300px;
-    padding: 10px;
-    background-color: #ff6600;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.login-button:hover {
-    background-color: #ff4500;
-}

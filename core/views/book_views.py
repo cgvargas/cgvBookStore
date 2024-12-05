@@ -9,12 +9,13 @@ from .utils import _processar_resultados_google_books, _ordenar_resultados, _pag
 
 logger = logging.getLogger(__name__)
 
+
 def livro_detail(request, livro_id):
     try:
         livro = get_object_or_404(Livro, pk=livro_id)
         livros_relacionados = Livro.objects.filter(
             destaque=True
-        ).exclude(id=livro.id)[:4]
+        ).exclude(id=livro.id)[:3]
 
         context = {
             'livro': livro,
@@ -26,38 +27,57 @@ def livro_detail(request, livro_id):
         messages.error(request, 'Ocorreu um erro ao buscar os detalhes do livro.')
         return redirect('index')
 
+
+@login_required
 def buscar_livro(request):
-    livros_encontrados = []
-    livros_paginados = []
-    tipo_busca = request.GET.get('tipo_busca', '')
-    query = request.GET.get('query', '')
-    order = request.GET.get('order', 'title')
-    page = request.GET.get('page', 1)
+    resultados = []
+    mensagem = ''
+    termo_busca = request.GET.get('query', '')
+    tipo_busca = request.GET.get('tipo_busca', 'titulo')
+    sem_resultados = False
 
-    try:
-        if query:
-            resultados = google_books_api.buscar_livros(query, tipo_busca)
-            livros_encontrados = _processar_resultados_google_books(resultados)
+    if termo_busca:
+        try:
+            # Busca no Google Books usando a API
+            resultados = google_books_api.buscar_livros(
+                termo_busca,
+                tipo_busca=tipo_busca,
+                max_results=40
+            )
 
-            if livros_encontrados:
-                livros_encontrados = _ordenar_resultados(livros_encontrados, order)
-                livros_paginados = _paginar_resultados(livros_encontrados, page)
+            if resultados:
+                # Processa os resultados se necessário
+                resultados = _processar_resultados_google_books(resultados)
+
+                # Ordena os resultados se houver parâmetro de ordenação
+                order_by = request.GET.get('order')
+                if order_by:
+                    resultados = _ordenar_resultados(resultados, order_by)
+
+                # Paginação dos resultados
+                page = request.GET.get('page')
+                resultados = _paginar_resultados(resultados, page)
             else:
-                messages.info(request, 'Nenhum livro encontrado...', extra_tags='busca')
+                logger.warning(f"Nenhum resultado encontrado para '{termo_busca}'")
+                mensagem = f"Nenhum resultado encontrado para '{termo_busca}'. Deseja adicionar manualmente?"
+                sem_resultados = True
+                messages.info(request, mensagem, extra_tags='busca')
 
-    except Exception as e:
-        logger.error(f"Erro durante a busca: {str(e)}")
-        messages.error(request, 'Ocorreu um erro durante a busca. Por favor, tente novamente.')
+        except Exception as e:
+            logger.error(f"Erro na busca: {str(e)}")
+            mensagem = "Ocorreu um erro durante a busca. Tente novamente."
+            messages.error(request, mensagem)
 
     context = {
-        'livros': livros_paginados,
-        'query': query,
+        'livros': resultados,
+        'query': termo_busca,
         'tipo_busca': tipo_busca,
-        'order': order,
-        'page_obj': livros_paginados if livros_encontrados else None,
+        'mensagem': mensagem,
+        'sem_resultados': sem_resultados
     }
 
     return render(request, 'buscar_livro.html', context)
+
 
 def google_book_detail(request, livro_id):
     try:
@@ -79,6 +99,7 @@ def google_book_detail(request, livro_id):
         logger.error(f"Erro ao buscar detalhes do livro Google {livro_id}: {str(e)}")
         messages.error(request, 'Ocorreu um erro ao buscar os detalhes do livro.')
         return redirect('buscar_livro')
+
 
 @login_required
 def adicionar_estante(request, livro_id):

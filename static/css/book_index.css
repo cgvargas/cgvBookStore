@@ -1,0 +1,180 @@
+/* ==========================================================================
+   Book Slider Layout
+   ========================================================================== */
+.book-slider {
+    position: relative;
+    margin: 30px auto;
+    padding: 0 40px;
+    max-width: 1400px; /* Aumentado para acomodar 5 livros */
+}
+
+.book-container {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    gap: 40px; /* Aumentado o espaço entre os livros */
+    padding: 15px 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.book-container::-webkit-scrollbar {
+    display: none;
+}
+
+/* ==========================================================================
+   Book Card Styling
+   ========================================================================== */
+.book-card {
+    flex: 0 0 auto;
+    width: calc((100% - 160px) / 5); /* Ajustado para 5 livros com gap */
+    min-width: 140px; /* Largura mínima para responsividade */
+    max-width: 180px; /* Largura máxima para manter proporção */
+}
+
+.book-card img {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+/* ==========================================================================
+   Navigation Buttons
+   ========================================================================== */
+.slider-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+.slider-btn:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.slider-btn.prev {
+    left: 0;
+}
+
+.slider-btn.next {
+    right: 0;
+}
+
+.slider-btn i {
+    font-size: 1rem;
+}
+
+/* ==========================================================================
+   Section Titles
+   ========================================================================== */
+.section-title {
+    text-align: center;
+    color: var(--text-dark);
+    margin: 40px 0 20px;
+}
+
+.section-title.main {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.section-title.sub {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-top: 60px;
+}
+
+/* ==========================================================================
+   Links Externos e Vídeos
+   ========================================================================== */
+.row .card {
+    height: 100%;
+    transition: transform 0.3s ease;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: white;
+}
+
+.row .card:hover {
+    transform: translateY(-5px);
+}
+
+.row .card .card-img-top {
+    height: 200px;
+    object-fit: contain;
+    padding: 15px;
+}
+
+.row .card .card-body {
+    padding: 15px;
+}
+
+.row .card .card-title {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    color: var(--text-dark);
+}
+
+.row .btn-primary {
+    background-color: var(--primary-color);
+    border: none;
+    padding: 8px 16px;
+    transition: background-color 0.3s ease;
+}
+
+.row .btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+/* ==========================================================================
+   Responsividade
+   ========================================================================== */
+@media (max-width: 1200px) {
+    .book-card {
+        width: calc((100% - 120px) / 4); /* 4 livros em telas menores */
+    }
+}
+
+@media (max-width: 992px) {
+    .book-card {
+        width: calc((100% - 80px) / 3); /* 3 livros em tablets */
+    }
+}
+
+@media (max-width: 768px) {
+    .book-card {
+        width: calc((100% - 40px) / 2); /* 2 livros em telas pequenas */
+    }
+
+    .book-slider {
+        padding: 0 30px;
+    }
+}
+
+@media (max-width: 576px) {
+    .book-card {
+        width: calc(100% - 20px); /* 1 livro em telas muito pequenas */
+    }
+
+    .book-slider {
+        padding: 0 25px;
+    }
+}
+
+
+

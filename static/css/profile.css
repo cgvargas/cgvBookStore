@@ -1,0 +1,373 @@
+/* ==========================================================================
+   1. Container Principal
+   ========================================================================== */
+.profile-container {
+    padding: 2rem 0;
+}
+
+/* ==========================================================================
+   2. Card do Perfil do Usuário
+   ========================================================================== */
+.user-profile-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    position: sticky;  /* Mudança aqui */
+    top: 20px;        /* Distância do topo ao fixar */
+    max-height: calc(100vh - 40px); /* Altura máxima considerando as margens */
+}
+
+/* Área da capa */
+.profile-cover-area {
+    height: 90px;
+    background: linear-gradient(45deg, #2c2c2c, #feb47b);
+    position: relative;
+}
+
+/* Avatar e Controles de Foto */
+.profile-avatar {
+    position: relative;
+    margin-top: -40px;
+    padding: 0 5px;
+    margin-bottom: 15px;
+}
+
+.avatar-img, .avatar-placeholder {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    border: 4px solid #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: #fff;
+}
+
+.avatar-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f2f5;
+}
+
+.avatar-placeholder i {
+    font-size: 2.5rem;
+    color: #999;
+}
+
+.change-avatar-btn {
+    position: absolute;
+    right: 20px;
+    bottom: 0;
+    background: #343a40;
+    color: #fff;
+    border: 2px solid #fff;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.change-avatar-btn:hover {
+    background: #ff6600;
+    transform: scale(1.1);
+}
+
+/* Informações do Perfil */
+.profile-info {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.profile-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    color: #2c3e50;
+}
+
+.profile-username {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 5px 0;
+}
+
+/* Estatísticas */
+.profile-stats {
+    display: flex;
+    justify-content: center;
+    padding: 15px 0;
+}
+
+.stat-item {
+    text-align: center;
+    color: #666;
+}
+
+.stat-value {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #2c3e50;
+    margin: 0 5px;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+}
+
+/* Ações do Perfil */
+.profile-actions {
+    padding: 20px;
+    background-color: #f8f9fa;
+}
+
+.action-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 500;
+    margin-bottom: 15px;
+}
+
+.secondary-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.secondary-actions .btn {
+    flex: 1;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+/* Ajustes do Slider */
+.profile-container .book-slider {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding: 0 3rem;
+    margin: 1.5rem 0 3rem;
+    min-height: 280px;
+}
+
+.profile-container .book-container {
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: hidden; /* Mudado de auto para hidden */
+    scroll-behavior: smooth;
+    padding: 1rem 0.5rem;
+    flex-grow: 1;
+    width: calc(100% - 6rem); /* Ajusta a largura considerando os botões */
+}
+
+.profile-container .book-card {
+    flex: 0 0 140px; /* Define largura fixa */
+    min-width: 140px;
+    transition: transform 0.2s ease;
+    margin-right: 30px; /* Espaçamento entre cards */
+}
+
+/* Botões do Slider mais visíveis */
+.profile-container .slider-btn {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    opacity: 1;
+}
+
+.profile-container .slider-btn:hover {
+    background: #f8f9fa;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.profile-container .slider-btn.prev {
+    left: 0;
+}
+
+.profile-container .slider-btn.next {
+    right: 0;
+}
+
+/* Ocultar scrollbar mas manter funcionalidade */
+.profile-container .book-container::-webkit-scrollbar {
+    display: none;
+}
+
+.profile-container .book-container {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* ==========================================================================
+   4. Modal de Gerenciamento de Livros
+   ========================================================================== */
+
+/* Estilo do Modal e Scrollbar */
+.shelf-manager-modal .modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: 1.5rem;
+}
+
+.shelf-manager-modal .modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.shelf-manager-modal .modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.shelf-manager-modal .modal-body::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.shelf-manager-modal .modal-body::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Layout base */
+.content-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+}
+
+/* Container dos livros */
+.books-container > div {
+    background: transparent;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.books-container > div:hover {
+    transform: translateX(5px);
+    background: #f8f9fa;
+}
+
+/* Layout do livro */
+.book-content {
+    display: flex;
+    padding: 1.5rem;
+    gap: 1.5rem;
+    align-items: flex-start;
+}
+
+.book-cover {
+    width: 80px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Detalhes do livro */
+.book-details {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.book-title {
+    margin: 0;
+    color: #1a1a1a;
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.book-author {
+    margin: 0;
+    color: #666;
+    font-size: 0.95rem;
+}
+
+/* Botões de ação */
+.book-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.transferir-livro-btn, .excluir-livro-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.transferir-livro-btn {
+    border: 1px solid #0d6efd;
+    background: transparent;
+    color: #0d6efd;
+}
+
+.transferir-livro-btn:hover {
+    background: #0d6efd;
+    color: white;
+}
+
+.excluir-livro-btn {
+    border: 1px solid #dc3545;
+    background: transparent;
+    color: #dc3545;
+}
+
+.excluir-livro-btn:hover {
+    background: #dc3545;
+    color: white;
+}
+
+/* Estado vazio */
+.empty-shelf {
+    text-align: center;
+    padding: 3rem 1rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+    margin: 2rem 0;
+}
+
+.empty-shelf i {
+    font-size: 3rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.empty-shelf p {
+    color: #6c757d;
+    font-size: 1.1rem;
+    margin: 0;
+}

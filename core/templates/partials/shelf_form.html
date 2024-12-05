@@ -1,0 +1,49 @@
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="books-container">
+        {% if livros %}
+            {% for livro in livros %}
+            <div>
+                <div class="book-content">
+                    <div>
+                        <img src="{{ livro.capa }}"
+                             alt="{{ livro.titulo }}"
+                             class="book-cover">
+                    </div>
+
+                    <div class="book-details">
+                        <h3 class="book-title">{{ livro.titulo }}</h3>
+                        <p class="book-author">{{ livro.autor }}</p>
+
+                        <div class="book-actions">
+                            <button class="transferir-livro-btn"
+                                    type="button"
+                                    data-livro-id="{{ livro.id }}"
+                                    data-livro-titulo="{{ livro.titulo }}"
+                                    data-tipo-atual="{{ tipo }}">
+                                <i class="bi bi-arrow-left-right"></i>
+                                Transferir
+                            </button>
+
+                            <button class="excluir-livro-btn"
+                                    type="button"
+                                    data-livro-id="{{ livro.id }}">
+                                <i class="bi bi-trash"></i>
+                                Excluir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-shelf">
+                <i class="bi bi-book"></i>
+                <p>Nenhum livro encontrado nesta prateleira.</p>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

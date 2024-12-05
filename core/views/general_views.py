@@ -4,17 +4,50 @@ from django.contrib import messages
 from ..models import Livro, URLExterna, VideoYouTube
 from ..forms import ContatoForm
 from ..utils.email_utils import enviar_email_contato
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 
 def index(request):
     try:
+        # Obtendo os livros para destaque e mais vendidos
+        livros_destaque = Livro.objects.filter(destaque=True).order_by('-data_publicacao', 'titulo')
+        livros_mais_vendidos = Livro.objects.filter(mais_vendido=True).order_by('titulo')
+
+        # Configuração da paginação
+        paginator_destaque = Paginator(livros_destaque, 8)  # Mudei para 4 para ter uma grade 2x2 mais bonita
+        paginator_vendidos = Paginator(livros_mais_vendidos, 8)
+
+        # Pegando a página da query string
+        page_destaque = request.GET.get('page_destaque', 1)
+        page_vendidos = request.GET.get('page_vendidos', 1)
+
+        # Paginação para livros em destaque
+        try:
+            livros_destaque_paginated = paginator_destaque.page(page_destaque)
+        except PageNotAnInteger:
+            livros_destaque_paginated = paginator_destaque.page(1)
+        except EmptyPage:
+            livros_destaque_paginated = paginator_destaque.page(paginator_destaque.num_pages)
+
+        # Paginação para livros mais vendidos
+        try:
+            livros_mais_vendidos_paginated = paginator_vendidos.page(page_vendidos)
+        except PageNotAnInteger:
+            livros_mais_vendidos_paginated = paginator_vendidos.page(1)
+        except EmptyPage:
+            livros_mais_vendidos_paginated = paginator_vendidos.page(paginator_vendidos.num_pages)
+
+        # Contexto da view
         context = {
-            'livros_destaque': Livro.objects.filter(destaque=True),
-            'livros_mais_vendidos': Livro.objects.filter(mais_vendido=True),
+            'livros_destaque': livros_destaque_paginated,
+            'livros_mais_vendidos': livros_mais_vendidos_paginated,
             'urls_externas': URLExterna.objects.all(),
             'videos_youtube': VideoYouTube.objects.all(),
         }
+
         return render(request, 'index.html', context)
     except Exception as e:
+        # Mensagem de erro
         messages.error(request, 'Ocorreu um erro ao carregar a página inicial.')
         return render(request, 'index.html', {})
 

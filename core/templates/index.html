@@ -1,69 +1,103 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Página Inicial{% endblock %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/book_index.css' %}">
+{% endblock %}
+
 {% block content %}
-    <h1 class="text-center" style="margin-bottom: 90px; font-size: 4rem;">Livros em Destaque</h1>
-    <div class="row">
-        {% for livro in livros_destaque %}
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <img src="{{ livro.imagem.url }}" class="card-img-top" alt="Capa de {{ livro.titulo }}" style="height: 500px; width: 100%; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ livro.titulo }}</h5>
-                        <p class="card-text">Autor: {{ livro.autor }}</p>
-                        <p class="card-text">{{ livro.descricao|truncatewords:20 }}</p>
-                        <a href="{% url 'livro_detail' livro.id %}" class="btn btn-primary">Ver Detalhes</a>
+<div class="container">
+    <!-- Livros em Destaque -->
+    <h1 class="section-title main">Livros em Destaque</h1>
+    <div class="book-slider">
+        <button class="slider-btn prev" onclick="slideBooks('destaque', 'prev')">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <div class="book-container" id="destaque-container">
+            {% for livro in livros_destaque %}
+            <div class="book-card" data-livro-id="{{ livro.id }}">
+                <div class="card border-0 bg-transparent">
+                    <img src="{{ livro.imagem.url }}" alt="{{ livro.titulo }}">
+                    <div class="card-body p-2">
+                        <h6 class="card-title small mb-0 text-truncate">{{ livro.titulo }}</h6>
+                        <p class="card-text small text-muted text-truncate">{{ livro.autor }}</p>
+                        <a href="{% url 'livro_detail' livro.id %}" class="btn btn-primary btn-sm">Detalhes</a>
                     </div>
                 </div>
             </div>
-        {% endfor %}
+            {% empty %}
+            <p class="text-muted">Nenhum livro em destaque.</p>
+            {% endfor %}
+        </div>
+        <button class="slider-btn next" onclick="slideBooks('destaque', 'next')">
+            <i class="bi bi-chevron-right"></i>
+        </button>
     </div>
 
-    <h1 class="text-center" style="margin-bottom: 90px; font-size: 3rem;">Livros Mais Vendidos</h1>
-    <div class="row">
-        {% for livro in livros_mais_vendidos %}
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <img src="{{ livro.imagem.url }}" class="card-img-top" alt="Capa de {{ livro.titulo }}" style="height: 500px; width: 100%; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ livro.titulo }}</h5>
-                        <p class="card-text">Autor: {{ livro.autor }}</p>
-                        <p class="card-text">{{ livro.descricao|truncatewords:20 }}</p>
-                        <a href="{% url 'livro_detail' livro.id %}" class="btn btn-primary">Ver Detalhes</a>
+    <!-- Livros Mais Vendidos -->
+    <h1 class="section-title sub">Livros Mais Vendidos</h1>
+    <div class="book-slider">
+        <button class="slider-btn prev" onclick="slideBooks('vendidos', 'prev')">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <div class="book-container" id="vendidos-container">
+            {% for livro in livros_mais_vendidos %}
+            <div class="book-card" data-livro-id="{{ livro.id }}">
+                <div class="card border-0 bg-transparent">
+                    <img src="{{ livro.imagem.url }}" alt="{{ livro.titulo }}">
+                    <div class="card-body p-2">
+                        <h6 class="card-title small mb-0 text-truncate">{{ livro.titulo }}</h6>
+                        <p class="card-text small text-muted text-truncate">{{ livro.autor }}</p>
+                        <a href="{% url 'livro_detail' livro.id %}" class="btn btn-primary btn-sm">Detalhes</a>
                     </div>
                 </div>
             </div>
-        {% endfor %}
+            {% empty %}
+            <p class="text-muted">Nenhum livro mais vendido.</p>
+            {% endfor %}
+        </div>
+        <button class="slider-btn next" onclick="slideBooks('vendidos', 'next')">
+            <i class="bi bi-chevron-right"></i>
+        </button>
     </div>
 
-    <h1 class="text-center" style="margin-bottom: 90px; font-size: 3rem;">Links Externos</h1>
+    <!-- Links Externos -->
+    <h1 class="section-title sub">Links Externos</h1>
     <div class="row">
         {% for url in urls_externas %}
-            <div class="col-md-4 mb-4">
-                <div class="card border-0" style="background-color: #F9F9F9;">
-                    <img src="{{ url.imagem.url }}" class="card-img-top" alt="{{ url.nome }}" style="height: 300px; width: 300px; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ url.nome }}</h5>
-                        <a href="{{ url.url }}" target="_blank" class="btn btn-primary">Visitar Site</a>
-                    </div>
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div class="card h-100">
+                <img src="{{ url.imagem.url }}" class="card-img-top p-3" alt="{{ url.nome }}" style="height: 200px; object-fit: contain;">
+                <div class="card-body d-flex flex-column justify-content-between text-center">
+                    <h5 class="card-title">{{ url.nome }}</h5>
+                    <a href="{{ url.url }}" target="_blank" class="btn btn-primary mt-2">Visitar Site</a>
                 </div>
             </div>
+        </div>
         {% endfor %}
     </div>
 
-    <h1 class="text-center" style="margin-bottom: 90px; font-size: 3rem;">Vídeos do YouTube</h1>
+    <!-- Vídeos do YouTube -->
+    <h1 class="section-title sub">Vídeos do YouTube</h1>
     <div class="row">
         {% for video in videos_youtube %}
-            <div class="col-md-4 mb-4">
-                <div class="card border-0" style="background-color: #F9F9F9;">
-                    <img src="{{ video.imagem }}" class="card-img-top" alt="{{ video.titulo }}" style="height: 500px; width: 100%; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ video.titulo }}</h5>
-                        <a href="{{ video.url }}" target="_blank" class="btn btn-primary">Assistir no YouTube</a>
-                    </div>
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div class="card h-100">
+                <img src="{{ video.imagem }}" class="card-img-top p-3" alt="{{ video.titulo }}" style="height: 200px; object-fit: contain;">
+                <div class="card-body d-flex flex-column justify-content-between text-center">
+                    <h5 class="card-title">{{ video.titulo }}</h5>
+                    <a href="{{ video.url }}" target="_blank" class="btn btn-primary mt-2">Assistir no YouTube</a>
                 </div>
             </div>
+        </div>
         {% endfor %}
     </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    {{ block.super }}
+    <script src="{% static 'js/carousel_index.js' %}"></script>
 {% endblock %}

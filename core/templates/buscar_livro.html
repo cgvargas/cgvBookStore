@@ -5,6 +5,7 @@
 {% block title %}Buscar Livros{% endblock %}
 
 {% block content %}
+
 <style>
 .google-search-box {
     height: 55px !important;
@@ -37,6 +38,15 @@
         flex: 0 0 100px !important;
     }
 }
+
+.hover-shadow:hover {
+     transform: translateY(-5px);
+     box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+}
+
+.transition-all {
+     transition: all 0.3s ease-in-out;
+}
 </style>
 
 <div class="container mt-5">
@@ -68,7 +78,7 @@
                            value="{{ query }}"
                            required>
                     <div class="input-group-append">
-                        <button class="btn btn-search" type="submit">
+                        <button class="btn btn-primary" type="submit">
                             <i class="bi bi-search"></i> Buscar
                         </button>
                     </div>
@@ -77,146 +87,229 @@
         </div>
     </form>
 
-    <!-- Resultados e Filtros -->
-    {% if request.path == '/buscar/' %}  {# Verifica se estamos na página de busca #}
-        {% if query %}
-            {% if livros %}
-                <!-- Contador de Resultados -->
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h5 class="mb-0">{{ livros|length }} resultado(s) encontrado(s)</h5>
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown">
-                            Ordenar por
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-right">
-                            <a class="dropdown-item" href="?query={{ query }}&tipo_busca={{ tipo_busca }}&order=title">Título</a>
-                            <a class="dropdown-item" href="?query={{ query }}&tipo_busca={{ tipo_busca }}&order=date">Data de Publicação</a>
-                        </div>
+    <!-- Resultados e Mensagens -->
+    {% if query %}
+        {% if livros %}
+            <!-- Contador de Resultados -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="mb-0">{{ livros|length }} resultado(s) encontrado(s)</h5>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown">
+                        Ordenar por
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <a class="dropdown-item" href="?query={{ query }}&tipo_busca={{ tipo_busca }}&order=title">Título</a>
+                        <a class="dropdown-item" href="?query={{ query }}&tipo_busca={{ tipo_busca }}&order=date">Data de Publicação</a>
                     </div>
                 </div>
+            </div>
 
-                <!-- Grid de Livros -->
-                <div class="row">
-                    {% for livro in livros %}
-                        <div class="col-md-4 mb-4">
-                            <div class="card h-100 shadow-sm hover-shadow transition-all">
-                                <!-- No card onde exibe a imagem -->
-                                <div class="card-header text-center bg-white border-0 pt-3">
-                                    <img src="{% if livro.imagem %}{{ livro.imagem }}{% else %}{% static 'images/capa-indisponivel.svg' %}{% endif %}"
-                                         class="img-fluid rounded"
-                                         alt="Capa de {{ livro.titulo }}"
-                                         style="height: 250px; object-fit: contain;"
-                                         onerror="this.onerror=null; this.src='{% static 'images/capa-indisponivel.svg' %}';">
-                                </div>
-
-                                <div class="card-body">
-                                    <h5 class="card-title text-primary mb-2">{{ livro.titulo }}</h5>
-                                    <p class="card-text mb-1"><strong>Autor:</strong> {{ livro.autor }}</p>
-
-                                    {% if livro.editora %}
-                                        <p class="card-text mb-1 text-muted small">
-                                            <i class="bi bi-building"></i> {{ livro.editora }}
-                                        </p>
-                                    {% endif %}
-
-                                    {% if livro.data_publicacao %}
-                                        <p class="card-text mb-1 text-muted small">
-                                            <i class="bi bi-calendar3"></i> {{ livro.data_publicacao }}
-                                        </p>
-                                    {% endif %}
-
-                                    {% if livro.paginas %}
-                                        <p class="card-text mb-1 text-muted small">
-                                            <i class="bi bi-book"></i> {{ livro.paginas }} páginas
-                                        </p>
-                                    {% endif %}
-
-                                    {% if livro.descricao %}
-                                        <p class="card-text mt-3">
-                                            {{ livro.descricao|truncatewords:30 }}
-                                        </p>
-                                    {% endif %}
-                                </div>
-
-                                <div class="card-footer bg-white border-top-0 pb-3">
-                                    <div class="d-flex justify-content-between">
-                                        <a href="{% url 'google_book_detail' livro.id %}"
-                                           class="btn btn-primary">
-                                           <i class="bi bi-info-circle"></i> Detalhes
+            <!-- Grid de Livros -->
+            <div class="row">
+                {% for livro in livros %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 shadow-sm hover-shadow transition-all">
+                            <div class="card-header text-center bg-white border-0 pt-3">
+                                <img src="{% if livro.imagem %}{{ livro.imagem }}{% else %}{% static 'images/capa-indisponivel.svg' %}{% endif %}"
+                                     class="img-fluid rounded"
+                                     alt="Capa de {{ livro.titulo }}"
+                                     style="height: 250px; object-fit: contain;"
+                                     onerror="this.onerror=null; this.src='{% static 'images/capa-indisponivel.svg' %}';">
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title text-primary mb-2">{{ livro.titulo }}</h5>
+                                <p class="card-text mb-1"><strong>Autor:</strong> {{ livro.autor }}</p>
+                                {% if livro.editora %}
+                                    <p class="card-text mb-1 text-muted small">
+                                        <i class="bi bi-building"></i> {{ livro.editora }}
+                                    </p>
+                                {% endif %}
+                                {% if livro.data_publicacao %}
+                                    <p class="card-text mb-1 text-muted small">
+                                        <i class="bi bi-calendar3"></i> {{ livro.data_publicacao }}
+                                    </p>
+                                {% endif %}
+                                {% if livro.paginas %}
+                                    <p class="card-text mb-1 text-muted small">
+                                        <i class="bi bi-book"></i> {{ livro.paginas }} páginas
+                                    </p>
+                                {% endif %}
+                                {% if livro.descricao %}
+                                    <p class="card-text mt-3">
+                                        {{ livro.descricao|truncatewords:30 }}
+                                    </p>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer bg-white border-top-0 pb-3">
+                                <div class="d-flex justify-content-between">
+                                    <a href="{% url 'google_book_detail' livro.id %}" class="btn btn-primary">
+                                        <i class="bi bi-info-circle"></i> Detalhes
+                                    </a>
+                                    {% if livro.link %}
+                                        <a href="{{ livro.link }}" class="btn btn-outline-secondary" target="_blank">
+                                            <i class="bi bi-google"></i> Google Books
                                         </a>
-                                        {% if livro.link %}
-                                            <a href="{{ livro.link }}"
-                                               class="btn btn-outline-secondary"
-                                               target="_blank">
-                                               <i class="bi bi-google"></i> Google Books
-                                            </a>
-                                        {% endif %}
-                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
-                    {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <!-- Mensagem quando não encontrar resultados -->
+            <div class="alert alert-info text-center mt-4">
+                <i class="bi bi-info-circle me-2"></i>
+                {{ mensagem }}
+                <div class="mt-3">
+                    <button class="btn btn-primary" onclick="showAddBookModal()">
+                        <i class="bi bi-plus-circle"></i> Adicionar Livro Manualmente
+                    </button>
                 </div>
-
-                <!-- Paginação -->
-                {% if page_obj.has_other_pages %}
-                <nav aria-label="Navegação de página" class="mt-4">
-                    <ul class="pagination justify-content-center">
-                        {% if page_obj.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link" href="?query={{ query }}&tipo_busca={{ tipo_busca }}&page={{ page_obj.previous_page_number }}">
-                                    <i class="bi bi-chevron-left"></i> Anterior
-                                </a>
-                            </li>
-                        {% endif %}
-
-                        {% for num in page_obj.paginator.page_range %}
-                            {% if page_obj.number == num %}
-                                <li class="page-item active">
-                                    <span class="page-link">{{ num }}</span>
-                                </li>
-                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?query={{ query }}&tipo_busca={{ tipo_busca }}&page={{ num }}">{{ num }}</a>
-                                </li>
-                            {% endif %}
-                        {% endfor %}
-
-                        {% if page_obj.has_next %}
-                            <li class="page-item">
-                                <a class="page-link" href="?query={{ query }}&tipo_busca={{ tipo_busca }}&page={{ page_obj.next_page_number }}">
-                                    Próxima <i class="bi bi-chevron-right"></i>
-                                </a>
-                            </li>
-                        {% endif %}
-                    </ul>
-                </nav>
-                {% endif %}
-
-                {% else %}
-                    {% if messages %}
-                        {% for message in messages %}
-                            {% if 'busca' in message.tags %}
-                                <div class="alert alert-info text-center">
-                                    <i class="bi bi-info-circle me-2"></i>
-                                    {{ message }}
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-                    {% endif %}
-                {% endif %}
+            </div>
         {% endif %}
     {% endif %}
 </div>
 
-<!-- Adicione isso ao seu CSS -->
-<style>
-    .hover-shadow:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
-    }
-    .transition-all {
-        transition: all 0.3s ease-in-out;
-    }
-</style>
+<!-- Modal para Adicionar Livro Manualmente -->
+<div class="modal fade" id="addBookModal" tabindex="-1" role="dialog" aria-labelledby="addBookModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addBookModalLabel">
+                    <i class="bi bi-plus-circle"></i> Adicionar Livro Manualmente
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="book-edit-form" id="addBookForm">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="cover-preview-container">
+                                <div class="cover-preview-placeholder" id="coverPreview">
+                                    <i class="bi bi-image"></i>
+                                    <small class="text-muted">Prévia da Capa</small>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="coverUrl">URL da Capa</label>
+                                <input type="url" class="form-control" id="coverUrl" name="capa"
+                                       placeholder="https://exemplo.com/imagem.jpg">
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label for="bookTitle">Título do Livro*</label>
+                                <input type="text" class="form-control" id="bookTitle" name="titulo" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="bookAuthor">Autor*</label>
+                                <input type="text" class="form-control" id="bookAuthor" name="autor" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="bookDescription">Descrição</label>
+                                <textarea class="form-control" id="bookDescription" name="descricao" rows="3"></textarea>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="bookPublisher">Editora</label>
+                                        <input type="text" class="form-control" id="bookPublisher" name="editora">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="publishDate">Data de Publicação</label>
+                                        <input type="date" class="form-control" id="publishDate" name="data_publicacao">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="bookCategory">Categoria</label>
+                                        <input type="text" class="form-control" id="bookCategory" name="categoria">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="bookLanguage">Idioma</label>
+                                        <select class="form-control" id="bookLanguage" name="idioma">
+                                            <option value="pt-BR">Português (BR)</option>
+                                            <option value="en">Inglês</option>
+                                            <option value="es">Espanhol</option>
+                                            <option value="fr">Francês</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-bookmark-plus"></i> Adicionar à Minha Estante
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showAddBookModal() {
+    $('#addBookModal').modal('show');
+}
+
+// Preview da capa do livro
+$(document).ready(function() {
+    $('#coverUrl').on('input', function() {
+        const url = $(this).val();
+        const preview = $('#coverPreview');
+
+        if (url) {
+            preview.html(`<img src="${url}" alt="Prévia da capa" class="img-fluid" onerror="this.onerror=null;this.parentElement.innerHTML='<i class=\'bi bi-image\'></i><small class=\'text-muted\'>Imagem inválida</small>'">`);
+        } else {
+            preview.html(`
+                <i class="bi bi-image"></i>
+                <small class="text-muted">Prévia da Capa</small>
+            `);
+        }
+    });
+
+    // Manipulação do formulário
+    $('#addBookForm').on('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        $.ajax({
+            url: '{% url "adicionar_livro_manual" %}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if (response.success) {
+                    $('#addBookModal').modal('hide');
+                    alert('Livro adicionado com sucesso!');
+                    location.reload();
+                } else {
+                    alert('Erro ao adicionar livro: ' + response.error);
+                }
+            },
+            error: function() {
+                alert('Erro ao processar a requisição');
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

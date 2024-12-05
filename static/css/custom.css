@@ -1,0 +1,242 @@
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Corpo da página */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #F9F9F9;
+    color: #333;
+}
+
+/* Navbar */
+.navbar {
+    background-color: #343a40;
+    padding: 10px 20px;
+}
+
+.navbar-nav .nav-link {
+    color: white;
+    margin-right: 15px;
+    font-size: 1rem;
+    transition: color 0.3s;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #ffcc00;
+}
+
+.nav-link.active {
+    color: orange !important;
+}
+
+/* Linha decorativa */
+.line {
+    height: 3px;
+    background-color: orange;
+    transition: background-color 0.3s ease;
+}
+
+.line:hover {
+    background-color: #ff6600;
+}
+
+/* Conteúdo principal */
+.container {
+    max-width: 1100px;
+    margin: 20px auto;
+    padding: 15px;
+}
+
+/* Estilos do Buscador Google Books */
+.google-search-box {
+    border-radius: 24px !important;
+    border: 1px solid #dfe1e5 !important;
+    box-shadow: none !important;
+    transition: all 0.3s ease-in-out;
+    background: white;
+}
+
+.google-search-box:hover,
+.google-search-box:focus-within {
+    box-shadow: 0 1px 6px rgba(32,33,36,.28) !important;
+    border-color: rgba(223,225,229,0) !important;
+}
+
+.google-search-box select {
+    border: none !important;
+    border-radius: 24px 0 0 24px !important;
+    background-color: transparent;
+    font-size: 16px;
+    color: #202124;
+    min-width: 120px;
+}
+
+.google-search-box input {
+    border: none !important;
+    border-radius: 0 !important;
+    padding-left: 0;
+    font-size: 16px;
+    color: #202124;
+    height: 48px;
+}
+
+.google-search-box .btn-search {
+    border-radius: 0 24px 24px 0 !important;
+    padding: 0.5rem 1.5rem;
+    background-color: #1a73e8;
+    color: white;
+    border: none;
+    font-size: 16px;
+    height: 48px;
+    transition: background-color 0.2s;
+}
+
+.google-search-box .btn-search:hover {
+    background-color: #1557b0;
+}
+
+.google-search-box select:focus,
+.google-search-box input:focus {
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.google-search-box .input-group-append {
+    margin-left: 0 !important;
+}
+
+/* Footer */
+.footer {
+    background-color: #343a40;
+    color: #ffffff;
+    padding: 20px 0;
+}
+
+.footer .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.footer-link {
+    color: #ffcc00;
+    text-decoration: none;
+    margin: 0 5px;
+    font-size: 1.05rem;
+    transition: color 0.3s;
+}
+
+.footer-link:hover {
+    color: #ff6600;
+}
+
+.footer-separator {
+    margin: 0 5px;
+    color: #ffffff;
+}
+
+.footer-link-nowrap {
+    white-space: nowrap;
+}
+
+.footer .bi {
+    color: #ffffff;
+    transition: color 0.2s;
+}
+
+.footer .bi:hover {
+    color: #ffd700;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .navbar-nav {
+        text-align: center;
+    }
+
+    .navbar-nav .nav-link {
+        margin: 5px 0;
+    }
+
+    .footer .container {
+        flex-direction: column;
+    }
+
+    .footer .col-md-4 {
+        margin-bottom: 10px;
+    }
+
+    .google-search-box {
+        border-radius: 16px !important;
+    }
+
+    .google-search-box select,
+    .google-search-box input,
+    .google-search-box .btn-search {
+        height: 42px;
+    }
+}
+
+/* Define o tamanho da logo */
+.navbar-brand .logo {
+    height: 60px;
+    width: auto;
+}
+
+/* Estilo do nome CG BookStore */
+.navbar-brand .store-name {
+    font-size: 1.5rem;
+    color: orange;
+    font-weight: bold;
+}
+
+/* Estilo adicional para o formulário */
+.form-control {
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Botão de envio */
+.btn-primary {
+    padding: 10px 20px;
+    border-radius: 5px;
+}
+
+/* Layout para a área de redes sociais */
+ul.list-unstyled li {
+    margin-bottom: 10px;
+}
+
+/* Estilização para inputs do login */
+.login-input {
+    width: 100%;
+    max-width: 300px;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+/* Botão de login */
+.login-button {
+    width: 100%;
+    max-width: 300px;
+    padding: 10px;
+    background-color: #ff6600;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.login-button:hover {
+    background-color: #ff4500;
+}

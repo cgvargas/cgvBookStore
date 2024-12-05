@@ -1,14 +1,12 @@
 # core/models.py
-import decimal
+import json
+import logging
+from datetime import timedelta
 
 from django.contrib.auth.models import AbstractUser
+from django.core.cache import cache
 from django.db import models
 from django.utils import timezone
-from django.core.cache import cache
-from datetime import timedelta
-import logging
-import json
-
 
 logger = logging.getLogger(__name__)
 
@@ -203,15 +201,45 @@ class Contato(models.Model):
 class CustomUser(AbstractUser):
     nome_completo = models.CharField(max_length=255, verbose_name="Nome Completo")
     data_registro = models.DateTimeField(auto_now_add=True)
+    profile_image = models.ImageField(
+        upload_to='profile_photos/',
+        null=True,
+        blank=True,
+        verbose_name='Foto de Perfil'
+    )
+
+    # Resolvendo os conflitos de relacionamento
+    groups = models.ManyToManyField(
+        'auth.Group',
+        verbose_name='groups',
+        blank=True,
+        help_text='The groups this user belongs to.',
+        related_name='customuser_set',
+        related_query_name='customuser'
+    )
+
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        verbose_name='user permissions',
+        blank=True,
+        help_text='Specific permissions for this user.',
+        related_name='customuser_set',
+        related_query_name='customuser'
+    )
 
     class Meta:
         verbose_name = 'Usuário'
         verbose_name_plural = 'Usuários'
-        # Adicione isto para garantir o nome correto da tabela
         db_table = 'core_customuser'
 
     def __str__(self):
         return self.username
+
+    def get_profile_image_url(self):
+        """Retorna a URL da imagem de perfil ou None se não houver"""
+        if self.profile_image and hasattr(self.profile_image, 'url'):
+            return self.profile_image.url
+        return None
 
 
 class EstanteLivro(models.Model):
@@ -222,16 +250,61 @@ class EstanteLivro(models.Model):
         ('lido', 'Lido'),
     ]
 
-    usuario = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    livro_id = models.CharField(max_length=100)  # ID do Google Books
+    usuario = models.ForeignKey('CustomUser', on_delete=models.CASCADE)
+    livro_id = models.CharField(max_length=100, blank=True,
+                                null=True)  # ID do Google Books, opcional para livros manuais
     tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
     titulo = models.CharField(max_length=255)
     autor = models.CharField(max_length=255)
-    capa = models.URLField()
-    data_lancamento = models.CharField(max_length=50)
-    sinopse = models.TextField()
+    capa = models.URLField(blank=True)  # Opcional para permitir livros sem capa
+    data_lancamento = models.CharField(max_length=50, blank=True)
+    sinopse = models.TextField(blank=True)
     data_adicao = models.DateTimeField(auto_now_add=True)
+
+    # Novos campos para livros manuais
+    manual = models.BooleanField(default=False)  # Indica se foi adicionado manualmente
+    editora = models.CharField(max_length=255, blank=True)
+    numero_paginas = models.IntegerField(null=True, blank=True)
+    isbn = models.CharField(max_length=13, blank=True)
+    idioma = models.CharField(max_length=50, blank=True)
+    categoria = models.CharField(max_length=100, blank=True)
+    ultima_atualizacao = models.DateTimeField(auto_now=True)
+    notas_pessoais = models.TextField(blank=True)  # Para usuários adicionarem notas sobre o livro
 
     class Meta:
         ordering = ['titulo']
+        verbose_name = 'Livro na Estante'
+        verbose_name_plural = 'Livros na Estante'
+        unique_together = [['usuario', 'livro_id', 'tipo']]
 
+    def __str__(self):
+        return f"{self.titulo} ({self.get_tipo_display()}) - {self.usuario.username}"
+
+    def save(self, *args, **kwargs):
+        # Se for um livro manual e não tiver capa definida, usa uma capa padrão
+        if self.manual and not self.capa:
+            self.capa = '/static/images/default-book-cover.jpg'
+
+        super().save(*args, **kwargs)
+
+    @property
+    def tem_capa(self):
+        """Verifica se o livro tem uma capa válida"""
+        return bool(self.capa and not self.capa.endswith('default-book-cover.jpg'))
+
+
+class HistoricoAtividade(models.Model):
+    usuario = models.ForeignKey('CustomUser', on_delete=models.CASCADE)
+    acao = models.CharField(max_length=50)
+    livro_id = models.CharField(max_length=100)
+    titulo_livro = models.CharField(max_length=255)
+    detalhes = models.TextField()
+    data = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-data']
+        verbose_name = 'Histórico de Atividade'
+        verbose_name_plural = 'Histórico de Atividades'
+
+    def __str__(self):
+        return f"{self.usuario.username} - {self.acao} - {self.titulo_livro}"
