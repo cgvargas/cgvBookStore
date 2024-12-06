@@ -207,13 +207,14 @@ class LivroManualForm(forms.ModelForm):
 
     def clean_isbn(self):
         isbn = self.cleaned_data.get('isbn')
-        if isbn:
+        if isbn:  # Se um ISBN foi fornecido
             # Remove hífens e espaços do ISBN
             isbn = isbn.replace('-', '').replace(' ', '')
             # Verifica se o ISBN tem 10 ou 13 dígitos
             if len(isbn) not in [10, 13]:
                 raise ValidationError('ISBN deve ter 10 ou 13 dígitos')
-        return isbn
+            return isbn
+        return ''  # Retorna string vazia se nenhum ISBN foi fornecido
 
     def clean_numero_paginas(self):
         numero = self.cleaned_data.get('numero_paginas')

@@ -5,51 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e53a36a2-09c4-4f9a-adfc-da02e0b05877" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/core/templates/partials/shelf_form.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/core/views/book_actions.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/css/base/_reset.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/css/base/_typography.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/css/book_index.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/css/components/_book-card.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/css/components/_buttons.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/css/components/_cards.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/css/components/_footer.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/css/components/_forms.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/css/components/_navbar.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/css/components/_pagination.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/css/components/_search.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/css/custom.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/css/layout/_containers.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/css/layout/_grid.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/css/main.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/css/profile.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/css/utilities/_animations.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/css/utilities/_helpers.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/css/utilities/_spacing.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/images/favicon.ico" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/images/fundo.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/js/carousel_index.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/js/profile.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/js/shelf-management.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/js/shelf-manager.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/js/csrf-setup.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/api.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/templates/adicionar_livros.html" beforeDir="false" afterPath="$PROJECT_DIR$/core/templates/adicionar_livros.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/core/templates/base.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/templates/buscar_livro.html" beforeDir="false" afterPath="$PROJECT_DIR$/core/templates/buscar_livro.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/templates/emails/confirmacao_contato.html" beforeDir="false" afterPath="$PROJECT_DIR$/core/templates/emails/confirmacao_contato.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/core/templates/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/templates/contato.html" beforeDir="false" afterPath="$PROJECT_DIR$/core/templates/contato.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/templates/perfil.html" beforeDir="false" afterPath="$PROJECT_DIR$/core/templates/perfil.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/views/book_views.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/views/book_views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/views/general_views.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/views/general_views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/views/profile_views.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/views/profile_views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/views/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/views/utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/static/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/styles.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/images/books.jpg" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

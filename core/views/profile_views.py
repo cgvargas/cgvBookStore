@@ -68,28 +68,40 @@ def profile(request):
 @login_required
 @require_http_methods(["POST"])
 def adicionar_livro_manual(request):
-    form = LivroManualForm(request.POST)
-    if form.is_valid():
-        livro = form.save(commit=False)
-        livro.usuario = request.user
-        livro.save()
+    try:
+        form = LivroManualForm(request.POST)
+        if form.is_valid():
+            livro = form.save(commit=False)
+            livro.usuario = request.user
+            livro.manual = True
+            livro.save()
 
-        return JsonResponse({
-            'success': True,
-            'message': 'Livro adicionado com sucesso!',
-            'livro': {
-                'id': livro.id,
-                'titulo': livro.titulo,
-                'autor': livro.autor,
-                'capa': livro.capa
-            }
-        })
-    else:
+            return JsonResponse({
+                'success': True,
+                'message': 'Livro adicionado com sucesso!',
+                'livro': {
+                    'id': livro.id,
+                    'titulo': livro.titulo,
+                    'autor': livro.autor,
+                    'capa': livro.capa,
+                    'tipo': livro.tipo
+                }
+            })
+        else:
+            # Formata os erros de uma maneira mais amigável
+            errors = {}
+            for field, error_list in form.errors.items():
+                errors[field] = [str(error) for error in error_list]
+
+            return JsonResponse({
+                'success': False,
+                'error': errors
+            })
+    except Exception as e:
         return JsonResponse({
             'success': False,
-            'error': form.errors
+            'error': str(e)
         })
-
 
 
 @login_required

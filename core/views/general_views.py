@@ -62,14 +62,32 @@ def contato(request):
                 contato = form.save()
                 emails_enviados = enviar_email_contato(form.cleaned_data)
 
+                print("Form salvo:", contato)  # Debug
+                print("Emails enviados:", emails_enviados)  # Debug
+
                 if emails_enviados:
-                    messages.success(request, 'Mensagem enviada com sucesso! Verifique seu e-mail para confirmação.')
+                    messages.success(
+                        request,
+                        'Mensagem enviada com sucesso! Verifique seu e-mail para confirmação.',
+                        extra_tags='contact success'  # Adicionando ambas as tags
+
+                    )
+                    print("Mensagem de sucesso adicionada")  # Debug
                 else:
-                    messages.warning(request, 'Sua mensagem foi recebida, mas houve um problema ao enviar o e-mail de confirmação.')
+                    messages.warning(
+                        request,
+                        'Sua mensagem foi recebida, mas houve um problema ao enviar o e-mail de confirmação.',
+                        extra_tags='contact warning'
+                    )
+                    print("Mensagem de aviso adicionada")  # Debug
 
                 return redirect('contato')
             except Exception as e:
-                messages.error(request, 'Ocorreu um erro ao processar sua mensagem. Por favor, tente novamente.')
+                messages.error(
+                    request,
+                    'Ocorreu um erro ao processar sua mensagem. Por favor, tente novamente.',
+                    extra_tags='contact error'
+                )
     else:
         form = ContatoForm()
 

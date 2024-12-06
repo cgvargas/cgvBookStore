@@ -1,70 +1,170 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}?v=2">
+{% endblock %}
+
 {% block title %}Contato{% endblock %}
 
 {% block content %}
-    <div class="container mt-5">
-        <h2>Entre em contato conosco</h2>
-
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-success">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-
-        <form method="post" autocomplete="off">
-            {% csrf_token %}
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="id_nome">Nome</label>
-                        <input type="text" class="form-control" id="id_nome" name="nome" required>
-                        {% if form.nome.errors %}
-                            <div class="text-danger">{{ form.nome.errors }}</div>
-                        {% endif %}
+<div class="container mt-3">
+    <div class="row">
+        <!-- Coluna do Formulário -->
+        <div class="col-md-6 p-4">
+            <h2 class="mb-3">Entre em contato conosco</h2>
+            {% if messages %}
+                {% for message in messages %}
+                    {% if 'success' in message.tags %}
+                    <div class="alert alert-success mb-2">
+                        <i class="bi bi-check-circle me-2"></i>{{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    {% elif 'error' in message.tags %}
+                    <div class="alert alert-danger mb-2">
+                        <i class="bi bi-exclamation-circle me-2"></i>{{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    {% elif 'warning' in message.tags %}
+                    <div class="alert alert-warning mb-2">
+                        <i class="bi bi-exclamation-triangle me-2"></i>{{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            <form method="post" autocomplete="off">
+                {% csrf_token %}
+                <div class="row mb-2">
+                    <div class="col-md-6">
+                        <div class="form-group mb-2">
+                            <label for="id_nome" class="mb-1">Nome</label>
+                            <input type="text" class="form-control form-control-sm" id="id_nome" name="nome" required>
+                            {% if form.nome.errors %}
+                                <div class="text-danger small">{{ form.nome.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-2">
+                            <label for="id_email" class="mb-1">Email</label>
+                            <input type="email" class="form-control form-control-sm" id="id_email" name="email" required>
+                            {% if form.email.errors %}
+                                <div class="text-danger small">{{ form.email.errors }}</div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="id_email">Email</label>
-                        <input type="email" class="form-control" id="id_email" name="email" required>
-                        {% if form.email.errors %}
-                            <div class="text-danger">{{ form.email.errors }}</div>
-                        {% endif %}
-                    </div>
+
+                <div class="form-group mb-2">
+                    <label for="id_assunto" class="mb-1">Assunto</label>
+                    <input type="text" class="form-control form-control-sm" id="id_assunto" name="assunto" required>
+                    {% if form.assunto.errors %}
+                        <div class="text-danger small">{{ form.assunto.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group mb-2">
+                    <label for="id_mensagem" class="mb-1">Mensagem</label>
+                    <textarea class="form-control form-control-sm" id="id_mensagem" name="mensagem" rows="4" required></textarea>
+                    {% if form.mensagem.errors %}
+                        <div class="text-danger small">{{ form.mensagem.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-sm">Enviar</button>
+            </form>
+        </div>
+
+        <!-- Coluna de Informações Adicionais -->
+        <div class="col-md-6 bg-light p-4">
+            <!-- Seção de Informações de Contato -->
+            <div class="contact-info mb-4">
+                <h3 class="mb-3">Informações de Contato</h3>
+                <div class="d-flex align-items-center mb-2">
+                    <i class="bi bi-envelope-fill me-2"></i>
+                    <span>cg.bookstore.online@gmail.com</span>
+                </div>
+                <div class="d-flex align-items-center mb-2">
+                    <i class="bi bi-clock-fill me-2"></i>
+                    <span>Segunda a Sexta: 9h às 18h</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-geo-alt-fill me-2"></i>
+                    <span>Nilópolis, RJ - Brasil</span>
                 </div>
             </div>
 
-            <div class="row mt-3">
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="id_assunto">Assunto</label>
-                        <input type="text" class="form-control" id="id_assunto" name="assunto" required>
-                        {% if form.assunto.errors %}
-                            <div class="text-danger">{{ form.assunto.errors }}</div>
-                        {% endif %}
-                    </div>
+            <!-- Redes Sociais -->
+            <div class="social-section">
+                <h3 class="mb-3">Nos Siga nas Redes Sociais</h3>
+                <div class="d-flex">
+                    <a href="https://www.instagram.com/cg.bookstore/" class="text-decoration-none mr-3">
+                        <i class="bi bi-instagram fs-4"></i>
+                    </a>
+                    <a href="https://www.facebook.com/profile.php?id=61569188766565" class="text-decoration-none mr-3">
+                        <i class="bi bi-facebook fs-4"></i>
+                    </a>
+                    <a href="https://x.com/CG_BookStore" class="text-decoration-none">
+                        <i class="bi bi-twitter-x fs-4"></i>
+                    </a>
                 </div>
             </div>
 
-            <div class="row mt-3">
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="id_mensagem">Mensagem</label>
-                        <textarea class="form-control" id="id_mensagem" name="mensagem" rows="5" required></textarea>
-                        {% if form.mensagem.errors %}
-                            <div class="text-danger">{{ form.mensagem.errors }}</div>
-                        {% endif %}
+            <!-- Mapa de Nilópolis -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-body p-0">
+                            <iframe
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d29451.866891040837!2d-43.42645721345536!3d-22.809554441010692!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9962fd0cec20eb%3A0x6796d4517e22574e!2sNil%C3%B3polis%2C%20RJ!5e0!3m2!1spt-BR!2sbr!4v1709336117965!5m2!1spt-BR!2sbr"
+                                width="100%"
+                                height="400"
+                                style="border:0;"
+                                allowfullscreen=""
+                                loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <div class="row mt-3">
-                <div class="col-md-12">
-                    <button type="submit" class="btn btn-primary">Enviar</button>
-                </div>
-            </div>
-        </form>
+        </div>
     </div>
+</div>
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    console.log('Script loaded'); // Debug
+
+    // Verificar se há mensagens
+    var hasMessages = $('.alert').length;
+    console.log('Número de alertas:', hasMessages); // Debug
+
+    // Configurar alertas
+    $('.alert').addClass('show');
+
+    // Auto-fechar após 5 segundos
+    setTimeout(function() {
+        $('.alert').fadeOut('slow', function() {
+            $(this).remove();
+        });
+    }, 5000);
+
+    // Fechar ao clicar no botão
+    $('.btn-close').on('click', function() {
+        $(this).closest('.alert').fadeOut('slow', function() {
+            $(this).remove();
+        });
+    });
+});
+</script>
+{% endblock %}
 {% endblock %}

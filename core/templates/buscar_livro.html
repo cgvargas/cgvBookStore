@@ -1,3 +1,4 @@
+<!-- template/buscar_livro.html -->
 {% extends 'base.html' %}
 
 {% load static %}
@@ -5,6 +6,13 @@
 {% block title %}Buscar Livros{% endblock %}
 
 {% block content %}
+    {% if messages %}
+        {% for message in messages %}
+            {% if 'search' in message.tags or message.tags == 'info' %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
 
 <style>
 .google-search-box {
@@ -162,7 +170,7 @@
                 <i class="bi bi-info-circle me-2"></i>
                 {{ mensagem }}
                 <div class="mt-3">
-                    <button class="btn btn-primary" onclick="showAddBookModal()">
+                    <button class="btn btn-primary btn-add-manual" onclick="showAddBookModal()">
                         <i class="bi bi-plus-circle"></i> Adicionar Livro Manualmente
                     </button>
                 </div>
@@ -173,7 +181,7 @@
 
 <!-- Modal para Adicionar Livro Manualmente -->
 <div class="modal fade" id="addBookModal" tabindex="-1" role="dialog" aria-labelledby="addBookModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="addBookModalLabel">
@@ -188,7 +196,7 @@
                     {% csrf_token %}
                     <div class="row">
                         <div class="col-md-4">
-                            <div class="cover-preview-container">
+                            <div class="cover-preview-container mb-3">
                                 <div class="cover-preview-placeholder" id="coverPreview">
                                     <i class="bi bi-image"></i>
                                     <small class="text-muted">Prévia da Capa</small>
@@ -196,65 +204,161 @@
                             </div>
                             <div class="form-group">
                                 <label for="coverUrl">URL da Capa</label>
-                                <input type="url" class="form-control" id="coverUrl" name="capa"
-                                       placeholder="https://exemplo.com/imagem.jpg">
+                                <input type="url"
+                                       class="form-control"
+                                       id="coverUrl"
+                                       name="capa"
+                                       placeholder="URL da capa (opcional)">
                             </div>
                         </div>
                         <div class="col-md-8">
-                            <div class="form-group">
-                                <label for="bookTitle">Título do Livro*</label>
-                                <input type="text" class="form-control" id="bookTitle" name="titulo" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="bookAuthor">Autor*</label>
-                                <input type="text" class="form-control" id="bookAuthor" name="autor" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="bookDescription">Descrição</label>
-                                <textarea class="form-control" id="bookDescription" name="descricao" rows="3"></textarea>
-                            </div>
                             <div class="row">
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label for="bookTitle">Título*</label>
+                                        <input type="text"
+                                               class="form-control"
+                                               id="bookTitle"
+                                               name="titulo"
+                                               placeholder="Título do livro"
+                                               required>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label for="bookAuthor">Autor*</label>
+                                        <input type="text"
+                                               class="form-control"
+                                               id="bookAuthor"
+                                               name="autor"
+                                               placeholder="Autor do livro"
+                                               required>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label for="bookSynopsis">Sinopse</label>
+                                        <textarea class="form-control"
+                                                  id="bookSynopsis"
+                                                  name="sinopse"
+                                                  rows="4"
+                                                  placeholder="Sinopse do livro (opcional)"></textarea>
+                                    </div>
+                                </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="bookPublisher">Editora</label>
-                                        <input type="text" class="form-control" id="bookPublisher" name="editora">
+                                        <input type="text"
+                                               class="form-control"
+                                               id="bookPublisher"
+                                               name="editora"
+                                               placeholder="Editora (opcional)">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="publishDate">Data de Publicação</label>
-                                        <input type="date" class="form-control" id="publishDate" name="data_publicacao">
+                                        <label for="publishDate">Data de Lançamento</label>
+                                        <input type="text"
+                                               class="form-control"
+                                               id="publishDate"
+                                               name="data_lancamento"
+                                               placeholder="Data de lançamento (opcional)">
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="bookPages">Número de Páginas</label>
+                                        <input type="number"
+                                               class="form-control"
+                                               id="bookPages"
+                                               name="numero_paginas"
+                                               placeholder="Número de páginas">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="bookISBN">ISBN</label>
+                                        <input type="text"
+                                               class="form-control"
+                                               id="bookISBN"
+                                               name="isbn"
+                                               placeholder="ISBN (opcional)"
+                                               maxlength="13">
+                                    </div>
+                                </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="bookCategory">Categoria</label>
-                                        <input type="text" class="form-control" id="bookCategory" name="categoria">
+                                        <input type="text"
+                                               class="form-control"
+                                               id="bookCategory"
+                                               name="categoria"
+                                               placeholder="Categoria/Gênero (opcional)">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="bookLanguage">Idioma</label>
-                                        <select class="form-control" id="bookLanguage" name="idioma">
-                                            <option value="pt-BR">Português (BR)</option>
-                                            <option value="en">Inglês</option>
-                                            <option value="es">Espanhol</option>
-                                            <option value="fr">Francês</option>
-                                        </select>
+                                        <input type="text"
+                                               class="form-control"
+                                               id="bookLanguage"
+                                               name="idioma"
+                                               placeholder="Idioma (opcional)">
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label for="bookNotes">Notas Pessoais</label>
+                                        <textarea class="form-control"
+                                                  id="bookNotes"
+                                                  name="notas_pessoais"
+                                                  rows="3"
+                                                  placeholder="Notas pessoais sobre o livro (opcional)"></textarea>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-bookmark-plus"></i> Adicionar à Minha Estante
-                        </button>
-                    </div>
+                    <!-- Campo oculto para o tipo -->
+                    <input type="hidden" name="tipo" id="shelfType" value="">
                 </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="submit" form="addBookForm" class="btn btn-primary">
+                    <i class="bi bi-bookmark-plus"></i> Continuar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Seleção de Prateleira -->
+<div class="modal fade" id="selectShelfModal" tabindex="-1" aria-labelledby="selectShelfModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Escolher Prateleira</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body d-flex flex-column align-items-center">
+                <p>Em qual prateleira você deseja adicionar o livro?</p>
+                <div class="d-flex flex-wrap justify-content-center">
+                    <button class="btn btn-outline-primary select-shelf mr-3 mb-2" data-tipo="favorito">
+                        <i class="bi bi-star"></i> Favoritos
+                    </button>
+                    <button class="btn btn-outline-success select-shelf mr-3 mb-2" data-tipo="lendo">
+                        <i class="bi bi-book-half"></i> Lendo
+                    </button>
+                    <button class="btn btn-outline-info select-shelf mr-3 mb-2" data-tipo="vou_ler">
+                        <i class="bi bi-bookmark"></i> Vou Ler
+                    </button>
+                    <button class="btn btn-outline-secondary select-shelf mb-2" data-tipo="lido">
+                        <i class="bi bi-check2-circle"></i> Lidos
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -264,12 +368,30 @@
 
 {% block extra_js %}
 <script>
+// Defina a função no escopo global
 function showAddBookModal() {
+    console.log('Tentando abrir o modal');
     $('#addBookModal').modal('show');
 }
 
-// Preview da capa do livro
 $(document).ready(function() {
+    // Auto-fechar alertas após 5 segundos
+    setTimeout(function() {
+        $('.alert').fadeOut('slow', function() {
+            $(this).remove();
+        });
+    }, 5000);
+
+    // Permitir fechar manualmente
+    $('.alert .close').on('click', function() {
+        $(this).closest('.alert').fadeOut('slow', function() {
+            $(this).remove();
+        });
+
+    let formData = null;
+    console.log('Script initialized');
+
+    // Preview da capa do livro
     $('#coverUrl').on('input', function() {
         const url = $(this).val();
         const preview = $('#coverPreview');
@@ -284,31 +406,75 @@ $(document).ready(function() {
         }
     });
 
+    // Inicializar modais
+    $('.modal').modal({
+        show: false
+    });
+
+    // Também adicionar listener pelo classe
+    $('.btn-add-manual').on('click', function() {
+        console.log('Botão clicado via classe');
+        $('#addBookModal').modal('show');
+    });
+
     // Manipulação do formulário
     $('#addBookForm').on('submit', function(e) {
         e.preventDefault();
+        console.log('Form submitted');
 
-        const formData = new FormData(this);
+        formData = new FormData(this);
 
-        $.ajax({
-            url: '{% url "adicionar_livro_manual" %}',
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                if (response.success) {
-                    $('#addBookModal').modal('hide');
-                    alert('Livro adicionado com sucesso!');
-                    location.reload();
-                } else {
-                    alert('Erro ao adicionar livro: ' + response.error);
+        $('#addBookModal').modal('hide');
+        setTimeout(() => {
+            $('#selectShelfModal').modal('show');
+        }, 500);
+    });
+
+    // Manipulação da seleção de prateleira
+    $('.select-shelf').on('click', function() {
+        const tipo = $(this).data('tipo');
+        console.log('Selected shelf:', tipo);
+
+        if (formData) {
+            formData.append('tipo', tipo);
+
+            $.ajax({
+                url: '{% url "adicionar_livro_manual" %}',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    $('#selectShelfModal').modal('hide');
+                    if (response.success) {
+                        alert('Livro adicionado com sucesso!');
+                        window.location.href = '{% url "profile" %}';
+                    } else {
+                        let errorMessage = 'Erro desconhecido';
+                        if (typeof response.error === 'string') {
+                            errorMessage = response.error;
+                        } else if (response.error instanceof Object) {
+                            errorMessage = Object.entries(response.error)
+                                .map(([field, errors]) => `${field}: ${errors.join(', ')}`)
+                                .join('\n');
+                        }
+                        alert('Erro ao adicionar livro:\n' + errorMessage);
+                        $('#addBookModal').modal('show');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Ajax error:', error);
+                    $('#selectShelfModal').modal('hide');
+                    alert('Erro ao processar a requisição: ' + error);
+                    $('#addBookModal').modal('show');
                 }
-            },
-            error: function() {
-                alert('Erro ao processar a requisição');
-            }
-        });
+            });
+        }
+    });
+
+    // Fechar modais
+    $('.close, [data-dismiss="modal"]').on('click', function() {
+        $(this).closest('.modal').modal('hide');
     });
 });
 </script>
