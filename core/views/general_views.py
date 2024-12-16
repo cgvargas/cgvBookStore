@@ -2,10 +2,56 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from ..models import Livro, URLExterna, VideoYouTube
-from ..forms import ContatoForm
+from ..forms import ContatoForm, CustomUserCreationForm
 from ..utils.email_utils import enviar_email_contato
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.http import JsonResponse
+from django.urls import reverse
 
+
+def register(request):
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            try:
+                user = form.save()
+
+                # Se a requisição for AJAX, retorna JSON
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': True,
+                        'redirect_url': reverse('login')
+                    })
+
+                # Se for uma requisição normal, adiciona mensagem e redireciona
+                messages.success(
+                    request,
+                    'Conta criada com sucesso! Agora você pode fazer login.',
+                    extra_tags='register success'
+                )
+                return redirect('login')
+
+            except Exception as e:
+                # Log do erro (opcional)
+                print(f"Erro ao registrar usuário: {e}")
+
+                # Se for AJAX
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': False,
+                        'error': 'Ocorreu um erro ao criar sua conta. Por favor, tente novamente.'
+                    })
+
+                # Se for requisição normal
+                messages.error(
+                    request,
+                    'Ocorreu um erro ao criar sua conta. Por favor, tente novamente.',
+                    extra_tags='register error'
+                )
+    else:
+        form = CustomUserCreationForm()
+
+    return render(request, 'registro.html', {'form': form})
 
 def index(request):
     try:
@@ -14,7 +60,7 @@ def index(request):
         livros_mais_vendidos = Livro.objects.filter(mais_vendido=True).order_by('titulo')
 
         # Configuração da paginação
-        paginator_destaque = Paginator(livros_destaque, 8)  # Mudei para 4 para ter uma grade 2x2 mais bonita
+        paginator_destaque = Paginator(livros_destaque, 8)
         paginator_vendidos = Paginator(livros_mais_vendidos, 8)
 
         # Pegando a página da query string

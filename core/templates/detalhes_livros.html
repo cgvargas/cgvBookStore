@@ -1,0 +1,686 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+/* Reset de estilos do modal */
+
+.modal-backdrop {
+    z-index: 1040;
+}
+
+.modal {
+    z-index: 1050;
+}
+
+.modal-content {
+    z-index: 1060;
+}
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #000;
+    opacity: 0.5;
+    z-index: 1500 !important; /* Aumentado */
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1600 !important; /* Aumentado */
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    outline: 0;
+}
+
+.modal-dialog {
+    position: relative;
+    width: auto;
+    margin: 0.5rem;
+    pointer-events: none;
+}
+
+.modal-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    pointer-events: auto;
+    background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 0.3rem;
+    outline: 0;
+    z-index: 1700 !important; /* Aumentado */
+}
+
+@media (min-width: 576px) {
+    .modal-dialog {
+        max-width: 500px;
+        margin: 1.75rem auto;
+    }
+}
+
+body.modal-open {
+    overflow: hidden;
+    padding-right: 0 !important;
+}
+
+/* Estilos para o modal de compartilhamento */
+.share-preview-image {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.share-buttons .btn {
+    padding: 12px 20px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.share-buttons .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.share-buttons .btn i {
+    font-size: 1.2rem;
+}
+
+/* Estilo específico para o botão do X (Twitter) */
+.share-buttons .btn[data-platform="twitter"] {
+    background-color: white;
+    border-color: #000;
+    color: #000;
+}
+
+.share-buttons .btn[data-platform="twitter"]:hover {
+    background-color: #000;
+    color: white;
+}
+
+.star-rating {
+    display: inline-flex;
+    gap: 5px;
+}
+
+.star-icon {
+    font-size: 24px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.star-icon:hover {
+    transform: scale(1.1);
+}
+
+/* Cores para diferentes níveis de avaliação */
+.rating-bad .bi-star-fill {
+    color: #dc3545;  /* Vermelho para avaliações baixas */
+}
+
+.rating-good .bi-star-fill {
+    color: #ffc107;  /* Amarelo para avaliações médias */
+}
+
+.rating-excellent .bi-star-fill {
+    color: #28a745;  /* Verde para avaliações altas */
+}
+
+.rating-text {
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5 animate-fade-in">
+    <!-- Breadcrumb com estilo moderno -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb bg-transparent p-0">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}" class="text-decoration-none">Início</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'profile' %}" class="text-decoration-none">Minha Estante</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ livro.titulo }}</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <!-- Coluna Esquerda - Capa e Ações -->
+        <div class="col-lg-4">
+            <div class="position-sticky" style="top: 2rem;">
+                <!-- Capa do Livro -->
+                <div class="text-center mb-4">
+                    <img src="{{ livro.imagem }}" 
+                         alt="{{ livro.titulo }}" 
+                         class="book-cover img-fluid mb-4"
+                         style="max-height: 500px; width: auto;">
+                </div>
+
+                <!-- Botões de Ação -->
+                <div class="d-grid gap-3">
+                    <button class="btn btn-primary" data-toggle="modal" data-target="#shareModal">
+                        <i class="bi bi-share"></i> Compartilhar
+                    </button>
+                    <button class="btn btn-outline-secondary action-button" id="btnEdit"
+                            onclick="window.location.href='{% url 'editar_livro_manual' livro.id %}'">
+                        <i class="bi bi-pencil"></i> Editar
+                    </button>
+                    <button class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">
+                        <i class="bi bi-trash"></i> Excluir
+                    </button>
+                </div>
+
+                <!-- Estatísticas do Livro -->
+                <div class="row g-3 mt-4">
+                    <div class="col-6">
+                        <div class="book-stats text-center">
+                            <i class="bi bi-book h4 mb-2"></i>
+                            <h6 class="mb-1">Páginas</h6>
+                            <p class="mb-0 fw-bold">{{ livro.numero_paginas|default:"N/A" }}</p>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="book-stats text-center">
+                            <i class="bi bi-globe h4 mb-2"></i>
+                            <h6 class="mb-1">Idioma</h6>
+                            <p class="mb-0 fw-bold">{{ livro.idioma|default:"N/A" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coluna Direita - Informações do Livro -->
+        <div class="col-lg-8">
+            {% if messages %}
+            <div class="row mb-4">
+                <div class="col">
+                    {% for message in messages %}
+                    <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            <!-- Cabeçalho do Livro -->
+            <div class="book-info-card p-4 mb-4">
+                <h1 class="display-5 mb-3">{{ livro.titulo }}</h1>
+                <h4 class="text-muted mb-4">por {{ livro.autor }}</h4>
+
+                <!-- Sistema de classificação -->
+                <div class="rating-section mb-4" data-livro-id="{{ livro.id }}" data-rating="{{ livro.classificacao|default_if_none:0 }}">
+                    <div class="stars d-flex align-items-center">
+                        <div class="star-rating">
+                            {% for i in "12345" %}
+                            <i class="bi bi-star star-icon" data-rating="{{ forloop.counter }}"></i>
+                            {% endfor %}
+                        </div>
+                        <span class="rating-text ms-2"></span>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    {% if livro.categoria %}
+                        <span class="book-tag">
+                            <i class="bi bi-tag"></i> {{ livro.categoria }}
+                        </span>
+                    {% endif %}
+                    {% if livro.editora %}
+                        <span class="book-tag">
+                            <i class="bi bi-building"></i> {{ livro.editora }}
+                        </span>
+                    {% endif %}
+                    {% if livro.data_publicacao %}
+                        <span class="book-tag">
+                            <i class="bi bi-calendar3"></i> {{ livro.data_publicacao }}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Sinopse -->
+            <div class="metadata-card mb-4">
+                <h4 class="mb-4"><i class="bi bi-book-half me-2"></i>Sobre o Livro</h4>
+                <p class="description-text">{{ livro.descricao|default:"Descrição não disponível" }}</p>
+            </div>
+
+            <!-- Informações Detalhadas -->
+            <div class="metadata-card">
+                <h4 class="mb-4"><i class="bi bi-info-circle me-2"></i>Informações Adicionais</h4>
+                <div class="row g-4">
+                    {% if livro.isbn %}
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-upc info-icon"></i>
+                            <div>
+                                <small class="text-muted d-block">ISBN</small>
+                                <span>{{ livro.isbn }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if livro.editora %}
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-building info-icon"></i>
+                            <div>
+                                <small class="text-muted d-block">Editora</small>
+                                <span>{{ livro.editora }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if livro.data_publicacao %}
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-calendar3 info-icon"></i>
+                            <div>
+                                <small class="text-muted d-block">Data de Publicação</small>
+                                <span>{{ livro.data_publicacao }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if livro.numero_paginas %}
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-file-text info-icon"></i>
+                            <div>
+                                <small class="text-muted d-block">Número de Páginas</small>
+                                <span>{{ livro.numero_paginas }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if livro.idioma %}
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-globe info-icon"></i>
+                            <div>
+                                <small class="text-muted d-block">Idioma</small>
+                                <span>{{ livro.idioma }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if livro.preco %}
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-tag info-icon"></i>
+                            <div>
+                                <small class="text-muted d-block">Preço Sugerido</small>
+                                <span>
+                                    {% if livro.moeda == 'BRL' %}
+                                        R$ {{ livro.preco|floatformat:2 }}
+                                    {% else %}
+                                        {{ livro.moeda }} {{ livro.preco|floatformat:2 }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Compartilhamento -->
+<div class="modal fade" id="shareModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-share"></i> Compartilhar Livro
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="text-center mb-4">
+                    <img src="{{ livro.imagem }}"
+                         alt="{{ livro.titulo }}"
+                         class="share-preview-image mb-3"
+                         style="max-height: 200px; width: auto;">
+                    <h5 class="mb-2">{{ livro.titulo }}</h5>
+                    <p class="text-muted mb-4">por {{ livro.autor }}</p>
+                </div>
+
+                <div class="share-buttons d-grid gap-3">
+                    <button class="btn btn-outline-primary share-btn w-100 d-flex align-items-center justify-content-center" data-platform="facebook">
+                        <i class="bi bi-facebook me-2"></i> Compartilhar no Facebook
+                    </button>
+                    <button class="btn btn-outline-dark share-btn w-100 d-flex align-items-center justify-content-center" data-platform="twitter">
+                        <i class="bi bi-twitter-x me-2"></i> Compartilhar no X
+                    </button>
+                    <button class="btn btn-outline-success share-btn w-100 d-flex align-items-center justify-content-center" data-platform="whatsapp">
+                        <i class="bi bi-whatsapp me-2"></i> Compartilhar no WhatsApp
+                    </button>
+                    <button class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center" id="copyLinkBtn">
+                        <i class="bi bi-link-45deg me-2"></i> Copiar Link
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="bi bi-x"></i> Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Exclusão</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja remover "<strong>{{ livro.titulo }}</strong>" da sua estante?</p>
+                <p class="text-muted small">Esta ação não pode ser desfeita.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">
+                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    Remover
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+
+// Função getCookie no escopo global
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicialização dos modais no Bootstrap 4
+    $('.modal').modal({
+        show: false,
+        backdrop: 'static'
+    });
+
+    // Garante que apenas um modal esteja aberto por vez
+    $('.modal').on('show.bs.modal', function () {
+        $('.modal').not($(this)).modal('hide');
+    });
+
+    var shareModal = $('#bookShareModal');
+    var deleteModal = $('#bookDeleteModal');
+
+    // Botões de ação
+    $('#btnShare').on('click', function(e) {
+        e.preventDefault();
+        shareModal.modal('show');
+    });
+
+    $('#btnRemove').on('click', function(e) {
+        e.preventDefault();
+        deleteModal.modal('show');
+    });
+
+
+    // Controle de scroll
+    shareModal.on('show.bs.modal', function () {
+        $('body').addClass('modal-open');
+    });
+
+    shareModal.on('hidden.bs.modal', function () {
+        $('body').removeClass('modal-open');
+    });
+
+    deleteModal.on('show.bs.modal', function () {
+        $('body').addClass('modal-open');
+    });
+
+    deleteModal.on('hidden.bs.modal', function () {
+        $('body').removeClass('modal-open');
+    });
+
+    // Botão de compartilhamento
+    $('.share-btn').on('click', function() {
+        var platform = $(this).data('platform');
+        var url = encodeURIComponent(window.location.href);
+        var title = encodeURIComponent('{{ livro.titulo }}');
+        var shareUrl = '';
+
+        switch(platform) {
+            case 'facebook':
+                shareUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + url;
+                break;
+            case 'twitter':
+                shareUrl = 'https://twitter.com/intent/tweet?url=' + url + '&text=' + title;
+                break;
+            case 'whatsapp':
+                shareUrl = 'https://api.whatsapp.com/send?text=' + title + '%20' + url;
+                break;
+        }
+
+        if (shareUrl) {
+            window.open(shareUrl, '_blank');
+        }
+    });
+
+    // Copiar link
+    $('#copyLinkBtn').on('click', function() {
+        var $this = $(this);
+        var originalText = $this.html();
+
+        navigator.clipboard.writeText(window.location.href).then(function() {
+            $this.html('<i class="bi bi-check2"></i> Link Copiado!');
+            setTimeout(function() {
+                $this.html(originalText);
+            }, 2000);
+        });
+    });
+
+    // Exclusão do livro
+    var isDeleting = false;
+
+    $('#confirmDelete').on('click', function() {
+    if (isDeleting) return;
+
+    var $this = $(this);
+    var $spinner = $this.find('.spinner-border');
+
+    isDeleting = true;
+    $this.prop('disabled', true);
+    $spinner.removeClass('d-none');
+
+    $.ajax({
+        url: '/livros/excluir/{{ livro.id }}/',
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        success: function(data) {
+            $('#deleteModal').modal('hide');
+            alert('Livro removido com sucesso!');
+            window.location.href = '{% url "profile" %}';
+        },
+        error: function(xhr, status, error) {
+            if (xhr.status === 404) {
+                // Se o livro não for encontrado (já foi excluído)
+                alert('O livro já foi removido da estante.');
+                window.location.href = '{% url "profile" %}';
+            } else {
+                console.error('Erro:', error);
+                alert('Erro ao tentar remover o livro. Por favor, tente novamente.');
+            }
+        },
+        complete: function() {
+            isDeleting = false;
+            $this.prop('disabled', false);
+            $spinner.addClass('d-none');
+        }
+    });
+});
+
+    // Sistema de avaliação
+    const starContainer = document.querySelector('.star-rating');
+    if (starContainer) {
+        const stars = starContainer.querySelectorAll('.star-icon');
+        const ratingText = document.querySelector('.rating-text');
+        const saveButton = document.createElement('button');
+        let currentRating = parseInt(starContainer.parentElement.dataset.rating) || 0;
+        let tempRating = currentRating;
+        let isStarClicked = false;
+
+        // Criar botão de salvar
+        saveButton.className = 'btn btn-primary btn-sm ms-2 save-rating-btn d-none';
+        saveButton.innerHTML = '<i class="bi bi-check2"></i> Salvar';
+        starContainer.parentElement.appendChild(saveButton);
+
+        function updateStars(rating, isClick = false) {
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.remove('bi-star');
+                    star.classList.add('bi-star-fill');
+                } else {
+                    star.classList.remove('bi-star-fill');
+                    star.classList.add('bi-star');
+                }
+            });
+
+            starContainer.classList.remove('rating-bad', 'rating-good', 'rating-excellent');
+
+            if (rating > 0) {
+                if (rating <= 2) {
+                    starContainer.classList.add('rating-bad');
+                    ratingText.style.color = '#dc3545';
+                    ratingText.textContent = 'Ruim';
+                } else if (rating <= 3) {
+                    starContainer.classList.add('rating-good');
+                    ratingText.style.color = '#ffc107';
+                    ratingText.textContent = 'Bom';
+                } else {
+                    starContainer.classList.add('rating-excellent');
+                    ratingText.style.color = '#28a745';
+                    ratingText.textContent = 'Excelente';
+                }
+            } else {
+                ratingText.textContent = '';
+            }
+
+            if (isClick || (tempRating !== currentRating && isStarClicked)) {
+                saveButton.classList.remove('d-none');
+            }
+        }
+
+        // Inicializa com a classificação existente
+        updateStars(currentRating);
+
+        stars.forEach(star => {
+            star.addEventListener('mouseover', () => {
+                if (!isStarClicked) {
+                    tempRating = parseInt(star.dataset.rating);
+                    updateStars(tempRating);
+                }
+            });
+
+            star.addEventListener('mouseout', () => {
+                if (!isStarClicked) {
+                    tempRating = currentRating;
+                    updateStars(currentRating);
+                }
+            });
+
+            star.addEventListener('click', () => {
+                isStarClicked = true;
+                tempRating = parseInt(star.dataset.rating);
+                updateStars(tempRating, true);
+            });
+        });
+
+        // Adicionar evento de clique ao botão de salvar
+        saveButton.addEventListener('click', () => {
+            const livroId = document.querySelector('.rating-section').dataset.livroId;
+            console.log('Salvando classificação:', tempRating, 'para o livro:', livroId);
+
+            $.ajax({
+                url: `/livros/${livroId}/classificar/`,
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                data: {
+                    classificacao: tempRating
+                },
+                success: function(response) {
+                    console.log('Resposta do servidor:', response);
+                    currentRating = tempRating;
+                    isStarClicked = false;
+                    saveButton.classList.add('d-none');
+                    updateStars(currentRating);
+
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-success alert-dismissible fade show mt-2';
+                    alert.innerHTML = `
+                        <strong>Sucesso!</strong> Classificação salva.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    starContainer.parentElement.appendChild(alert);
+
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Erro:', error);
+                    console.error('Status:', status);
+                    console.error('Resposta:', xhr.responseText);
+
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-danger alert-dismissible fade show mt-2';
+                    alert.innerHTML = `
+                        <strong>Erro!</strong> Não foi possível salvar a classificação.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    starContainer.parentElement.appendChild(alert);
+                }
+            });
+        });
+    }
+}); // Fechamento do DOMContentLoaded
+
+</script>
+{% endblock %}

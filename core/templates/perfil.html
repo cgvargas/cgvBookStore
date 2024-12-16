@@ -1,4 +1,4 @@
-<!-- template/perfil.html -->
+<!-- core/template/perfil.html -->
 {% extends 'base.html' %}
 {% load static %}
 
@@ -64,7 +64,7 @@
                     </a>
 
                     <div class="secondary-actions">
-                        <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                        <button class="btn btn-light btn-sm" data-toggle="modal" data-target="#editProfileModal">
                             <i class="bi bi-pencil"></i> Editar
                         </button>
                         <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm">
@@ -133,17 +133,35 @@
                 </h4>
             </div>
             <div class="book-slider">
-                <button class="slider-btn prev" onclick="slideBooks('favoritos', 'prev')">
+                <button class="slider-btn prev" onclick="window.slideBooks('favoritos', 'prev')">
                     <i class="bi bi-chevron-left"></i>
                 </button>
                 <div class="book-container" id="favoritos-container">
                     {% for livro in favoritos %}
                     <div class="book-card" data-livro-id="{{ livro.id }}">
                         <div class="card border-0 bg-transparent">
-                            <img src="{{ livro.capa }}" alt="{{ livro.titulo }}">
+                            <img src="{{ livro.capa }}" alt="{{ livro.titulo }}" loading="lazy">
                             <div class="card-body p-2">
                                 <h6 class="card-title small mb-0 text-truncate">{{ livro.titulo }}</h6>
                                 <p class="card-text small text-muted text-truncate">{{ livro.autor }}</p>
+                                <div class="book-rating small">
+                                    <div class="stars">
+                                        {% if livro.classificacao %}
+                                            {% for i in "12345" %}
+                                                {% if forloop.counter <= livro.classificacao %}
+                                                    <i class="bi bi-star-fill {% if livro.classificacao <= 2 %}text-danger{% elif livro.classificacao <= 3 %}text-warning{% else %}text-success{% endif %}"></i>
+                                                {% else %}
+                                                    <i class="bi bi-star text-muted"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% else %}
+                                            {% for i in "12345" %}
+                                                <i class="bi bi-star text-muted"></i>
+                                            {% endfor %}
+                                            <small class="text-muted ms-1">(Sem avaliação)</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -170,22 +188,40 @@
                 </h4>
             </div>
             <div class="book-slider">
-                <button class="slider-btn prev" onclick="slideBooks('lendo', 'prev')">
+                <button class="slider-btn prev" onclick="window.slideBooks('lendo', 'prev')">
                     <i class="bi bi-chevron-left"></i>
                 </button>
                 <div class="book-container" id="lendo-container">
                     {% for livro in lendo %}
                     <div class="book-card" data-livro-id="{{ livro.id }}">
                         <div class="card border-0 bg-transparent">
-                            <img src="{{ livro.capa }}" alt="{{ livro.titulo }}">
+                            <img src="{{ livro.capa }}" alt="{{ livro.titulo }}" loading="lazy">
                             <div class="card-body p-2">
                                 <h6 class="card-title small mb-0 text-truncate">{{ livro.titulo }}</h6>
                                 <p class="card-text small text-muted text-truncate">{{ livro.autor }}</p>
+                                <div class="book-rating small">
+                                    <div class="stars">
+                                        {% if livro.classificacao %}
+                                            {% for i in "12345" %}
+                                                {% if forloop.counter <= livro.classificacao %}
+                                                    <i class="bi bi-star-fill {% if livro.classificacao <= 2 %}text-danger{% elif livro.classificacao <= 3 %}text-warning{% else %}text-success{% endif %}"></i>
+                                                {% else %}
+                                                    <i class="bi bi-star text-muted"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% else %}
+                                            {% for i in "12345" %}
+                                                <i class="bi bi-star text-muted"></i>
+                                            {% endfor %}
+                                            <small class="text-muted ms-1">(Sem avaliação)</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                     {% empty %}
-                    <p class="text-muted">Nenhum livro sendo lido atualmente.</p>
+                    <p class="text-muted">Ainda não está lendo nenhum livro.</p>
                     {% endfor %}
                 </div>
                 <button class="slider-btn next" onclick="slideBooks('lendo', 'next')">
@@ -207,17 +243,35 @@
                 </h4>
             </div>
             <div class="book-slider">
-                <button class="slider-btn prev" onclick="slideBooks('vou_ler', 'prev')">
+                <button class="slider-btn prev" onclick="window.slideBooks('vou_ler', 'prev')">
                     <i class="bi bi-chevron-left"></i>
                 </button>
                 <div class="book-container" id="vou_ler-container">
                     {% for livro in vou_ler %}
                     <div class="book-card" data-livro-id="{{ livro.id }}">
                         <div class="card border-0 bg-transparent">
-                            <img src="{{ livro.capa }}" alt="{{ livro.titulo }}">
+                            <img src="{{ livro.capa }}" alt="{{ livro.titulo }}" loading="lazy">
                             <div class="card-body p-2">
                                 <h6 class="card-title small mb-0 text-truncate">{{ livro.titulo }}</h6>
                                 <p class="card-text small text-muted text-truncate">{{ livro.autor }}</p>
+                                <div class="book-rating small">
+                                    <div class="stars">
+                                        {% if livro.classificacao %}
+                                            {% for i in "12345" %}
+                                                {% if forloop.counter <= livro.classificacao %}
+                                                    <i class="bi bi-star-fill {% if livro.classificacao <= 2 %}text-danger{% elif livro.classificacao <= 3 %}text-warning{% else %}text-success{% endif %}"></i>
+                                                {% else %}
+                                                    <i class="bi bi-star text-muted"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% else %}
+                                            {% for i in "12345" %}
+                                                <i class="bi bi-star text-muted"></i>
+                                            {% endfor %}
+                                            <small class="text-muted ms-1">(Sem avaliação)</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -244,17 +298,35 @@
                 </h4>
             </div>
             <div class="book-slider">
-                <button class="slider-btn prev" onclick="slideBooks('lidos', 'prev')">
+                <button class="slider-btn prev" onclick="window.slideBooks('lidos', 'prev')">
                     <i class="bi bi-chevron-left"></i>
                 </button>
                 <div class="book-container" id="lidos-container">
                     {% for livro in lidos %}
                     <div class="book-card" data-livro-id="{{ livro.id }}">
                         <div class="card border-0 bg-transparent">
-                            <img src="{{ livro.capa }}" alt="{{ livro.titulo }}">
+                            <img src="{{ livro.capa }}" alt="{{ livro.titulo }}" loading="lazy">
                             <div class="card-body p-2">
                                 <h6 class="card-title small mb-0 text-truncate">{{ livro.titulo }}</h6>
                                 <p class="card-text small text-muted text-truncate">{{ livro.autor }}</p>
+                                <div class="book-rating small">
+                                    <div class="stars">
+                                        {% if livro.classificacao %}
+                                            {% for i in "12345" %}
+                                                {% if forloop.counter <= livro.classificacao %}
+                                                    <i class="bi bi-star-fill {% if livro.classificacao <= 2 %}text-danger{% elif livro.classificacao <= 3 %}text-warning{% else %}text-success{% endif %}"></i>
+                                                {% else %}
+                                                    <i class="bi bi-star text-muted"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% else %}
+                                            {% for i in "12345" %}
+                                                <i class="bi bi-star text-muted"></i>
+                                            {% endfor %}
+                                            <small class="text-muted ms-1">(Sem avaliação)</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -270,6 +342,58 @@
     </div>
 </div>
 
+<!-- Seção de Recomendações -->
+<div class="section-title section-recomendacoes position-relative mt-4">
+    <h4 class="d-flex justify-content-between align-items-center m-0">
+        <span><i class="bi bi-lightbulb"></i> Recomendações para Você</span>
+        <div>
+            <span class="badge bg-warning rounded-pill me-2">{{ recomendacoes|length }}</span>
+            <button class="btn btn-sm btn-outline-warning" id="refreshRecommendations">
+                <i class="bi bi-arrow-clockwise"></i> Atualizar
+            </button>
+        </div>
+    </h4>
+</div>
+<div class="book-slider">
+    <div class="book-container" id="recomendacoes-container">
+        {% for livro in recomendacoes %}
+        <div class="book-card recommendation-card" data-livro-id="{{ livro.id }}">
+            <a href="{% url 'google_book_detail' livro_id=livro.id %}" class="text-decoration-none">
+                <div class="card border-0 bg-transparent">
+                    <div class="position-relative">
+                        {% if livro.capa %}
+                            <img src="{{ livro.capa }}"
+                                 alt="{{ livro.titulo }}"
+                                 loading="lazy"
+                                 onerror="this.src='/static/images/capa-indisponivel.svg'"
+                                 class="book-cover">
+                        {% else %}
+                            <img src="/static/images/capa-indisponivel.svg"
+                                 alt="{{ livro.titulo }}"
+                                 class="book-cover">
+                        {% endif %}
+                        <div class="recommendation-score">
+                            <span class="badge bg-warning">
+                                <i class="bi bi-star-fill"></i>
+                                {{ livro.score|floatformat:1 }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body p-2">
+                        <h6 class="card-title small mb-0 text-truncate text-dark">{{ livro.titulo }}</h6>
+                        <p class="card-text small text-muted text-truncate">{{ livro.autor }}</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% empty %}
+        <div class="text-center py-4">
+            <i class="bi bi-emoji-smile fs-3 text-muted"></i>
+            <p class="text-muted mt-2">Adicione mais livros às suas estantes para receber recomendações personalizadas!</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 <!-- Modal para gerenciamento -->
 <div class="modal fade shelf-manager-modal" id="shelfModal" tabindex="-1" aria-labelledby="shelfModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -283,7 +407,7 @@
             <!-- Corpo do Modal -->
             <div class="modal-body py-3">
                 <div class="shelf-books">
-                    <!-- Item do Livro -->
+                    <!-- ‘Item’ do Livro -->
                     <div class="card d-flex flex-row align-items-center">
                         {% if livro.capa %}
                             <img src="{{ livro.capa }}" alt="{{ livro.titulo }}" class="book-cover rounded">
@@ -316,7 +440,6 @@
         </div>
     </div>
 </div>
-
 
 <!-- Modal de Transferência -->
 <div class="modal fade" id="transferModal" tabindex="-1" aria-labelledby="transferModalLabel" aria-hidden="true">
@@ -357,25 +480,27 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="editProfileModalLabel">Editar Perfil</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body">
-                <form id="editProfileForm">
+               <form id="editProfileForm" method="POST">
                     {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="nome_completo" class="form-label">Nome Completo</label>
+                    <div class="form-group">
+                        <label for="nome_completo">Nome Completo</label>
                         <input type="text" class="form-control" id="nome_completo" name="nome_completo" value="{{ user.nome_completo }}" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Nome de Usuário</label>
+                    <div class="form-group">
+                        <label for="username">Nome de Usuário</label>
                         <input type="text" class="form-control" id="username" name="username" value="{{ user.username }}" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">E-mail</label>
+                    <div class="form-group">
+                        <label for="email">E-mail</label>
                         <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
                     </div>
-                    <div class="text-end">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <div class="text-right">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn btn-primary">Salvar Alterações</button>
                     </div>
                 </form>
@@ -480,14 +605,22 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- Primeiro carregamos as bibliotecas base -->
+<script src="{% static 'js/csrf-setup.js' %}"></script>
+
+<!-- Depois carregamos os ‘scripts’ da aplicação -->
 <script src="{% static 'js/profile.js' %}"></script>
+<script src="{% static 'js/book-interaction.js' %}"></script>
+
+<!-- Por último, inicializamos o gerenciador de estante -->
 <script type="module">
     import { initializeShelfManager } from "{% static 'js/shelf-manager.js' %}";
-    // Garantir que o DOM e profile.js estejam carregados
     document.addEventListener('DOMContentLoaded', () => {
         const modalElement = document.getElementById('shelfModal');
-        window.shelfModal = new bootstrap.Modal(modalElement);
-        window.shelfManager = initializeShelfManager(window.shelfModal);
+        if (modalElement) {
+            window.shelfModal = new bootstrap.Modal(modalElement);
+            window.shelfManager = initializeShelfManager(window.shelfModal);
+        }
     });
 </script>
 {% endblock %}

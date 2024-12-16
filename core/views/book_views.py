@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from ..models import Livro, EstanteLivro
 from ..api import google_books_api
 from .utils import _processar_resultados_google_books, _ordenar_resultados, _paginar_resultados
+from analytics.utils import register_book_view
 
 logger = logging.getLogger(__name__)
 
@@ -13,6 +14,18 @@ logger = logging.getLogger(__name__)
 def livro_detail(request, livro_id):
     try:
         livro = get_object_or_404(Livro, pk=livro_id)
+
+        # Registra visualização no analytics
+        try:
+            register_book_view(livro.titulo, request.user)
+
+            # Incrementa o contador local também
+            livro.visualizacoes += 1
+            livro.save()
+        except Exception as e:
+            logger.warning(f"Erro ao registrar visualização do livro {livro_id}: {str(e)}")
+            # Continua a execução mesmo se falhar ao incrementar visualizações
+
         livros_relacionados = Livro.objects.filter(
             destaque=True
         ).exclude(id=livro.id)[:3]

@@ -1,126 +1,191 @@
 {% extends 'base.html' %}
-{% load static %}
 
 {% block content %}
+<!-- Toast de Sucesso -->
+<div class="position-fixed top-0 right-0 p-4" style="z-index: 1050; right: 0; top: 60px;">
+    <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="5000">
+        <div class="toast-header bg-success text-white">
+            <i class="bi bi-check-circle mr-2"></i>
+            <strong class="mr-auto">Sucesso!</strong>
+            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                <span aria-hidden="true" class="text-white">&times;</span>
+            </button>
+        </div>
+        <div class="toast-body"></div>
+    </div>
+</div>
+
+<!-- Toast de Erro -->
+<div class="position-fixed top-0 right-0 p-4" style="z-index: 1050; right: 0; top: 120px;">
+    <div id="errorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="5000">
+        <div class="toast-header bg-danger text-white">
+            <i class="bi bi-exclamation-circle mr-2"></i>
+            <strong class="mr-auto">Erro</strong>
+            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                <span aria-hidden="true" class="text-white">&times;</span>
+            </button>
+        </div>
+        <div class="toast-body"></div>
+    </div>
+</div>
+
 <div class="container d-flex justify-content-center align-items-center min-vh-100 py-5">
     <div class="card p-4" style="max-width: 400px; width: 100%; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); border-radius: 15px;">
         <div class="text-center mb-4">
-            <img src="{% static 'images/logo.png' %}" alt="Logo" class="mb-3" style="max-width: 100px;">
             <h2 class="fw-bold">Criar Conta</h2>
             <p class="text-muted">Junte-se à nossa comunidade de leitores</p>
         </div>
 
-        <form method="post" action="{% url 'register' %}" class="needs-validation" novalidate id="registrationForm" autocomplete="off">
+        {% if messages %}
+        <div class="mb-3">
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'register' %}" class="needs-validation" novalidate>
             {% csrf_token %}
 
-            <!-- Username field -->
+            <!-- Nome Completo -->
             <div class="form-group mb-3">
-                <label for="id_username" class="form-label">Usuário *</label>
+                <label for="nome_completo">Nome Completo *</label>
                 <div class="input-group">
-                    <span class="input-group-text bg-light">
-                        <i class="bi bi-person"></i>
-                    </span>
-                    <input type="text" name="username" id="id_username"
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">
+                            <i class="bi bi-person"></i>
+                        </span>
+                    </div>
+                    <input type="text" name="{{ form.nome_completo.html_name }}"
+                           id="nome_completo"
+                           class="form-control {% if form.nome_completo.errors %}is-invalid{% endif %}"
+                           value="{{ form.nome_completo.value|default:'' }}"
+                           required>
+                </div>
+                {% if form.nome_completo.errors %}
+                <div class="invalid-feedback" style="display: block;">
+                    {{ form.nome_completo.errors|join:", " }}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Username -->
+            <div class="form-group mb-3">
+                <label for="username">Usuário *</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">
+                            <i class="bi bi-at"></i>
+                        </span>
+                    </div>
+                    <input type="text" name="{{ form.username.html_name }}"
+                           id="username"
                            class="form-control {% if form.username.errors %}is-invalid{% endif %}"
-                           required minlength="3"
-                           pattern="^[a-zA-Z0-9_]*$"
-                           autocomplete="new-username"
-                           title="Apenas letras, números e underscore são permitidos">
-                    <div class="invalid-feedback">
-                        {% if form.username.errors %}
-                            {{ form.username.errors|join:", " }}
-                        {% else %}
-                            Por favor, escolha um nome de usuário válido
-                        {% endif %}
-                    </div>
+                           value="{{ form.username.value|default:'' }}"
+                           required>
                 </div>
-                <small class="text-muted">Mínimo de 3 caracteres, sem espaços</small>
+                {% if form.username.errors %}
+                <div class="invalid-feedback" style="display: block;">
+                    {{ form.username.errors|join:", " }}
+                </div>
+                {% endif %}
             </div>
 
-            <!-- Email field -->
+            <!-- Email -->
             <div class="form-group mb-3">
-                <label for="id_email" class="form-label">Email *</label>
+                <label for="email">Email *</label>
                 <div class="input-group">
-                    <span class="input-group-text bg-light">
-                        <i class="bi bi-envelope"></i>
-                    </span>
-                    <input type="email" name="email" id="id_email"
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">
+                            <i class="bi bi-envelope"></i>
+                        </span>
+                    </div>
+                    <input type="email" name="{{ form.email.html_name }}"
+                           id="email"
                            class="form-control {% if form.email.errors %}is-invalid{% endif %}"
-                           required
-                           autocomplete="new-email">
-                    <div class="invalid-feedback">
-                        {% if form.email.errors %}
-                            {{ form.email.errors|join:", " }}
-                        {% else %}
-                            Por favor, forneça um email válido
-                        {% endif %}
-                    </div>
+                           value="{{ form.email.value|default:'' }}"
+                           required>
                 </div>
+                {% if form.email.errors %}
+                <div class="invalid-feedback" style="display: block;">
+                    {{ form.email.errors|join:", " }}
+                </div>
+                {% endif %}
             </div>
 
-            <!-- Password field -->
+            <!-- Senha -->
             <div class="form-group mb-3">
-                <label for="id_password1" class="form-label">Senha *</label>
+                <label for="password1">Senha *</label>
                 <div class="input-group">
-                    <span class="input-group-text bg-light">
-                        <i class="bi bi-lock"></i>
-                    </span>
-                    <input type="password" name="password1" id="id_password1"
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">
+                            <i class="bi bi-lock"></i>
+                        </span>
+                    </div>
+                    <input type="password" name="{{ form.password1.html_name }}"
+                           id="password1"
                            class="form-control {% if form.password1.errors %}is-invalid{% endif %}"
-                           required minlength="8"
-                           autocomplete="new-password">
-                    <button class="btn btn-outline-secondary" type="button" id="togglePassword1">
-                        <i class="bi bi-eye"></i>
-                    </button>
-                    <div class="invalid-feedback">
-                        {% if form.password1.errors %}
-                            {{ form.password1.errors|join:", " }}
-                        {% else %}
-                            A senha deve ter pelo menos 8 caracteres
-                        {% endif %}
+                           required>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="button" id="togglePassword1">
+                            <i class="bi bi-eye"></i>
+                        </button>
                     </div>
                 </div>
-                <div class="password-strength mt-2" id="password-strength"></div>
+                {% if form.password1.errors %}
+                <div class="invalid-feedback" style="display: block;">
+                    {{ form.password1.errors|join:", " }}
+                </div>
+                {% endif %}
             </div>
 
-            <!-- Confirm Password field -->
+            <!-- Confirmar Senha -->
             <div class="form-group mb-4">
-                <label for="id_password2" class="form-label">Confirme a Senha *</label>
+                <label for="password2">Confirmar Senha *</label>
                 <div class="input-group">
-                    <span class="input-group-text bg-light">
-                        <i class="bi bi-lock-check"></i>
-                    </span>
-                    <input type="password" name="password2" id="id_password2"
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">
+                            <i class="bi bi-lock-check"></i>
+                        </span>
+                    </div>
+                    <input type="password" name="{{ form.password2.html_name }}"
+                           id="password2"
                            class="form-control {% if form.password2.errors %}is-invalid{% endif %}"
-                           required
-                           autocomplete="new-password">
-                    <button class="btn btn-outline-secondary" type="button" id="togglePassword2">
-                        <i class="bi bi-eye"></i>
-                    </button>
+                           required>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="button" id="togglePassword2">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                {% if form.password2.errors %}
+                <div class="invalid-feedback" style="display: block;">
+                    {{ form.password2.errors|join:", " }}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Termos de Uso -->
+            <div class="form-group mb-4">
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="termsCheck" required>
+                    <label class="custom-control-label" for="termsCheck">
+                        Eu concordo com os <a href="{% url 'termos_uso' %}" target="_blank">Termos de Uso</a> e
+                        <a href="{% url 'politica_privacidade' %}" target="_blank">Política de Privacidade</a>
+                    </label>
                     <div class="invalid-feedback">
-                        {% if form.password2.errors %}
-                            {{ form.password2.errors|join:", " }}
-                        {% else %}
-                            As senhas devem coincidir
-                        {% endif %}
+                        Você deve concordar com os termos para continuar
                     </div>
                 </div>
             </div>
 
-            <!-- Terms and conditions -->
-            <div class="form-check mb-4">
-                <input class="form-check-input" type="checkbox" id="termsCheck" required>
-                <label class="form-check-label" for="termsCheck">
-                    Eu concordo com os <a href="{% url 'termos_uso' %}" target="_blank">Termos de Uso</a> e
-                    <a href="{% url 'politica_privacidade' %}" target="_blank">Política de Privacidade</a>
-                </label>
-                <div class="invalid-feedback">
-                    Você deve concordar com os termos para continuar
-                </div>
-            </div>
-
-            <!-- Submit button -->
-            <button type="submit" class="btn btn-primary btn-block w-100">Registrar</button>
+            <!-- Botão de Submit -->
+            <button type="submit" class="btn btn-primary w-100">Criar Conta</button>
         </form>
 
         <div class="text-center mt-3">
@@ -128,6 +193,85 @@
                 Já possui uma conta? <a href="{% url 'login' %}">Entrar</a>
             </p>
         </div>
+
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicialização dos toasts (apenas uma vez)
+    $('.toast').toast({
+        animation: true,
+        autohide: true,
+        delay: 5000
+    });
+
+    // Toggle password visibility
+    function togglePasswordVisibility(inputId, buttonId) {
+        const input = document.getElementById(inputId);
+        const button = document.getElementById(buttonId);
+
+        button.addEventListener('click', function() {
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.innerHTML = '<i class="bi bi-eye-slash"></i>';
+            } else {
+                input.type = 'password';
+                button.innerHTML = '<i class="bi bi-eye"></i>';
+            }
+        });
+    }
+
+    // Inicializa os toggle password buttons
+    togglePasswordVisibility('password1', 'togglePassword1');
+    togglePasswordVisibility('password2', 'togglePassword2');
+
+    // Form submission
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        if (!document.getElementById('termsCheck').checked) {
+            $('#errorToast').find('.toast-body').text('Você deve concordar com os termos para continuar');
+            $('#errorToast').toast('show');
+            return;
+        }
+
+        // Envia o formulário via AJAX
+        fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Mostra o toast de sucesso
+                $('#successToast').find('.toast-body').text(data.message);
+                $('#successToast').toast('show');
+
+                // Redireciona após 2 segundos
+                setTimeout(() => {
+                    window.location.href = data.redirect_url;
+                }, 2000);
+            } else {
+                // Se houver erro(s), mostra no toast
+                const errorMessage = data.errors ? data.errors.join('\n') : data.error;
+                $('#errorToast').find('.toast-body').text(errorMessage);
+                $('#errorToast').toast('show');
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            $('#errorToast').find('.toast-body').text('Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente.');
+            $('#errorToast').toast('show');
+        });
+    });
+});
+</script>
 {% endblock %}

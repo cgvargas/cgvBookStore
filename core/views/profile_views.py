@@ -1,22 +1,24 @@
 # profile_views.py
+from django.contrib import messages
 import logging
-import os
-from datetime import datetime
+from django.contrib.auth import get_user_model
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import JsonResponse
-from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Count
-from django.contrib import messages
-from django.views.decorators.http import require_http_methods
+from django.shortcuts import render, get_object_or_404, redirect
+from django.views.decorators.http import require_http_methods, require_POST
+from django.views.decorators.csrf import csrf_exempt
 
-from core.models import EstanteLivro
-from core.forms import LivroManualForm  # Importando o novo form que criamos
+from core.forms import LivroManualForm
+from core.models import EstanteLivro, LivroCache
+from .recommendation_views import gerar_recomendacoes
+from analytics.utils import register_book_view
 
 ITEMS_PER_PAGE = 8
 logger = logging.getLogger(__name__)
 
+User = get_user_model()
 
 def get_paginated_books(queryset, page_number):
     """Helper function to handle pagination"""
@@ -31,38 +33,64 @@ def get_paginated_books(queryset, page_number):
 
 @login_required
 def profile(request):
-    # Buscar livros com anotações em uma única query
-    estantes = {
-        'favorito': request.GET.get('page_fav'),
-        'lendo': request.GET.get('page_lendo'),
-        'vou_ler': request.GET.get('page_vou_ler'),
-        'lido': request.GET.get('page_lidos')
-    }
+    try:
+        # Buscar livros com anotações em uma única query
+        estantes = {
+            'favorito': request.GET.get('page_fav'),
+            'lendo': request.GET.get('page_lendo'),
+            'vou_ler': request.GET.get('page_vou_ler'),
+            'lido': request.GET.get('page_lidos')
+        }
 
-    # Otimizar queries usando select_related se houver relações
-    livros_paginados = {}
-    for tipo, page in estantes.items():
-        queryset = EstanteLivro.objects.filter(
+        # Otimizar queries usando select_related se houver relações
+        livros_paginados = {}
+        for tipo, page in estantes.items():
+            queryset = EstanteLivro.objects.filter(
+                usuario=request.user,
+                tipo=tipo
+            ).order_by('-data_adicao')
+            livros_paginados[tipo] = get_paginated_books(queryset, page)
+
+        # Fazer contagem apenas de livros válidos
+        total_livros = EstanteLivro.objects.filter(
             usuario=request.user,
-            tipo=tipo
-        ).order_by('-data_adicao')
-        livros_paginados[tipo] = get_paginated_books(queryset, page)
+            titulo__isnull=False
+        ).distinct().count()
 
-    # Fazer contagem apenas de livros válidos
-    total_livros = EstanteLivro.objects.filter(
-        usuario=request.user,
-        titulo__isnull=False
-    ).distinct().count()
+        # Busca recomendações e formata com informações completas
+        recomendacoes_raw = gerar_recomendacoes(request)
+        recomendacoes = []
 
-    context = {
-        'favoritos': livros_paginados['favorito'],
-        'lendo': livros_paginados['lendo'],
-        'vou_ler': livros_paginados['vou_ler'],
-        'lidos': livros_paginados['lido'],
-        'total_livros': total_livros
-    }
+        for rec in recomendacoes_raw:
+            try:
+                livro_cache = LivroCache.objects.get(book_id=rec.livro_id)
+                recomendacoes.append({
+                    'id': rec.livro_id,  # Mantemos o ID do Google Books
+                    'titulo': rec.titulo,
+                    'autor': rec.autor,
+                    'categoria': rec.categoria,
+                    'score': float(rec.score),
+                    'capa': livro_cache.imagem_url
+                })
+            except LivroCache.DoesNotExist:
+                logger.warning(f"Livro {rec.livro_id} não encontrado no cache")
+                continue
 
-    return render(request, 'perfil.html', context)
+        context = {
+            'favoritos': livros_paginados['favorito'],
+            'lendo': livros_paginados['lendo'],
+            'vou_ler': livros_paginados['vou_ler'],
+            'lidos': livros_paginados['lido'],
+            'total_livros': total_livros,
+            'recomendacoes': recomendacoes,
+        }
+
+        return render(request, 'perfil.html', context)
+
+    except Exception as e:
+        logger.error(f"Erro na view profile: {str(e)}")
+        messages.error(request, "Ocorreu um erro ao carregar o perfil.")
+        return redirect('index')
 
 
 @login_required
@@ -108,45 +136,27 @@ def adicionar_livro_manual(request):
 def editar_livro_manual(request, livro_id):
     """Edita um livro existente na estante"""
     livro = get_object_or_404(EstanteLivro, id=livro_id, usuario=request.user)
+    form = LivroManualForm(instance=livro)  # Inicializa o form aqui
 
     if request.method == 'POST':
         try:
-            form = LivroManualForm(request.POST, instance=livro)
+            form = LivroManualForm(request.POST, instance=livro)  # Redefine o form com os dados POST
             if form.is_valid():
-                livro = form.save()
-                return JsonResponse({
-                    'success': True,
-                    'message': 'Livro atualizado com sucesso!',
-                    'livro': {
-                        'id': livro.id,
-                        'titulo': livro.titulo,
-                        'autor': livro.autor,
-                        'capa': livro.capa,
-                        'descricao': livro.sinopse,
-                        'editora': livro.editora,
-                        'data_publicacao': livro.data_lancamento,
-                        'numero_paginas': livro.numero_paginas,
-                        'idioma': livro.idioma,
-                        'categoria': livro.categoria,
-                        'isbn': livro.isbn,
-                        'notas_pessoais': livro.notas_pessoais,
-                        'tipo': livro.tipo
-                    }
-                })
+                livro_atualizado = form.save(commit=False)
+                livro_atualizado.usuario = request.user
+                livro_atualizado.save()
+                messages.add_message(request, messages.INFO, 'Livro atualizado com sucesso!')
+                return redirect('detalhes_livro', livro_id=livro.id)
             else:
-                return JsonResponse({
-                    'success': False,
-                    'error': 'Dados inválidos',
-                    'errors': form.errors
-                })
-
+                messages.add_message(request, messages.ERROR, 'Por favor, corrija os erros no formulário.')
         except Exception as e:
+            messages.add_message(request, messages.ERROR, f'Erro ao atualizar o livro. Tente novamente. {str(e)}')
             logger.error(f"Erro ao atualizar livro: {str(e)}")
-            return JsonResponse({
-                'success': False,
-                'error': 'Erro ao atualizar o livro. Tente novamente.'
-            })
 
+    return render(request, 'editar_livro.html', {
+        'form': form,
+        'livro': livro
+    })
     # Para requisições GET, retornamos o formulário inicial com os dados do livro
     form = LivroManualForm(instance=livro)
     return JsonResponse({
@@ -181,15 +191,14 @@ def excluir_livro(request, livro_id):
             'message': 'Livro removido com sucesso!'
         })
 
+
     except Exception as e:
-        logger.error(f"Erro ao excluir livro: {str(e)}")
         return JsonResponse({
             'success': False,
-            'error': 'Erro ao remover o livro. Tente novamente.'
+            'error': str(e)
         })
 
 
-# Manter suas funções existentes de atualização de foto de perfil
 @login_required
 def update_profile_photo(request):
     if request.method == 'POST' and request.FILES.get('profile_photo'):
@@ -245,6 +254,38 @@ def delete_profile_photo(request):
 
 
 @login_required
+@require_http_methods(["POST"])
+def update_profile(request):
+    try:
+        user = request.user
+        print("Dados recebidos:", request.POST)  # Debug
+
+        nome_completo = request.POST.get('nome_completo')
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+
+        # Atualiza os dados
+        user.nome_completo = nome_completo
+        user.username = username
+        user.email = email
+        user.save()
+
+        return JsonResponse({
+            'status': 'success',
+            'user': {
+                'nome_completo': user.nome_completo,
+                'username': user.username,
+                'email': user.email
+            }
+        })
+    except Exception as e:
+        print("Erro ao atualizar perfil:", str(e))  # Debug
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
+
+@login_required
 def verificar_livro_existente(request):
     """
     Verifica se um livro já existe na estante do usuário
@@ -288,3 +329,68 @@ def verificar_livro_existente(request):
         'exists': False,
         'message': 'Livro não encontrado na sua estante.'
     })
+
+
+# Detalhe para os livros das prateleiras
+def detalhes_livro(request, livro_id):
+    livro = get_object_or_404(EstanteLivro, id=livro_id)
+
+    # Registra visualização no analytics
+    try:
+        register_book_view(livro.titulo, request.user)
+    except Exception as e:
+        logger.warning(f"Erro ao registrar visualização do livro {livro_id}: {str(e)}")
+    context = {
+        'livro': {
+            'id': livro.id,
+            'titulo': livro.titulo,
+            'autor': livro.autor,
+            'imagem': livro.capa,
+            'descricao': livro.sinopse,
+            'editora': livro.editora,
+            'data_publicacao': livro.data_lancamento,
+            'numero_paginas': livro.numero_paginas,
+            'isbn': livro.isbn,
+            'idioma': livro.idioma,
+            'categoria': livro.categoria,
+            'preco': livro.preco if hasattr(livro, 'preco') else None,
+            'moeda': 'BRL',  # ou adicione um campo no seu modelo para isso
+            'classificacao': livro.classificacao # Adicionando o campo de classificação
+        }
+    }
+    print(f"Classificação atual do livro: {livro.classificacao}")
+    return render(request, 'detalhes_livros.html', context)
+
+
+@csrf_exempt  # Temporário para teste
+@require_POST
+def salvar_classificacao(request, livro_id):
+    try:
+        livro = EstanteLivro.objects.get(id=livro_id)  # Mudando de Livro para EstanteLivro
+        classificacao = int(request.POST.get('classificacao'))
+
+        if 1 <= classificacao <= 5:
+            livro.classificacao = classificacao
+            livro.save()
+            print(f"Classificação {classificacao} salva para o livro {livro.id}")  # Debug
+            return JsonResponse({
+                'success': True,
+                'message': 'Classificação salva com sucesso!'
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'message': 'A classificação deve ser entre 1 e 5'
+            }, status=400)
+
+    except EstanteLivro.DoesNotExist:  # Mudando a exceção também
+        return JsonResponse({
+            'success': False,
+            'message': 'Livro não encontrado'
+        }, status=404)
+    except Exception as e:
+        print(f"Erro ao salvar classificação: {str(e)}")  # Debug
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=500)
