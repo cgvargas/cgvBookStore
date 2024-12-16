@@ -371,3 +371,151 @@
     font-size: 1.1rem;
     margin: 0;
 }
+
+/* Estilos de livros */
+.book-card.clickable {
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.book-card.clickable:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.book-card .card {
+    height: 100%;
+}
+
+.book-card img {
+    height: 200px;
+    object-fit: cover;
+    width: 100%;
+}
+
+/* Estilo para preservar cliques em botões dentro do card */
+.book-card .book-actions {
+    position: relative;
+    z-index: 2;
+}
+
+/* Adiciona sistema de ranking aos livros das prateleiras */
+.book-rating {
+    margin-top: 0.25rem;
+}
+
+.book-rating .stars {
+    font-size: 0.8rem;
+    display: flex;
+    gap: 2px;
+    justify-content: center;
+}
+
+.book-rating .bi-star-fill.text-danger {
+    color: #dc3545;
+}
+
+.book-rating .bi-star-fill.text-warning {
+    color: #ffc107;
+}
+
+.book-rating .bi-star-fill.text-success {
+    color: #28a745;
+}
+
+.book-rating .bi-star {
+    opacity: 0.5;
+}
+
+/* ==========================================================================
+   5.  Estilos para a seção de recomendações
+   ========================================================================== */
+
+.section-recomendacoes {
+    border-left: 4px solid #ffc107;
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(to right, rgba(255,193,7,0.1), transparent);
+}
+
+.recommendation-score {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+}
+
+.recommendation-score .badge {
+    padding: 0.5em 0.7em;
+    font-size: 0.8rem;
+}
+
+.recommendation-reasons {
+    margin-top: 0.5rem;
+}
+
+.recommendation-reasons .badge {
+    font-size: 0.7rem;
+    padding: 0.3em 0.6em;
+}
+
+/* Animação para o botão de atualizar */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.refreshing {
+    animation: spin 1s linear infinite;
+}
+
+.recommendation-card {
+    transition: transform 0.2s;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-5px);
+}
+
+.recommendation-card img.book-cover {
+    width: 100%;
+    height: 240px; /* ou o tamanho que preferir */
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.recommendation-card .card-body {
+    padding: 1rem;
+}
+
+.recommendation-score {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+}
+
+.recommendation-card a {
+    display: block;
+    transition: transform 0.2s;
+}
+
+.recommendation-card a:hover {
+    transform: translateY(-5px);
+    text-decoration: none;
+}
+
+.recommendation-card img.book-cover {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.recommendation-score {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+}
+
