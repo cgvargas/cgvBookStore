@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Editar - {{ livro.titulo }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .edit-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .cover-preview {
+        width: 200px;
+        height: 300px;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+    }
+
+    .form-control:focus {
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+        border-color: #0d6efd;
+    }
+
+    .metadata-section {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
+
+    .btn-save {
+        padding: 12px 30px;
+        font-weight: 500;
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .cover-placeholder {
+        width: 200px;
+        height: 300px;
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        border: 2px dashed #dee2e6;
+    }
+
+    .cover-placeholder i {
+        font-size: 3rem;
+        color: #adb5bd;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5 animate-fade-in">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'profile' %}">Minha Estante</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'detalhes_livro' livro.id %}">{{ livro.titulo }}</a></li>
+            <li class="breadcrumb-item active">Editar</li>
+        </ol>
+    </nav>
+
+    <div class="edit-container">
+        <h2 class="mb-4">Editar Livro</h2>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="row">
+                <!-- Coluna da Capa -->
+                <div class="col-md-4 mb-4">
+                    <div class="text-center">
+                        {% if livro.capa %}
+                            <img src="{{ livro.capa }}" alt="Capa do livro" class="cover-preview" id="coverPreview">
+                        {% else %}
+                            <div class="cover-placeholder">
+                                <i class="bi bi-image"></i>
+                            </div>
+                        {% endif %}
+                        <div class="mt-3">
+                            <label class="form-label">URL da Capa</label>
+                            {{ form.capa }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coluna das Informações -->
+                <div class="col-md-8">
+                    <!-- Informações Básicas -->
+                    <div class="metadata-section">
+                        <h5 class="mb-3">Informações Básicas</h5>
+                        <div class="mb-3">
+                            <label class="form-label">Título</label>
+                            {{ form.titulo }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Autor</label>
+                            {{ form.autor }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Sinopse</label>
+                            {{ form.sinopse }}
+                        </div>
+                    </div>
+
+                    <!-- Detalhes da Publicação -->
+                    <div class="metadata-section">
+                        <h5 class="mb-3">Detalhes da Publicação</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Editora</label>
+                                {{ form.editora }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Data de Publicação</label>
+                                {{ form.data_lancamento }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Número de Páginas</label>
+                                {{ form.numero_paginas }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">ISBN</label>
+                                {{ form.isbn }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Classificação -->
+                    <div class="metadata-section">
+                        <h5 class="mb-3">Classificação</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Idioma</label>
+                                {{ form.idioma }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Categoria</label>
+                                {{ form.categoria }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notas Pessoais -->
+                    <div class="metadata-section">
+                        <h5 class="mb-3">Suas Anotações</h5>
+                        <div class="mb-3">
+                            <label class="form-label">Notas Pessoais</label>
+                            {{ form.notas_pessoais }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a href="{% url 'detalhes_livro' livro.id %}" class="btn btn-outline-secondary">
+                    Cancelar
+                </a>
+                <button type="submit" class="btn btn-primary btn-save">
+                    <i class="bi bi-check2"></i> Salvar Alterações
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Preview da capa ao mudar a URL
+    const capaInput = document.querySelector('input[name="capa"]');
+    const coverPreview = document.getElementById('coverPreview');
+
+    if (capaInput && coverPreview) {
+        capaInput.addEventListener('change', function() {
+            const url = this.value;
+            if (url) {
+                coverPreview.src = url;
+            }
+        });
+    }
+
+    // Aplicar classes do Bootstrap aos campos do formulário
+    const formControls = document.querySelectorAll('input, select, textarea');
+    formControls.forEach(element => {
+        element.classList.add('form-control');
+        
+        // Ajustes específicos para textarea
+        if (element.tagName === 'TEXTAREA') {
+            element.rows = 4;
+        }
+    });
+});
+</script>
+{% endblock %}

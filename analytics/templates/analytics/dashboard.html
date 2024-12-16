@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Analytics Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css">
+<link rel="stylesheet" href="{% static 'css/analytics.css' %}">
+<style>
+    .metric-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .chart-container {
+        position: relative;
+        height: 400px;
+        margin-top: 20px;
+    }
+    .reset-button {
+        margin-left: 10px;
+    }
+    .export-buttons {
+        margin-left: 10px;
+    }
+    .dropdown-menu {
+        min-width: 100px;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h1 class="h3 mb-0 text-gray-800">Dashboard Analytics</h1>
+        </div>
+        <div class="col-md-6 text-right">
+            <div class="d-inline-block mr-3">
+                <input type="text" id="daterange" class="form-control">
+            </div>
+            <!-- Botões de Exportação -->
+            <div class="btn-group export-buttons">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="bi bi-download"></i> Exportar
+                </button>
+                <div class="dropdown-menu">
+                    <button id="exportExcel" class="dropdown-item">
+                        <i class="bi bi-file-excel"></i> Excel
+                    </button>
+                    <button id="exportCsv" class="dropdown-item">
+                        <i class="bi bi-file-text"></i> CSV
+                    </button>
+                    <button id="exportPdf" class="dropdown-item">
+                        <i class="bi bi-file-pdf"></i> PDF
+                    </button>
+                </div>
+            </div>
+            <button id="resetAnalytics" class="btn btn-danger reset-button">
+                <i class="bi bi-trash"></i> Resetar Dados
+            </button>
+        </div>
+    </div>
+
+    <!-- Métricas Cards -->
+    <div class="row">
+        <!-- Visitas Totais -->
+        <div class="col-xl-3 col-md-6 mb-4" data-toggle="modal" data-target="#visitDetailsModal">
+            <div class="card border-left-primary shadow h-100 py-2 metric-card">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Visitas Totais</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalVisits">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-eye fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Alerta para mensagens de erro -->
+        <div id="alertContainer"></div>
+
+        <!-- Usuários Ativos -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2 metric-card">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Usuários Ativos</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="activeUsers">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-people fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visualizações de Livros -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2 metric-card">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Visualizações de Livros</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="bookViews">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-book fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Compartilhamentos -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2 metric-card">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Compartilhamentos</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalShares">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-share fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="row">
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Visitas ao Longo do Tempo</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="visitsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Distribuição de Dispositivos</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="devicesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Detalhes de Visitas -->
+<div class="modal fade" id="visitDetailsModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalhes de Visitas</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Cards de Resumo -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">Visitas Hoje</h6>
+                                <h2 class="card-text" id="todayVisits">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">Visitantes Registrados</h6>
+                                <h2 class="card-text" id="modalRegisteredVisits">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">Visitantes Anônimos</h6>
+                                <h2 class="card-text" id="modalAnonymousVisits">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">Taxa de Conversão</h6>
+                                <h2 class="card-text" id="modalConversionRate">0%</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico de Detalhes -->
+                <div class="chart-container mb-4">
+                    <canvas id="visitsDetailChart"></canvas>
+                </div>
+
+                <!-- Tabela de Visitas -->
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Usuário</th>
+                                <th>Página</th>
+                                <th>Dispositivo</th>
+                                <th>Duração</th>
+                            </tr>
+                        </thead>
+                        <tbody id="visitsDetailTable">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% csrf_token %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/moment/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment/locale/pt-br.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/analytics-dashboard.js' %}"></script>
+{% endblock %}

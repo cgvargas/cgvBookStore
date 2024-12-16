@@ -1,0 +1,93 @@
+<!-- analytics/templates/analytics/modals/visit_details_modal.html -->
+<div class="modal fade" id="visitDetailsModal" tabindex="-1" role="dialog" aria-labelledby="visitDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="visitDetailsModalLabel">Detalhes de Visitas</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Cards com métricas principais -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">Visitas Hoje</h6>
+                                <h2 class="card-text" id="todayVisits">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">Visitantes Registrados</h6>
+                                <h2 class="card-text" id="registeredVisits">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">Visitantes Anônimos</h6>
+                                <h2 class="card-text" id="anonymousVisits">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">Taxa de Conversão</h6>
+                                <h2 class="card-text" id="conversionRate">0%</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráficos -->
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">Visitas ao Longo do Tempo</h6>
+                                <canvas id="visitsTimelineChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">Distribuição de Visitantes</h6>
+                                <canvas id="visitorsPieChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabela de Detalhes -->
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">Últimas Visitas</h6>
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="visitsDetailsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Data/Hora</th>
+                                        <th>Usuário</th>
+                                        <th>Página Visitada</th>
+                                        <th>Tempo na Página</th>
+                                        <th>Dispositivo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Preenchido via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
