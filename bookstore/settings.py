@@ -47,10 +47,12 @@ INSTALLED_APPS = [
     'bootstrap4',
     'stdimage',
     'crispy_forms',
+    'analytics',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'analytics.middleware.CustomSessionMiddleware',  # Novo middleware de sessão personalizado
     # 'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -58,6 +60,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'analytics.middleware.AnalyticsMiddleware',  # Seu middleware de analytics existente
 ]
 
 ROOT_URLCONF = 'bookstore.urls'
@@ -94,12 +97,13 @@ DATABASES = {
 
 
 # Configuração de cache
-
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-        'LOCATION': 'cache_table',  # Nome da tabela no SQLite
-        'TIMEOUT': 7 * 24 * 60 * 60,  # Cache expira em 7 dias (em segundos)
+        'LOCATION': 'cache_table',
+        'TIMEOUT': 7 * 24 * 60 * 60,
+        'KEY_PREFIX': 'bookstore',  # Adicione um prefixo para evitar conflitos
+        'KEY_FUNCTION': 'django.utils.crypto.get_random_string',  # Use uma função personalizada para gerar chaves
     }
 }
 
@@ -150,6 +154,15 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'  # Ou o nome da URL para onde deseja redirecionar após o login
 LOGOUT_REDIRECT_URL = '/'  # Redireciona para a página inicial após o logout
 
+# Sessão
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_AGE = 86400  # 24 horas
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_COOKIE_SECURE = False  # Mude para True em produção com HTTPS
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
@@ -184,3 +197,47 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # settings.py (adicione ao final do arquivo)
 
 AUTH_USER_MODEL = 'core.CustomUser'
+
+# Configurações de segurança
+
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        '': {  # Root logger
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+        },
+        'core.views': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
