@@ -5,10 +5,12 @@ from datetime import timedelta
 
 from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
+
 
 class Livro(models.Model):
     titulo = models.CharField(max_length=200)
@@ -16,10 +18,24 @@ class Livro(models.Model):
     descricao = models.TextField()
     data_publicacao = models.DateField()
     imagem = models.ImageField(upload_to='imagens/', default='imagens/default.jpg')
-    downloads = models.IntegerField(default=0)
+    visualizacoes = models.IntegerField(default=0)  # Alterado de downloads para visualizacoes
     destaque = models.BooleanField(default=False)
     mais_vendido = models.BooleanField(default=False)
-    categoria = models.CharField(max_length=100, blank=True, null=True)  # Novo campo
+    categoria = models.CharField(max_length=100, blank=True, null=True)
+    classificacao = models.IntegerField(
+        null=True,
+        blank=True,
+        validators=[
+            MinValueValidator(1, 'A classificação deve ser de pelo menos 1 estrela'),
+            MaxValueValidator(5, 'A classificação não pode ser maior que 5 estrelas')
+        ],
+        verbose_name="Classificação"
+    )
+
+    def incrementar_visualizacoes(self):
+        """Incrementa o contador de visualizações do livro"""
+        self.visualizacoes += 1
+        self.save()
 
     class Meta:
         verbose_name = 'Livro'
@@ -270,6 +286,15 @@ class EstanteLivro(models.Model):
     categoria = models.CharField(max_length=100, blank=True)
     ultima_atualizacao = models.DateTimeField(auto_now=True)
     notas_pessoais = models.TextField(blank=True)  # Para usuários adicionarem notas sobre o livro
+    classificacao = models.IntegerField(
+        null=True,
+        blank=True,
+        validators=[
+            MinValueValidator(1, 'A classificação deve ser de pelo menos 1 estrela'),
+            MaxValueValidator(5, 'A classificação não pode ser maior que 5 estrelas')
+        ],
+        verbose_name="Classificação"
+    )
 
     class Meta:
         ordering = ['titulo']
@@ -308,3 +333,132 @@ class HistoricoAtividade(models.Model):
 
     def __str__(self):
         return f"{self.usuario.username} - {self.acao} - {self.titulo_livro}"
+
+
+class UserPreferences(models.Model):
+    usuario = models.OneToOneField('CustomUser', on_delete=models.CASCADE)
+    categorias_favoritas = models.JSONField(default=dict)  # Armazena categorias e suas pontuações
+    autores_favoritos = models.JSONField(default=dict)  # Armazena autores e suas pontuações
+    idiomas_preferidos = models.JSONField(default=dict)  # Armazena idiomas e suas pontuações
+    ultima_atualizacao = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Preferência do Usuário'
+        verbose_name_plural = 'Preferências dos Usuários'
+
+    def atualizar_preferencias(self):
+        """Atualiza as preferências baseado no histórico de leitura"""
+        from collections import Counter
+
+        # Busca todos os livros do usuário
+        livros = EstanteLivro.objects.filter(usuario=self.usuario)
+
+        # Inicializa contadores
+        categorias = Counter()
+        autores = Counter()
+        idiomas = Counter()
+
+        # Pesos para diferentes tipos de estante
+        pesos = {
+            'favorito': 2.0,
+            'lido': 1.5,
+            'lendo': 1.2,
+            'vou_ler': 1.0
+        }
+
+        # Analisa cada livro
+        for livro in livros:
+            peso = pesos.get(livro.tipo, 1.0)
+
+            # Adiciona peso extra para livros com boa classificação
+            if livro.classificacao:
+                peso *= (1 + (livro.classificacao - 3) * 0.1)  # Ajuste baseado na classificação
+
+            if livro.categoria:
+                categorias[livro.categoria] += peso
+            if livro.autor:
+                autores[livro.autor] += peso
+            if livro.idioma:
+                idiomas[livro.idioma] += peso
+
+        # Atualiza as preferências
+        self.categorias_favoritas = dict(categorias.most_common(10))
+        self.autores_favoritos = dict(autores.most_common(10))
+        self.idiomas_preferidos = dict(idiomas.most_common(5))
+        self.save()
+
+    def calcular_score_livro(self, livro):
+        """Calcula o score de compatibilidade de um livro com as preferências"""
+        base_score = 1.0
+
+        try:
+            # Pontuação por categoria
+            if livro.categoria and self.categorias_favoritas:
+                categoria_livro = livro.categoria.lower().strip()
+
+                # Divide as categorias do livro se houver múltiplas
+                categorias_livro = set(cat.strip() for cat in categoria_livro.replace('/', ',').split(','))
+
+                for cat_pref, peso in self.categorias_favoritas.items():
+                    cat_pref_parts = set(cat.strip().lower() for cat in cat_pref.replace('/', ',').split(','))
+
+                    # Verifica intersecção entre as categorias
+                    matching_cats = categorias_livro.intersection(cat_pref_parts)
+                    if matching_cats:
+                        base_score += float(peso) * (len(matching_cats) / len(cat_pref_parts))
+                        break
+
+                    # Verifica correspondência parcial se não houver intersecção exata
+                    for cat_livro in categorias_livro:
+                        for cat_pref_single in cat_pref_parts:
+                            if cat_pref_single in cat_livro or cat_livro in cat_pref_single:
+                                base_score += float(peso) * 0.5
+                                break
+
+            # Pontuação por autor
+            if livro.autor and self.autores_favoritos:
+                autor_livro = livro.autor.lower().strip()
+
+                # Trata autores múltiplos
+                autores_livro = set(autor.strip() for autor in autor_livro.split(','))
+
+                for autor_pref, peso in self.autores_favoritos.items():
+                    autor_pref = autor_pref.lower().strip()
+                    autores_pref = set(autor.strip() for autor in autor_pref.split(','))
+
+                    # Verifica correspondência exata
+                    if autores_livro.intersection(autores_pref):
+                        base_score += float(peso)
+                        break
+
+                    # Verifica correspondência parcial
+                    for autor_l in autores_livro:
+                        for autor_p in autores_pref:
+                            if autor_p in autor_l or autor_l in autor_p:
+                                base_score += float(peso) * 0.75
+                                break
+
+            # Normaliza o score para um intervalo de 1 a 5
+            normalized_score = round(min(5.0, max(1.0, base_score)))
+
+            logger.info(f"Score calculado para '{livro.titulo}': {normalized_score} (base_score: {base_score})")
+            return normalized_score
+
+        except Exception as e:
+            logger.error(f"Erro ao calcular score para '{livro.titulo}': {str(e)}")
+            return 1  # Score mínimo em caso de erro
+
+
+class LivroRecomendado(models.Model):
+    usuario = models.ForeignKey('CustomUser', on_delete=models.CASCADE)
+    livro_id = models.CharField(max_length=100)  # Google Books ID
+    titulo = models.CharField(max_length=255)
+    autor = models.CharField(max_length=255)
+    categoria = models.CharField(max_length=100, blank=True)
+    score = models.FloatField()
+    data_recomendacao = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-score']
+        verbose_name = 'Livro Recomendado'
+        verbose_name_plural = 'Livros Recomendados'

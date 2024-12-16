@@ -8,6 +8,7 @@ e fornecendo funcionalidades de apresentação.
 
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.templatetags.static import static
+from django.utils.crypto import get_random_string
 
 
 def _processar_resultados_google_books(resultados):
@@ -108,3 +109,9 @@ def _paginar_resultados(livros, pagina):
         return paginator.page(1)
     except EmptyPage:
         return paginator.page(paginator.num_pages)
+
+
+def safe_cache_key(key):
+    """Gera uma chave de cache segura removendo caracteres problemáticos"""
+    return get_random_string(length=32) + '_' + ''.join(e for e in key if e.isalnum() or e in '-_')
+

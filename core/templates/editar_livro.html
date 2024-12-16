@@ -163,6 +163,10 @@
                                 <label class="form-label">Categoria</label>
                                 {{ form.categoria }}
                             </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Tipo de Estante</label>
+                                {{ form.tipo }}
+                            </div>
                         </div>
                     </div>
 
@@ -192,8 +196,30 @@
 {% endblock %}
 
 {% block extra_js %}
+{{ block.super }}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    let formChanged = false;
+
+    // Detecta mudanças no formulário
+    form.addEventListener('change', function() {
+        formChanged = true;
+    });
+
+    // Confirma antes de sair se houver mudanças
+    window.addEventListener('beforeunload', function(e) {
+        if (formChanged) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+
+    // Não mostra confirmação ao submeter o form
+    form.addEventListener('submit', function() {
+        formChanged = false;
+    });
+
     // Preview da capa ao mudar a URL
     const capaInput = document.querySelector('input[name="capa"]');
     const coverPreview = document.getElementById('coverPreview');
