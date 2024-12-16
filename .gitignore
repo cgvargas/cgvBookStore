@@ -32,3 +32,6 @@ Thumbs.db
 *.coverage
 coverage.xml
 *.egg-info/
+.idea/
+*.pyc
+__pycache__/
