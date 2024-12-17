@@ -11,6 +11,7 @@
 3. Instalar dependências
 4. Executar migrações
 5. Configurar variáveis de ambiente
+6. Popular cache inicial de livros
 
 ## Comandos Importantes
 ```bash
@@ -23,5 +24,9 @@ pip install -r requirements.txt
 # Executar migrações
 python manage.py migrate
 
+# Popular cache de livros
+python manage.py populate_book_cache
+
 # Rodar servidor
 python manage.py runserver
+```
