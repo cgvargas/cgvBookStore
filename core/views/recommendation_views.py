@@ -2,7 +2,9 @@ import re
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from core.models import UserPreferences, LivroRecomendado, LivroCache, EstanteLivro
+from core.infrastructure.persistence.django.models.recommendations import NewUserPreferences, NewLivroRecomendado
+from core.models import EstanteLivro
+from core.infrastructure.persistence.django.models import NewLivroCache
 import logging
 
 
@@ -101,7 +103,7 @@ def gerar_recomendacoes(request):
             return []
 
         # Obtém preferências
-        preferences, created = UserPreferences.objects.get_or_create(usuario=request.user)
+        preferences, created = NewUserPreferences.objects.get_or_create(usuario=request.user)
         preferences.atualizar_preferencias()
 
         logger.info(f"Preferências do usuário - Categorias: {preferences.categorias_favoritas}")
@@ -120,7 +122,7 @@ def gerar_recomendacoes(request):
         logger.info(f"IDs de livros do usuário: {livros_usuario_ids}")
 
         # Busca livros no cache
-        query = LivroCache.objects.all()
+        query = NewLivroCache.objects.all()
         if livros_usuario_ids:
             query = query.exclude(book_id__in=livros_usuario_ids)
 
@@ -157,7 +159,7 @@ def gerar_recomendacoes(request):
             logger.info(f"Score calculado para '{livro_cache.titulo}': {score}")
 
             if score >= 1:
-                recomendacao = LivroRecomendado(
+                recomendacao = NewLivroRecomendado(
                     usuario=request.user,
                     livro_id=livro_cache.book_id,
                     titulo=livro_cache.titulo,
@@ -172,9 +174,9 @@ def gerar_recomendacoes(request):
         top_recomendacoes = recomendacoes[:8]
 
         # Salva as recomendações
-        LivroRecomendado.objects.filter(usuario=request.user).delete()
+        NewLivroRecomendado.objects.filter(usuario=request.user).delete()
         if top_recomendacoes:
-            LivroRecomendado.objects.bulk_create(top_recomendacoes)
+            NewLivroRecomendado.objects.bulk_create(top_recomendacoes)
             logger.info(f"Salvas {len(top_recomendacoes)} recomendações")
         else:
             logger.warning("Nenhuma recomendação gerada após análise")
@@ -199,10 +201,10 @@ def obter_recomendacoes_ajax(request):
         for rec in recomendacoes:
             try:
                 # Busca informações do livro no cache
-                livro_cache = LivroCache.objects.get(book_id=rec.livro_id)
+                livro_cache = NewLivroCache.objects.get(book_id=rec.livro_id)
 
                 # Obtém as preferências do usuário
-                preferences = UserPreferences.objects.get(usuario=request.user)
+                preferences = NewUserPreferences.objects.get(usuario=request.user)
 
                 # Monta o dicionário de recomendação
                 recomendacao = {
@@ -235,7 +237,7 @@ def obter_recomendacoes_ajax(request):
 
                 recomendacoes_formatadas.append(recomendacao)
 
-            except LivroCache.DoesNotExist:
+            except NewLivroCache.DoesNotExist:
                 logger.warning(f"Livro {rec.livro_id} não encontrado no cache")
                 continue
             except Exception as e:
@@ -259,7 +261,7 @@ def obter_recomendacoes_ajax(request):
 def atualizar_preferencias(request):
     """Endpoint para atualizar preferências do usuário"""
     try:
-        preferences, _ = UserPreferences.objects.get_or_create(usuario=request.user)
+        preferences, _ = NewUserPreferences.objects.get_or_create(usuario=request.user)
         preferences.atualizar_preferencias()
         logger.info("Preferências atualizadas com sucesso")
 
@@ -279,9 +281,9 @@ def atualizar_preferencias(request):
 def debug_recomendacoes(request):
     """Endpoint para debug do sistema de recomendações"""
     try:
-        total_cache = LivroCache.objects.count()
+        total_cache = NewLivroCache.objects.count()
         livros_usuario = EstanteLivro.objects.filter(usuario=request.user).count()
-        preferences = UserPreferences.objects.get(usuario=request.user)
+        preferences = NewUserPreferences.objects.get(usuario=request.user)
 
         return JsonResponse({
             'total_livros_cache': total_cache,

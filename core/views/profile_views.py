@@ -11,7 +11,8 @@ from django.views.decorators.http import require_http_methods, require_POST
 from django.views.decorators.csrf import csrf_exempt
 
 from core.forms import LivroManualForm
-from core.models import EstanteLivro, LivroCache
+from core.models import EstanteLivro
+from core.infrastructure.persistence.django.models import NewLivroCache
 from .recommendation_views import gerar_recomendacoes
 from analytics.utils import register_book_view
 
@@ -63,16 +64,16 @@ def profile(request):
 
         for rec in recomendacoes_raw:
             try:
-                livro_cache = LivroCache.objects.get(book_id=rec.livro_id)
+                livro_cache = NewLivroCache.objects.get(book_id=rec.livro_id)
                 recomendacoes.append({
-                    'id': rec.livro_id,  # Mantemos o ID do Google Books
+                    'id': rec.livro_id,
                     'titulo': rec.titulo,
                     'autor': rec.autor,
                     'categoria': rec.categoria,
                     'score': float(rec.score),
                     'capa': livro_cache.imagem_url
                 })
-            except LivroCache.DoesNotExist:
+            except NewLivroCache.DoesNotExist:
                 logger.warning(f"Livro {rec.livro_id} não encontrado no cache")
                 continue
 

@@ -7,7 +7,7 @@ from datetime import datetime
 from core.domain.recommendations.entities import BookRecommendation, UserPreference
 from core.domain.recommendations.services import RecommendationService
 from core.infrastructure.persistence.django.repositories.recommendation_repository import DjangoRecommendationRepository
-from core.infrastructure.persistence.django.models import LivroCache
+from core.infrastructure.persistence.django.models import NewLivroCache
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -21,7 +21,6 @@ class RecommendationApplicationService:
         self.domain_service = RecommendationService()
 
     def generate_recommendations(self, user_id: int) -> List[BookRecommendation]:
-        """Gera recomendações para um usuário"""
         try:
             logger.info(f"Gerando recomendações para usuário {user_id}")
 
@@ -36,8 +35,24 @@ class RecommendationApplicationService:
                 )
                 self.repository.save_user_preferences(user_preferences)
 
-            # Busca livros candidatos do cache
-            cached_books = LivroCache.objects.all()[:200]  # Limitando para performance
+            # Busca livros da estante do usuário
+            from core.infrastructure.persistence.django.models import EstanteLivro, NewLivroCache
+            user_books = EstanteLivro.objects.filter(usuario_id=user_id)
+
+            # Garante que os livros estão no cache
+            for book in user_books:
+                if not NewLivroCache.get_book(book.book_id):
+                    NewLivroCache.salvar_book(book.book_id, {
+                        'titulo': book.titulo,
+                        'autor': book.autor,
+                        'categoria': book.categoria,
+                        'imagem': book.imagem_url
+                    })
+
+            # Busca livros do cache para recomendação
+            cached_books = NewLivroCache.objects.exclude(
+                book_id__in=user_books.values_list('book_id', flat=True)
+            ).order_by('-data_cache')[:200]
 
             recommendations = []
             for book in cached_books:
@@ -71,35 +86,3 @@ class RecommendationApplicationService:
         except Exception as e:
             logger.error(f"Erro ao gerar recomendações: {str(e)}")
             return []
-
-    def update_user_preferences(self, user_id: int) -> None:
-        """Atualiza as preferências do usuário baseado em seu histórico"""
-        try:
-            from core.infrastructure.persistence.django.models import EstanteLivro
-
-            # Busca livros do usuário
-            user_books = EstanteLivro.objects.filter(usuario_id=user_id)
-
-            # Conta categorias e autores
-            categorias = {}
-            autores = {}
-
-            for book in user_books:
-                if book.categoria:
-                    categorias[book.categoria] = categorias.get(book.categoria, 0) + 1
-                if book.autor:
-                    autores[book.autor] = autores.get(book.autor, 0) + 1
-
-            # Atualiza preferências
-            preferences = UserPreference(
-                usuario_id=user_id,
-                categorias_favoritas=categorias,
-                autores_favoritos=autores,
-                ultima_atualizacao=datetime.now()
-            )
-
-            self.repository.save_user_preferences(preferences)
-            logger.info(f"Preferências atualizadas para usuário {user_id}")
-
-        except Exception as e:
-            logger.error(f"Erro ao atualizar preferências: {str(e)}")
