@@ -13,6 +13,16 @@
 5. Configurar variáveis de ambiente
 6. Popular cache inicial de livros
 
+## Nova Estrutura Administrativa
+```
+core/presentation/admin/
+    ├── __init__.py            # Configurações gerais
+    ├── book_admin.py          # Livros e Cache
+    ├── user_admin.py          # Usuários
+    ├── media_admin.py         # URLs e Vídeos
+    └── interaction_admin.py   # Contatos e Interações
+```
+
 ## Comandos Importantes
 ```bash
 # Ativar ambiente virtual
@@ -30,3 +40,17 @@ python manage.py populate_book_cache
 # Rodar servidor
 python manage.py runserver
 ```
+
+## Estrutura do Projeto
+O projeto segue uma arquitetura limpa (clean architecture) com as seguintes camadas:
+
+1. Domain - Regras de negócio e entidades
+2. Application - Casos de uso e serviços
+3. Infrastructure - Implementações técnicas
+4. Presentation - Interface com usuário e admin
+
+## Configurações Adicionais
+1. Configurar variáveis no arquivo .env
+2. Verificar permissões de diretórios media/ e static/
+3. Configurar banco de dados se necessário
+4. Executar collectstatic para arquivos estáticos
