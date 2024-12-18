@@ -19,34 +19,30 @@ logger.setLevel(logging.DEBUG)
 
 
 class CustomSessionMiddleware(SessionMiddleware):
+    """
+    Processa a resposta do request e trata exceções de sessão interrompida.
+    """
     def process_response(self, request, response):
-        """
-        Processa a resposta do request e trata exceções de sessão interrompida.
-        """
         try:
             return super().process_response(request, response)
         except SessionInterrupted:
             logger.warning("Sessão interrompida detectada")
 
-            # Verifica se é uma requisição que requer autenticação
             if hasattr(request, 'user') and request.user.is_authenticated:
                 logger.warning("Usuário autenticado com sessão interrompida")
 
-                # Cria uma nova sessão
+                # Ao invés de forçar logout, tenta recuperar a sessão
                 request.session = SessionStore()
                 request.session.create()
 
-                # Força logout do usuário
-                from django.contrib.auth import logout
-                logout(request)
+                # Preserva a autenticação do usuário
+                from django.contrib.auth import login
+                login(request, request.user)
 
                 # Adiciona mensagem de aviso
-                messages.warning(request, "Sua sessão expirou. Por favor, faça login novamente.")
+                messages.info(request, "Sua sessão foi renovada por motivos de segurança.")
 
-                # Redireciona para a página de login
-                response = redirect('login')
-
-                # Configura os cookies da nova sessão
+                # Retorna a resposta original com a nova sessão
                 response.set_cookie(
                     settings.SESSION_COOKIE_NAME,
                     request.session.session_key,
@@ -57,13 +53,9 @@ class CustomSessionMiddleware(SessionMiddleware):
                     httponly=settings.SESSION_COOKIE_HTTPONLY,
                     samesite=settings.SESSION_COOKIE_SAMESITE
                 )
-            else:
-                # Para usuários não autenticados, apenas cria uma nova sessão
-                request.session = SessionStore()
-                request.session.create()
-                response = super().process_response(request, response)
+                return response
 
-            return response
+            return super().process_response(request, response)
 
         except Exception as e:
             logger.error(f"Erro no middleware de sessão: {str(e)}", exc_info=True)
@@ -353,6 +345,43 @@ class AnalyticsMiddleware:
         if x_forwarded_for:
             return x_forwarded_for.split(',')[0].strip()
         return request.META.get('REMOTE_ADDR')
+
+
+class AutoLogoutMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.user.is_authenticated:
+            # Obtém o timestamp da última atividade
+            last_activity = request.session.get('last_activity')
+            current_time = time.time()
+
+            # Atualiza o timestamp da última atividade
+            request.session['last_activity'] = current_time
+
+            if last_activity:
+                # Define timeout de 30 minutos (1800 segundos)
+                if current_time - float(last_activity) > 1800:
+                    # Registra a ação antes do logout
+                    logger.warning(f"Timeout de sessão para usuário: {request.user.username}")
+
+                    # Se for uma requisição AJAX, retorna 401
+                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                        response = JsonResponse({'error': 'session_timeout'}, status=401)
+                        return response
+
+                    # Logout normal para requisições não-AJAX
+                    from django.contrib.auth import logout
+                    logout(request)
+                    messages.warning(request, "Sua sessão expirou devido a inatividade.")
+
+                    # Redireciona preservando o 'next' parameter
+                    next_url = request.path
+                    return redirect(f'{settings.LOGIN_URL}?next={next_url}')
+
+        response = self.get_response(request)
+        return response
 
 
 # Conecta aos sinais de login/logout

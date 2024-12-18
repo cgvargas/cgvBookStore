@@ -13,12 +13,13 @@ from django.shortcuts import render
 import json
 from django.http import JsonResponse, HttpResponse
 from django.utils import timezone
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from .email_utils import send_analytics_report_email
 from .utils import AnalyticsProcessor
 from .models import (SiteAnalytics, PageView, BookAnalytics, UserActivityLog,
                      AnalyticsSettings, SearchAnalytics, ErrorLog)
 from .pdf_generator import generate_analytics_pdf
+from django.views.decorators.http import require_POST
 
 
 # Configuração do logger
@@ -646,3 +647,11 @@ def get_visit_details(request):
         logger.error(f"Erro em get_visit_details: {str(e)}")
         logger.error(traceback.format_exc())
         return JsonResponse({'error': str(e)}, status=500)
+
+
+@require_POST
+def refresh_session(request):
+    if request.user.is_authenticated:
+        request.session['last_activity'] = time.time()
+        return JsonResponse({'status': 'ok'})
+    return JsonResponse({'status': 'unauthenticated'}, status=401)
