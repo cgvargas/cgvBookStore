@@ -113,5 +113,6 @@ def _paginar_resultados(livros, pagina):
 
 def safe_cache_key(key):
     """Gera uma chave de cache segura removendo caracteres problemáticos"""
-    return get_random_string(length=32) + '_' + ''.join(e for e in key if e.isalnum() or e in '-_')
+    random_suffix = get_random_string(8)
+    return f"{random_suffix}_{(''.join(c for c in key if c.isalnum() or c in '-_'))}"
 

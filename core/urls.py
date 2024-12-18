@@ -10,7 +10,7 @@ from core.views import (
     book_actions, profile_views,
     recommendation_views, auth_views,
 )
-from core.presentation.views import recommendation_views as new_recommendation_views
+
 
 
 urlpatterns = [
@@ -54,14 +54,11 @@ urlpatterns = [
     path('livros/<int:livro_id>/detalhes/', profile_views.detalhes_livro, name='detalhes_livro'),
     path('livros/<int:livro_id>/classificar/', profile_views.salvar_classificacao, name='salvar_classificacao'),
 
-    # URLs de recomendação
+    # URLs de recomendação - manter apenas as originais
     path('perfil/recomendacoes/', recommendation_views.gerar_recomendacoes, name='recomendacoes_perfil'),
     path('api/preferencias/atualizar/', recommendation_views.atualizar_preferencias, name='atualizar_preferencias'),
     path('api/recomendacoes/obter/', recommendation_views.obter_recomendacoes_ajax, name='obter_recomendacoes'),
     path('api/debug-recomendacoes/', recommendation_views.debug_recomendacoes, name='debug_recomendacoes'),
 
-    # Novas URLs com a nova estrutura
-    path('api/v2/recommendations/', new_recommendation_views.get_recommendations, name='api_recommendations'),
-    path('api/v2/recommendations/preferences/', new_recommendation_views.update_preferences, name='api_update_preferences'),
 
 ]

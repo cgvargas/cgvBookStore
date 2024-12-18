@@ -1,0 +1,42 @@
+{# core/templates/recommendations/recommendations.html #}
+{% extends 'base.html' %}
+
+{% block title %}Recomendações - CGBookStore{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="text-center">Recomendações Personalizadas</h1>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for book in recommendations %}
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    <img src="{{ book.imagem_url|default:'static/images/default-book.jpg' }}"
+                         class="card-img-top"
+                         alt="{{ book.titulo }}"
+                         style="height: 300px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ book.titulo }}</h5>
+                        <p class="card-text">{{ book.autor }}</p>
+                        {% if book.categoria %}
+                            <p class="card-text"><small class="text-muted">{{ book.categoria }}</small></p>
+                        {% endif %}
+                        <div class="badge bg-primary mb-2">Score: {{ book.score|floatformat:1 }}</div>
+                    </div>
+                    <div class="card-footer bg-white">
+                        <a href="{% url 'google_book_detail' book.id %}" class="btn btn-primary w-100">Ver Detalhes</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center">
+                <p>Nenhuma recomendação encontrada. Adicione mais livros à sua estante para receber recomendações personalizadas.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

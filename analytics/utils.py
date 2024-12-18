@@ -424,7 +424,8 @@ def safe_cache_key(key: str) -> str:
     Returns:
         str: Uma chave segura para uso com qualquer backend de cache
     """
-    return ''.join(c for c in key if c.isalnum() or c in '-_') + '_' + get_random_string(8)
+    random_suffix = get_random_string(8)
+    return f"{random_suffix}_{(''.join(c for c in key if c.isalnum() or c in '-_'))}"
 
 
 def register_book_view(book_title: str, user=None) -> bool:

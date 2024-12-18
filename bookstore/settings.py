@@ -103,7 +103,6 @@ CACHES = {
         'LOCATION': 'cache_table',
         'TIMEOUT': 7 * 24 * 60 * 60,
         'KEY_PREFIX': 'bookstore',  # Adicione um prefixo para evitar conflitos
-        'KEY_FUNCTION': 'django.utils.crypto.get_random_string',  # Use uma função personalizada para gerar chaves
     }
 }
 
