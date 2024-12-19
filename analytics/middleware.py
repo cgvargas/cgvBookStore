@@ -1,9 +1,11 @@
 # analytics/middleware.py
 from django.conf import settings
+from django.contrib.auth import logout
 
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.contrib.sessions.exceptions import SessionInterrupted
 from django.contrib.sessions.backends.db import SessionStore
+from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.contrib import messages
 import time
@@ -347,43 +349,61 @@ class AnalyticsMiddleware:
         return request.META.get('REMOTE_ADDR')
 
 
-class AutoLogoutMiddleware:
+class ImprovedAutoLogoutMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
+        # Não processa se estiver na página de login ou for uma requisição de recursos estáticos
+        if (request.path == settings.LOGIN_URL or
+                request.path.startswith('/static/') or
+                request.path.startswith('/media/')):
+            return self.get_response(request)
+
         if request.user.is_authenticated:
-            # Obtém o timestamp da última atividade
-            last_activity = request.session.get('last_activity')
-            current_time = time.time()
+            try:
+                current_time = timezone.now().timestamp()
+                last_activity = request.session.get('last_activity')
 
-            # Atualiza o timestamp da última atividade
-            request.session['last_activity'] = current_time
+                # Atualiza o timestamp da última atividade
+                request.session['last_activity'] = current_time
 
-            if last_activity:
-                # Define timeout de 30 minutos (1800 segundos)
-                if current_time - float(last_activity) > 1800:
-                    # Registra a ação antes do logout
-                    logger.warning(f"Timeout de sessão para usuário: {request.user.username}")
+                if last_activity:
+                    idle_time = current_time - float(last_activity)
+                    timeout = getattr(settings, 'SESSION_COOKIE_AGE', 86400)
 
-                    # Se for uma requisição AJAX, retorna 401
-                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                        response = JsonResponse({'error': 'session_timeout'}, status=401)
-                        return response
+                    if idle_time > timeout:
+                        logger.info(f"Sessão expirada por inatividade para o usuário: {request.user.username}")
+                        logout(request)
+                        request.session.flush()
 
-                    # Logout normal para requisições não-AJAX
-                    from django.contrib.auth import logout
+                        # Se for AJAX, retorna 401
+                        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                            return JsonResponse({
+                                'status': 'error',
+                                'message': 'Sua sessão expirou por inatividade.',
+                                'code': 'session_timeout'
+                            }, status=401)
+
+                        # Se não for AJAX e não estiver já na página de login
+                        if request.path != settings.LOGIN_URL:
+                            messages.warning(request,
+                                             'Sua sessão expirou por inatividade. Por favor, faça login novamente.')
+                            return redirect(f"{settings.LOGIN_URL}?next={request.path}")
+
+                # Verifica se o navegador foi fechado
+                browser_closed = request.session.get('browser_closed', False)
+                if browser_closed:
+                    logger.info(f"Browser fechado detectado para usuário: {request.user.username}")
                     logout(request)
-                    messages.warning(request, "Sua sessão expirou devido a inatividade.")
+                    request.session.flush()
+                    return redirect(settings.LOGIN_URL)
 
-                    # Redireciona preservando o 'next' parameter
-                    next_url = request.path
-                    return redirect(f'{settings.LOGIN_URL}?next={next_url}')
+            except Exception as e:
+                logger.error(f"Erro no middleware de auto logout: {str(e)}")
 
         response = self.get_response(request)
         return response
-
-
 # Conecta aos sinais de login/logout
 def on_user_logged_in(sender, request, user, **kwargs):
     try:

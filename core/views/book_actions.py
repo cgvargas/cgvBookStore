@@ -16,9 +16,7 @@ logger = logging.getLogger(__name__)
 def adicionar_estante(request, livro_id):
     if request.method == 'POST':
         logger.info(f"Recebendo POST para adicionar livro {livro_id}")
-        logger.info(f"POST data: {request.POST}")
         try:
-            # Verifica se o livro já existe na estante do usuário
             if EstanteLivro.objects.filter(usuario=request.user, livro_id=livro_id).exists():
                 messages.warning(request, 'Este livro já está em sua estante!')
                 return redirect('google_book_detail', livro_id=livro_id)
@@ -26,29 +24,54 @@ def adicionar_estante(request, livro_id):
             # Busca os detalhes do livro na API do Google
             livro_info = google_books_api.buscar_detalhes(livro_id)
 
-            # Tipo deve vir do formulário ou request.POST
-            tipo = request.POST.get('tipo', 'vou_ler')  # default para 'vou_ler' se não especificado
+            # Log dos dados recebidos da API
+            logger.debug(f"""
+            Dados recebidos da API:
+            {livro_info}
+            """)
 
-            # Cria o livro na estante
+            tipo = request.POST.get('tipo', 'vou_ler')
+
+            # Log antes de criar o objeto
+            logger.debug(f"""
+            Dados que serão salvos:
+            Tipo: {tipo}
+            Título: {livro_info.get('titulo')}
+            Autor: {livro_info.get('autor')}
+            Editora: {livro_info.get('editora')}
+            Páginas: {livro_info.get('numero_paginas')}
+            Data: {livro_info.get('data_publicacao')}
+            Idioma: {livro_info.get('idioma')}
+            """)
+
+            # Cria o livro na estante com todos os campos
             estante_livro = EstanteLivro.objects.create(
                 usuario=request.user,
                 livro_id=livro_id,
-                tipo=tipo,  # usa o tipo especificado
+                tipo=tipo,
                 titulo=livro_info.get('titulo', ''),
                 autor=livro_info.get('autor', ''),
                 capa=livro_info.get('imagem', ''),
                 data_lancamento=livro_info.get('data_publicacao', ''),
-                sinopse=livro_info.get('descricao', '')
+                sinopse=livro_info.get('descricao', ''),
+                editora=livro_info.get('editora', ''),
+                numero_paginas=livro_info.get('numero_paginas'),
+                isbn=livro_info.get('isbn', ''),
+                idioma=livro_info.get('idioma', ''),
+                categoria=livro_info.get('categoria', ''),
+                manual=False
             )
 
-            # Registra a atividade
-            HistoricoAtividade.objects.create(
-                usuario=request.user,
-                acao='adicao',
-                livro_id=livro_id,
-                titulo_livro=estante_livro.titulo,
-                detalhes=f"Livro adicionado à estante '{tipo}'"
-            )
+            # Log após salvar
+            logger.debug(f"""
+            Livro salvo com sucesso:
+            ID: {estante_livro.id}
+            Título: {estante_livro.titulo}
+            Editora: {estante_livro.editora}
+            Páginas: {estante_livro.numero_paginas}
+            Data: {estante_livro.data_lancamento}
+            Idioma: {estante_livro.idioma}
+            """)
 
             messages.success(request, 'Livro adicionado com sucesso à sua estante!')
             return redirect('profile')
@@ -83,19 +106,16 @@ def get_shelf_books(request, shelf_type):
 @require_POST
 @login_required
 def excluir_livro(request, livro_id):
-    livro = get_object_or_404(EstanteLivro, id=livro_id, usuario=request.user)
-    tipo_anterior = livro.tipo
-    livro.delete()
-
-    HistoricoAtividade.objects.create(
-        usuario=request.user,
-        acao='exclusao',
-        livro_id=livro.livro_id,
-        titulo_livro=livro.titulo,
-        detalhes=f"Livro removido da estante {tipo_anterior}"
-    )
-
-    return JsonResponse({'status': 'success'})
+    logger.info(f"Recebida requisição para excluir livro {livro_id}")
+    try:
+        livro = get_object_or_404(EstanteLivro, id=livro_id, usuario=request.user)
+        logger.info(f"Livro encontrado: {livro.titulo}")
+        livro.delete()
+        logger.info(f"Livro excluído com sucesso")
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        logger.error(f"Erro ao excluir livro: {str(e)}")
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 
 @require_POST

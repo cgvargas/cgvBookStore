@@ -43,16 +43,13 @@ def _processar_resultados_google_books(resultados):
 
     livros_processados = []
     for item in resultados:
-        imagem = item.get('imagem')
-        if not imagem or imagem.strip() == '':
-            imagem = CAPA_PADRAO
-
+        # Garante que todos os campos necessários estejam presentes
         livro = {
             'id': item.get('id', ''),
             'titulo': item.get('titulo', 'Título não disponível'),
             'autor': item.get('autor', 'Autor não disponível'),
             'descricao': item.get('descricao', 'Descrição não disponível'),
-            'imagem': imagem,
+            'imagem': item.get('imagem', CAPA_PADRAO),
             'data_publicacao': item.get('data_publicacao', 'Data não disponível'),
             'editora': item.get('editora', 'Editora não disponível'),
             'paginas': item.get('numero_paginas', 'Não disponível'),
@@ -60,6 +57,13 @@ def _processar_resultados_google_books(resultados):
             'idioma': item.get('idioma', 'Não especificado'),
             'link': item.get('link', '#'),
             'isbn': item.get('isbn', 'ISBN não disponível'),
+            # Campos adicionais garantidos
+            'numero_paginas': item.get('numero_paginas', 'Não disponível'),
+            'data_publicacao_completa': item.get('publicado_em', ''),
+            'subtitulo': item.get('subtitulo', ''),
+            'preview': item.get('preview', '#'),
+            'volume_info': item.get('volume_info', {}),
+            'sale_info': item.get('sale_info', {})
         }
         livros_processados.append(livro)
     return livros_processados

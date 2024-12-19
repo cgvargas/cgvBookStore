@@ -61,25 +61,27 @@ class GoogleBooksAPI:
             volume_info = item.get('volumeInfo', {})
             sale_info = item.get('saleInfo', {})
 
-            # Processa informações da imagem com HTTPS
+            # Processamento de imagens com HTTPS
             imagens = volume_info.get('imageLinks', {})
             imagem_url = (
-                imagens.get('thumbnail') or
-                imagens.get('smallThumbnail') or
-                '/static/images/capa-indisponivel.svg'
+                    imagens.get('thumbnail') or
+                    imagens.get('smallThumbnail') or
+                    '/static/images/capa-indisponivel.svg'
             )
             imagem_url = imagem_url.replace('http://', 'https://')
 
-            # Processamento mais robusto da data
+            # Processamento completo da data
             data_publicacao = volume_info.get('publishedDate', '')
             if data_publicacao:
-                try:
-                    # Tenta pegar apenas o ano se a data estiver completa
-                    data_publicacao = data_publicacao.split('-')[0]
-                except Exception:
-                    pass
+                # Mantém a data completa para uso posterior
+                data_publicacao_completa = data_publicacao
+                # Também armazena apenas o ano para exibição simplificada
+                data_publicacao_ano = data_publicacao.split('-')[0]
+            else:
+                data_publicacao_completa = ''
+                data_publicacao_ano = ''
 
-            # Processamento de ISBN mais eficiente
+            # Processamento de ISBN
             isbns = volume_info.get('industryIdentifiers', [])
             isbn = next(
                 (isbn['identifier'] for isbn in isbns
@@ -87,48 +89,38 @@ class GoogleBooksAPI:
                 'ISBN não disponível'
             )
 
-            # Processamento de preço com conversão segura
-            preco = None
-            moeda = 'BRL'
-            if sale_info.get('saleability') == 'FOR_SALE':
-                retail_price = sale_info.get('retailPrice') or sale_info.get('listPrice', {})
-                if retail_price:
-                    try:
-                        preco = float(retail_price.get('amount', 0))
-                        moeda = retail_price.get('currencyCode', 'BRL')
-                    except (ValueError, TypeError):
-                        logger.warning(f"Erro ao converter preço para {item.get('id')}")
-
-            # Extração segura de categorias
+            # Processamento de categorias
             categorias = volume_info.get('categories', [])
-            if isinstance(categorias, list):
-                categoria = ', '.join(categorias)
+            categoria = ', '.join(categorias) if isinstance(categorias, list) else str(categorias)
+
+            # Processamento de número de páginas
+            numero_paginas = volume_info.get('pageCount')
+            if numero_paginas:
+                numero_paginas = str(numero_paginas)
             else:
-                categoria = str(categorias)
+                numero_paginas = 'Não disponível'
 
             processed_data = {
                 'id': item.get('id'),
                 'titulo': volume_info.get('title', 'Título não disponível'),
                 'autor': ', '.join(volume_info.get('authors', ['Autor não disponível'])),
                 'editora': volume_info.get('publisher', 'Editora não disponível'),
-                'data_publicacao': data_publicacao or 'Data não disponível',
+                'data_publicacao': data_publicacao_completa,
+                'data_publicacao_ano': data_publicacao_ano,
                 'descricao': volume_info.get('description', 'Descrição não disponível'),
                 'isbn': isbn,
-                'numero_paginas': str(volume_info.get('pageCount', 'Não disponível')),
+                'numero_paginas': numero_paginas,
                 'categoria': categoria,
                 'idioma': volume_info.get('language', 'Não especificado'),
                 'imagem': imagem_url,
-                'preco': preco,
-                'moeda': moeda,
                 'link': volume_info.get('infoLink', '#'),
-                'averageRating': float(volume_info.get('averageRating', 0)),
-                'ratingsCount': int(volume_info.get('ratingsCount', 0)),
-                'disponivel_venda': sale_info.get('saleability') == 'FOR_SALE',
-                'ebook': sale_info.get('isEbook', False),
                 'preview': volume_info.get('previewLink', '#'),
                 'paginas': volume_info.get('pageCount', 0),
                 'subtitulo': volume_info.get('subtitle', ''),
-                'publicado_em': data_publicacao
+                'publicado_em': data_publicacao_completa,
+                # Campos adicionais para melhor compatibilidade
+                'volume_info': volume_info,  # Mantém dados brutos para processamento posterior
+                'sale_info': sale_info  # Mantém dados brutos para processamento posterior
             }
 
             # Remove valores None para economizar cache

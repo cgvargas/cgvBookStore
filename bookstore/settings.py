@@ -53,13 +53,13 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'analytics.middleware.CustomSessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'analytics.middleware.AutoLogoutMiddleware',
+    'analytics.middleware.ImprovedAutoLogoutMiddleware',  # Novo middleware
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'analytics.middleware.CustomSessionMiddleware',
     'analytics.middleware.AnalyticsMiddleware',
 ]
 
@@ -150,20 +150,22 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Outras configurações...
 
 LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/'  # Ou o nome da URL para onde deseja redirecionar após o login
+LOGIN_REDIRECT_URL = '/profile/'  # Ou o nome da URL para onde deseja redirecionar após o login
 LOGOUT_REDIRECT_URL = '/'  # Redireciona para a página inicial após o logout
+
+AUTO_LOGOUT_DELAY = 1800  # 30 minutos em segundos
 
 # Sessão
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_COOKIE_AGE = 3600 * 24  # 24 horas em segundos
-SESSION_SAVE_EVERY_REQUEST = True
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False
-SESSION_COOKIE_SECURE = False  # Mude para True em produção
-SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_AGE = 86400             # 24 horas em segundos
+SESSION_SAVE_EVERY_REQUEST = True       # Expira a sessão quando o navegador fecha
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Salva a sessão a cada requisição
+SESSION_COOKIE_SECURE = True           # Para produção (HTTPS)
+SSESSION_COOKIE_HTTPONLY = True         # Previne acesso via JavaScript
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 SESSION_COOKIE_NAME = 'sessionid'  # Nome padrão, mas explícito
-AUTO_LOGOUT_DELAY = 1800  # 30 minutos em segundos
+
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',

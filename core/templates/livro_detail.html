@@ -39,8 +39,8 @@
 
                     <div class="mb-4">
                         <h5 class="text-primary mb-3">Informações Adicionais</h5>
-                        <p><strong>Data de Publicação:</strong> {{ livro.data_publicacao|date:"d/m/Y" }}</p>
-                        <p><strong>Visualizações:</strong> {{ livro.visualizacoes }}</p>
+                        <p><strong>Data de Publicação:</strong> {{livro.data_publicacao|date: "d/m/Y"}}</p>
+                        <p><strong>Visualizações:</strong> {{livro.visualizacoes}}</p>
                         {% if livro.categoria %}
                             <p><strong>Categoria:</strong> {{ livro.categoria }}</p>
                         {% endif %}
@@ -86,6 +86,22 @@
             {% endfor %}
         </div>
     </div>
+
+    {% if user.is_superuser %}
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">Debug Info</h5>
+            <pre>
+    ID: {{ livro.id }}
+    Título: {{ livro.titulo }}
+    Autor: {{ livro.autor }}
+    Editora: {{ livro.editora|default:"N/A" }}
+    Páginas: {{ livro.numero_paginas|default:"N/A" }}
+    Data: {{ livro.data_lancamento|default:"N/A" }}
+    Idioma: {{ livro.idioma|default:"N/A" }}
+    Categoria: {{ livro.categoria|default:"N/A" }}
+            </pre>
+        </div>
+    </div>
     {% endif %}
-</div>
 {% endblock %}

@@ -15,16 +15,17 @@ def livro_detail(request, livro_id):
     try:
         livro = get_object_or_404(Livro, pk=livro_id)
 
-        # Registra visualização no analytics
-        try:
-            register_book_view(livro.titulo, request.user)
-
-            # Incrementa o contador local também
-            livro.visualizacoes += 1
-            livro.save()
-        except Exception as e:
-            logger.warning(f"Erro ao registrar visualização do livro {livro_id}: {str(e)}")
-            # Continua a execução mesmo se falhar ao incrementar visualizações
+        # Log para debug
+        logger.debug(f"""
+        Detalhes do livro encontrado:
+        ID: {livro_id}
+        Título: {livro.titulo}
+        Autor: {livro.autor}
+        Editora: {getattr(livro, 'editora', 'N/A')}
+        Páginas: {getattr(livro, 'numero_paginas', 'N/A')}
+        Data: {getattr(livro, 'data_publicacao', 'N/A')}
+        Idioma: {getattr(livro, 'idioma', 'N/A')}
+        """)
 
         livros_relacionados = Livro.objects.filter(
             destaque=True
@@ -36,10 +37,9 @@ def livro_detail(request, livro_id):
         }
         return render(request, 'livro_detail.html', context)
     except Exception as e:
-        logger.error(f"Erro ao buscar detalhes do livro local {livro_id}: {str(e)}")
+        logger.error(f"Erro ao buscar detalhes do livro {livro_id}: {str(e)}")
         messages.error(request, 'Ocorreu um erro ao buscar os detalhes do livro.')
         return redirect('index')
-
 
 @login_required
 def buscar_livro(request):

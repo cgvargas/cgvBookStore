@@ -130,17 +130,3 @@ def check_username(request):
     if exists:
         logger.info(f"Verificação de username: {username} já existe")
     return JsonResponse({'available': not exists})
-
-
-@csrf_exempt
-def auto_logout(request):
-    try:
-        if request.user.is_authenticated:
-            username = request.user.username
-            logger.warning(f"Auto logout triggered for user: {username}")
-            logger.warning(f"Request META: {request.META.get('HTTP_REFERER')}")
-            logout(request)
-            request.session.flush()
-    except Exception as e:
-        logger.error(f"Erro no auto logout: {str(e)}")
-    return HttpResponse(status=200)

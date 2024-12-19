@@ -1,5 +1,7 @@
 # core/urls.py
 from django.urls import path
+
+from analytics import views
 from core.views import (
     CustomLogoutView, CustomLoginView,
     index, sobre,
@@ -22,7 +24,6 @@ urlpatterns = [
     # Autenticação
     path('login/', CustomLoginView.as_view(), name='login'),
     path('logout/', CustomLogoutView.as_view(), name='logout'),
-    path('auto-logout/', auth_views.auto_logout, name='auto_logout'),
     path('register/', register, name='register'),
     path('check-username/', check_username, name='check_username'),
 
@@ -60,5 +61,5 @@ urlpatterns = [
     path('api/recomendacoes/obter/', recommendation_views.obter_recomendacoes_ajax, name='obter_recomendacoes'),
     path('api/debug-recomendacoes/', recommendation_views.debug_recomendacoes, name='debug_recomendacoes'),
 
-
+    path('api/mark-browser-closing/', views.mark_browser_closing, name='mark_browser_closing'),
 ]

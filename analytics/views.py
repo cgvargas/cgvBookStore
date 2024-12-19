@@ -14,6 +14,9 @@ import json
 from django.http import JsonResponse, HttpResponse
 from django.utils import timezone
 from datetime import datetime, timedelta, time
+
+from django.views.decorators.csrf import ensure_csrf_cookie
+
 from .email_utils import send_analytics_report_email
 from .utils import AnalyticsProcessor
 from .models import (SiteAnalytics, PageView, BookAnalytics, UserActivityLog,
@@ -655,3 +658,11 @@ def refresh_session(request):
         request.session['last_activity'] = time.time()
         return JsonResponse({'status': 'ok'})
     return JsonResponse({'status': 'unauthenticated'}, status=401)
+
+
+@ensure_csrf_cookie
+def mark_browser_closing(request):
+    if request.method == 'POST' and request.user.is_authenticated:
+        request.session['browser_closed'] = True
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)
