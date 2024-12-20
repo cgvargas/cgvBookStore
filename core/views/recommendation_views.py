@@ -283,7 +283,7 @@ def debug_recomendacoes(request):
     try:
         total_cache = NewLivroCache.objects.count()
         livros_usuario = EstanteLivro.objects.filter(usuario=request.user).count()
-        preferences = UserPreferences.objects.get(usuario=request.user)
+        preferences = NewUserPreferences.objects.get(usuario=request.user)
 
         return JsonResponse({
             'total_livros_cache': total_cache,
