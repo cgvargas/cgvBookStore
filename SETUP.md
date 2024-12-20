@@ -54,3 +54,15 @@ O projeto segue uma arquitetura limpa (clean architecture) com as seguintes cama
 2. Verificar permissões de diretórios media/ e static/
 3. Configurar banco de dados se necessário
 4. Executar collectstatic para arquivos estáticos
+
+## Nova Estrutura de Assets
+```bash
+static/
+    ├── css/
+    │   ├── book_detail.css
+    │   ├── main.css
+    │   └── [outros arquivos CSS]
+    └── js/
+        ├── auto-logout-v2.js
+        ├── book_detail.js
+        └── [outros arquivos JS]

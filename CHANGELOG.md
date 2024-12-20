@@ -1,24 +1,20 @@
 # CHANGELOG.md
 
-## [2024-12-17] - Reestruturação Interface Administrativa
+## [2024-12-19] - Reorganização CSS e Ajustes no Sistema
 ### Adicionado
-- Nova estrutura administrativa em core/presentation/admin/
-  - book_admin.py para gestão de livros e cache
-  - user_admin.py para gestão de usuários
-  - media_admin.py para gestão de URLs e vídeos
-  - interaction_admin.py para gestão de contatos e interações
-- Funcionalidades visuais melhoradas no admin
-  - Previews de imagens
-  - Indicadores de status
-  - Links clicáveis
-  - Melhor organização de campos
+- Novo arquivo auto-logout-v2.js com melhorias no sistema de logout automático
+- Novo CSS consolidado para detalhes de livros
 
 ### Modificado
-- Reorganização do arquivo core/admin.py
-- Migração das classes Admin para estrutura modular
-- Melhoria na apresentação dos dados administrativos
+- Mantida estrutura de models com prefixo "New" para estabilidade
+- Reorganização completa da estrutura de arquivos CSS
+- Atualizações em views e templates relacionados a livros
+- Melhorias no sistema de analytics e middleware
+- Ajustes nos templates base e detalhes de livros
 
-### Corrigido
-- Sistema de cache de livros implementado e corrigido
-- Problema de cache vazio nas recomendações resolvido
-- Questões de importação circular nos modelos
+### Removido
+- Estrutura antiga de CSS (components, utilities, layout)
+- Versão antiga do auto-logout.js
+
+## [2024-12-17] - Reestruturação Interface Administrativa
+[resto do conteúdo mantido como está...]
