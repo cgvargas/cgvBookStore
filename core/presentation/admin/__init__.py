@@ -1,6 +1,7 @@
 # core/presentation/admin/__init__.py
 from django.contrib import admin
-from .book_admin import LivroAdmin, LivroCacheAdmin
+from .book_admin import LivroAdmin
+from .cache_admin import NewLivroCacheAdmin
 from .user_admin import CustomUserAdmin
 from .media_admin import URLExternaAdmin, VideoYouTubeAdmin
 from .interaction_admin import ContatoAdmin, EstanteLivroAdmin, HistoricoAtividadeAdmin
