@@ -91,6 +91,9 @@ class NewLivroCache(models.Model):
     def salvar_book(cls, book_id, dados_livro):
         """Salva um livro no cache com suporte a dados extras."""
         try:
+            # Log detalhado da data/hora atual
+            logger.debug(f"Iniciando salvamento do livro {book_id} em {timezone.now()}")
+
             # Separa os dados principais dos extras
             dados_principais = {
                 'titulo': dados_livro.get('titulo', ''),
@@ -105,9 +108,6 @@ class NewLivroCache(models.Model):
                 'imagem_url': dados_livro.get('imagem', ''),
                 'preco': dados_livro.get('preco', 0.0) if dados_livro.get('preco') is not None else 0.0,
             }
-
-            # Log do preço antes de salvar
-            logger.debug(f"Preço a ser salvo para o livro {book_id}: {dados_principais['preco']}")
 
             # Dados extras vão para o campo JSON
             dados_extras = {
@@ -124,11 +124,13 @@ class NewLivroCache(models.Model):
                 }
             )
 
+            # Log da data do objeto após salvar
+            logger.debug(f"Livro {book_id} salvo. Data do cache: {obj.data_cache}")
+
             # Salva também no cache do Django
             cache_key = f"book_detail:{book_id}"
             cache.set(cache_key, dados_livro, timeout=86400)  # 24 horas
 
-            logger.info(f"Livro {book_id} {'criado' if created else 'atualizado'} no cache")
             return obj
 
         except Exception as e:
