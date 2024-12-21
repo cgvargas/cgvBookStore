@@ -1,3 +1,4 @@
+# core/domain/__init__.py
 from .books import Book, BookCache, BookShelf
 from .users import User, ActivityHistory
 from .media import ExternalURL, YouTubeVideo

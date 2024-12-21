@@ -1,13 +1,24 @@
-# general_views.py
+# core/views/general_views.py
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from ..models import Livro, URLExterna, VideoYouTube
-from ..forms import ContatoForm, CustomUserCreationForm
-from ..utils.email_utils import enviar_email_contato
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import JsonResponse
 from django.urls import reverse
 
+from core.forms import ContatoForm, CustomUserCreationForm
+from core.utils.email_utils import enviar_email_contato
+
+# Importação dos repositories
+from core.infrastructure.persistence.django.repositories.books.book_repository import BookRepository
+from core.infrastructure.persistence.django.repositories.media.external_url_repository import ExternalURLRepository
+from core.infrastructure.persistence.django.repositories.media.youtube_video_repository import YouTubeVideoRepository
+from core.infrastructure.persistence.django.repositories.contact.contact_repository import ContactRepository
+
+# Inicialização dos repositories
+book_repository = BookRepository()
+external_url_repository = ExternalURLRepository()
+youtube_video_repository = YouTubeVideoRepository()
+contact_repository = ContactRepository()
 
 def register(request):
     if request.method == 'POST':
@@ -16,14 +27,12 @@ def register(request):
             try:
                 user = form.save()
 
-                # Se a requisição for AJAX, retorna JSON
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                     return JsonResponse({
                         'success': True,
                         'redirect_url': reverse('login')
                     })
 
-                # Se for uma requisição normal, adiciona mensagem e redireciona
                 messages.success(
                     request,
                     'Conta criada com sucesso! Agora você pode fazer login.',
@@ -32,17 +41,14 @@ def register(request):
                 return redirect('login')
 
             except Exception as e:
-                # Log do erro (opcional)
                 print(f"Erro ao registrar usuário: {e}")
 
-                # Se for AJAX
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                     return JsonResponse({
                         'success': False,
                         'error': 'Ocorreu um erro ao criar sua conta. Por favor, tente novamente.'
                     })
 
-                # Se for requisição normal
                 messages.error(
                     request,
                     'Ocorreu um erro ao criar sua conta. Por favor, tente novamente.',
@@ -55,9 +61,13 @@ def register(request):
 
 def index(request):
     try:
-        # Obtendo os livros para destaque e mais vendidos
-        livros_destaque = Livro.objects.filter(destaque=True).order_by('-data_publicacao', 'titulo')
-        livros_mais_vendidos = Livro.objects.filter(mais_vendido=True).order_by('titulo')
+        # Obtendo os livros através dos repositories
+        livros_destaque = book_repository.get_featured_books(
+            order_by=['-data_publicacao', 'titulo']
+        )
+        livros_mais_vendidos = book_repository.get_bestseller_books(
+            order_by=['titulo']
+        )
 
         # Configuração da paginação
         paginator_destaque = Paginator(livros_destaque, 8)
@@ -83,17 +93,19 @@ def index(request):
         except EmptyPage:
             livros_mais_vendidos_paginated = paginator_vendidos.page(paginator_vendidos.num_pages)
 
-        # Contexto da view
+        # Obtendo URLs externas e vídeos através dos repositories
+        urls_externas = external_url_repository.get_all_urls()
+        videos_youtube = youtube_video_repository.get_all_videos()
+
         context = {
             'livros_destaque': livros_destaque_paginated,
             'livros_mais_vendidos': livros_mais_vendidos_paginated,
-            'urls_externas': URLExterna.objects.all(),
-            'videos_youtube': VideoYouTube.objects.all(),
+            'urls_externas': urls_externas,
+            'videos_youtube': videos_youtube,
         }
 
         return render(request, 'index.html', context)
     except Exception as e:
-        # Mensagem de erro
         messages.error(request, 'Ocorreu um erro ao carregar a página inicial.')
         return render(request, 'index.html', {})
 
@@ -105,27 +117,21 @@ def contato(request):
         form = ContatoForm(request.POST)
         if form.is_valid():
             try:
-                contato = form.save()
+                contato = contact_repository.save_contact(form.cleaned_data)
                 emails_enviados = enviar_email_contato(form.cleaned_data)
-
-                print("Form salvo:", contato)  # Debug
-                print("Emails enviados:", emails_enviados)  # Debug
 
                 if emails_enviados:
                     messages.success(
                         request,
                         'Mensagem enviada com sucesso! Verifique seu e-mail para confirmação.',
-                        extra_tags='contact success'  # Adicionando ambas as tags
-
+                        extra_tags='contact success'
                     )
-                    print("Mensagem de sucesso adicionada")  # Debug
                 else:
                     messages.warning(
                         request,
                         'Sua mensagem foi recebida, mas houve um problema ao enviar o e-mail de confirmação.',
                         extra_tags='contact warning'
                     )
-                    print("Mensagem de aviso adicionada")  # Debug
 
                 return redirect('contato')
             except Exception as e:

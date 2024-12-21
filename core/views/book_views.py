@@ -1,21 +1,30 @@
-# book_views.py
+# core/views/book_views.py
 import logging
 from django.contrib import messages
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from ..models import Livro, EstanteLivro
 from ..api import google_books_api
 from .utils import _processar_resultados_google_books, _ordenar_resultados, _paginar_resultados
 from analytics.utils import register_book_view
 
+# Importação dos repositories
+from core.infrastructure.persistence.django.repositories.books.book_repository import BookRepository
+from core.infrastructure.persistence.django.repositories.books.bookshelf_repository import BookShelfRepository
+
 logger = logging.getLogger(__name__)
+
+# Inicialização dos repositories
+book_repository = BookRepository()
+book_shelf_repository = BookShelfRepository()
 
 
 def livro_detail(request, livro_id):
     try:
-        livro = get_object_or_404(Livro, pk=livro_id)
+        livro = book_repository.get_book_by_id(livro_id)
+        if not livro:
+            messages.error(request, 'Livro não encontrado.')
+            return redirect('index')
 
-        # Log para debug
         logger.debug(f"""
         Detalhes do livro encontrado:
         ID: {livro_id}
@@ -27,9 +36,10 @@ def livro_detail(request, livro_id):
         Idioma: {getattr(livro, 'idioma', 'N/A')}
         """)
 
-        livros_relacionados = Livro.objects.filter(
-            destaque=True
-        ).exclude(id=livro.id)[:3]
+        livros_relacionados = book_repository.get_featured_books(
+            exclude_id=livro.id,
+            limit=3
+        )
 
         context = {
             'livro': livro,
@@ -40,6 +50,7 @@ def livro_detail(request, livro_id):
         logger.error(f"Erro ao buscar detalhes do livro {livro_id}: {str(e)}")
         messages.error(request, 'Ocorreu um erro ao buscar os detalhes do livro.')
         return redirect('index')
+
 
 @login_required
 def buscar_livro(request):
@@ -59,15 +70,12 @@ def buscar_livro(request):
             )
 
             if resultados:
-                # Processa os resultados se necessário
                 resultados = _processar_resultados_google_books(resultados)
 
-                # Ordena os resultados se houver parâmetro de ordenação
                 order_by = request.GET.get('order')
                 if order_by:
                     resultados = _ordenar_resultados(resultados, order_by)
 
-                # Paginação dos resultados
                 page = request.GET.get('page')
                 resultados = _paginar_resultados(resultados, page)
             else:
@@ -118,19 +126,25 @@ def google_book_detail(request, livro_id):
 def adicionar_estante(request, livro_id):
     if request.method == 'POST':
         try:
-            livro = EstanteLivro.objects.create(
-                usuario=request.user,
-                livro_id=request.POST['livro_id'],
-                tipo=request.POST['tipo'],
-                titulo=request.POST['titulo'],
-                autor=request.POST['autor'],
-                capa=request.POST['capa'],
-                data_lancamento=request.POST['data_lancamento'],
-                sinopse=request.POST['sinopse']
+            book_data = {
+                'livro_id': request.POST['livro_id'],
+                'tipo': request.POST['tipo'],
+                'titulo': request.POST['titulo'],
+                'autor': request.POST['autor'],
+                'capa': request.POST['capa'],
+                'data_lancamento': request.POST['data_lancamento'],
+                'sinopse': request.POST['sinopse']
+            }
+
+            livro = book_shelf_repository.add_book_to_shelf(
+                user=request.user,
+                book_data=book_data
             )
+
             logger.info(f"Livro criado com sucesso: {livro.id}")
             messages.success(request, 'Livro adicionado com sucesso!')
             return redirect('profile')
+
         except Exception as e:
             logger.error(f"Erro ao adicionar livro: {str(e)}")
             messages.error(request, 'Erro ao adicionar livro.')
