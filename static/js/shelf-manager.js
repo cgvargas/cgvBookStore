@@ -1,5 +1,8 @@
-export class ShelfManager {
+// static/js/shelf-manager.js
+
+class ShelfManager {
     constructor(modalInstance) {
+        console.log('Iniciando ShelfManager...');
         this.modal = modalInstance;
         this.currentBook = null;
         this.transferModal = null;
@@ -10,13 +13,16 @@ export class ShelfManager {
             this.transferModal = new bootstrap.Modal(transferModalElement);
         }
 
-        // Bind dos métodos para manter o contexto correto
+        // Bind dos métodos
+        this.openShelfManager = this.openShelfManager.bind(this);
+        this.setupEventListeners = this.setupEventListeners.bind(this);
         this.handleBookDeletion = this.handleBookDeletion.bind(this);
         this.handleTransferModalOpen = this.handleTransferModalOpen.bind(this);
         this.handleBookTransfer = this.handleBookTransfer.bind(this);
     }
 
     initialize() {
+        console.log('Inicializando ShelfManager...');
         this.setupModalCloseHandlers();
         this.setupEventListeners();
     }
@@ -98,27 +104,21 @@ export class ShelfManager {
         const button = event.target.closest('.transferir-livro-btn');
         if (!button) return;
 
-        if (!this.transferModal) {
-            console.error('Transfer modal not found');
-            return;
-        }
-
+        // Salva o livro atual para transferência
         this.currentBook = {
             id: button.dataset.livroId,
-            titulo: button.dataset.livroTitulo,
-            tipoAtual: button.dataset.tipoAtual
+            titulo: button.dataset.livroTitulo
         };
 
-        const tituloElement = document.getElementById('livroTitulo');
-        if (tituloElement) {
-            tituloElement.textContent = this.currentBook.titulo;
+        // Atualiza o título do modal de transferência
+        const modalTitle = document.querySelector('#transferModal .modal-title');
+        if (modalTitle) {
+            modalTitle.textContent = `Transferir "${this.currentBook.titulo}"`;
         }
 
-        document.querySelectorAll('.transferir-para').forEach(btn => {
-            btn.style.display = btn.dataset.tipo === this.currentBook.tipoAtual ? 'none' : 'block';
-        });
-
-        this.transferModal.show();
+        if (this.transferModal) {
+            this.transferModal.show();
+        }
     }
 
     handleBookTransfer(event) {
@@ -136,15 +136,27 @@ export class ShelfManager {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': this.getCookie('csrftoken'),
-                    'Content-Type': 'application/json'
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 credentials: 'same-origin'
             });
 
             const data = await response.json();
 
-            if (data.status === 'success') {
-                location.reload();
+            if (data.success) {
+                // Remove o elemento do livro da UI
+                const bookElement = document.querySelector(`[data-livro-id="${livroId}"]`);
+                if (bookElement) {
+                    bookElement.remove();
+                }
+
+                // Atualiza a contagem de livros
+                this.updateBookCount();
+
+                // Se houver URL de redirecionamento, use-a
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                }
             } else {
                 throw new Error(data.message || 'Erro ao excluir livro');
             }
@@ -162,7 +174,8 @@ export class ShelfManager {
             const response = await fetch(`/livros/transferir/${livroId}/`, {
                 method: 'POST',
                 headers: {
-                    'X-CSRFToken': this.getCookie('csrftoken')
+                    'X-CSRFToken': this.getCookie('csrftoken'),
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: formData,
                 credentials: 'same-origin'
@@ -174,7 +187,8 @@ export class ShelfManager {
                 if (this.transferModal) {
                     this.transferModal.hide();
                 }
-                location.reload();
+                // Atualiza a página para refletir as mudanças
+                window.location.reload();
             } else {
                 throw new Error(data.message || 'Erro ao transferir livro');
             }
@@ -182,6 +196,18 @@ export class ShelfManager {
             console.error('Erro:', error);
             alert('Erro ao transferir o livro. Por favor, tente novamente.');
         }
+    }
+
+    updateBookCount() {
+        // Atualiza a contagem de livros em cada seção
+        const sections = ['favorito', 'lendo', 'vou_ler', 'lido'];
+        sections.forEach(type => {
+            const countBadge = document.querySelector(`[data-tipo-prateleira="${type}"] .badge`);
+            const bookList = document.querySelector(`#${type}-list`);
+            if (countBadge && bookList) {
+                countBadge.textContent = bookList.children.length;
+            }
+        });
     }
 
     getCookie(name) {
@@ -200,6 +226,7 @@ export class ShelfManager {
     }
 
     openShelfManager(shelfType) {
+        console.log('Tentando abrir gerenciador para:', shelfType);
         if (!this.modal) {
             console.error('Modal instance not found');
             return;
@@ -211,6 +238,7 @@ export class ShelfManager {
                 return response.json();
             })
             .then(data => {
+                console.log('Dados recebidos:', data);
                 if (data.status === 'success') {
                     const modalElement = document.getElementById('shelfModal');
                     const modalTitle = modalElement.querySelector('.modal-title');
@@ -229,7 +257,6 @@ export class ShelfManager {
                     if (modalBody) {
                         modalBody.innerHTML = data.html;
                         this.setupEventListeners();
-                        this.setupModalCloseHandlers();
                         this.modal.show();
                     }
                 }
@@ -241,7 +268,9 @@ export class ShelfManager {
     }
 }
 
-export function initializeShelfManager(modalInstance) {
+// Exporta a função de inicialização
+export default function createShelfManager(modalInstance) {
+    console.log('Criando nova instância do ShelfManager...');
     const manager = new ShelfManager(modalInstance);
     manager.initialize();
     return manager;

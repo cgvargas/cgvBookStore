@@ -6,8 +6,9 @@
 {% endblock %}
 
 {% block content %}
-<div class="container py-5 animate-fade-in">
-    <!-- Breadcrumb com estilo moderno -->
+{% csrf_token %}
+<div class="container book-details-container animate-fade-in">
+    <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb bg-transparent p-0">
             <li class="breadcrumb-item"><a href="{% url 'index' %}" class="text-decoration-none">Início</a></li>
@@ -17,54 +18,47 @@
     </nav>
 
     <div class="row g-4">
-        <!-- Coluna Esquerda - Capa e Ações -->
+        <!-- Coluna da Imagem -->
         <div class="col-lg-4">
             <div class="position-sticky" style="top: 2rem;">
-                <!-- Capa do Livro -->
-                <div class="text-center mb-4">
-                    <img src="{{ livro.imagem }}"
+                <div class="book-cover-container mb-4">
+                    <img src="{{ livro.capa }}"
                          alt="{{ livro.titulo }}"
-                         class="book-cover img-fluid mb-4"
-                         style="max-height: 500px; width: auto;">
+                         class="book-cover">
                 </div>
 
                 <!-- Botões de Ação -->
-                <div class="d-grid gap-3">
-                    <button class="btn btn-primary" data-toggle="modal" data-target="#shareModal">
+                <div class="book-actions">
+                    <button class="btn btn-primary action-btn" type="button" data-bs-toggle="modal" data-bs-target="#shareModal">
                         <i class="bi bi-share"></i> Compartilhar
                     </button>
-                    <button class="btn btn-outline-secondary action-button" id="btnEdit"
-                            onclick="window.location.href='{% url 'editar_livro_manual' livro.id %}'">
+                    <a href="{% if livro.livro_id %}{% url 'editar_livro_manual_google' livro.livro_id %}{% else %}{% url 'editar_livro_manual' livro.id %}{% endif %}"
+                       class="btn btn-outline-secondary action-btn">
                         <i class="bi bi-pencil"></i> Editar
-                    </button>
-                    <button class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">
+                    </a>
+                    <button class="btn btn-danger action-btn" type="button" data-bs-toggle="modal" data-bs-target="#deleteModal">
                         <i class="bi bi-trash"></i> Excluir
                     </button>
                 </div>
 
-                <!-- Estatísticas do Livro em Cards -->
+                <!-- Informações Adicionais em Cards -->
                 <div class="mt-4">
                     <div class="row g-3">
                         {% if livro.numero_paginas %}
                         <div class="col-6">
-                            <div class="card h-100 text-center">
-                                <div class="card-body">
-                                    <i class="bi bi-book text-primary h4 mb-2"></i>
-                                    <h6 class="card-title mb-0">Páginas</h6>
-                                    <p class="card-text fw-bold">{{ livro.numero_paginas }}</p>
-                                </div>
+                            <div class="info-card text-center">
+                                <i class="bi bi-book info-icon"></i>
+                                <div class="info-label">Páginas</div>
+                                <div class="info-value">{{ livro.numero_paginas }}</div>
                             </div>
                         </div>
                         {% endif %}
-
                         {% if livro.idioma %}
                         <div class="col-6">
-                            <div class="card h-100 text-center">
-                                <div class="card-body">
-                                    <i class="bi bi-globe text-primary h4 mb-2"></i>
-                                    <h6 class="card-title mb-0">Idioma</h6>
-                                    <p class="card-text fw-bold">{{ livro.idioma }}</p>
-                                </div>
+                            <div class="info-card text-center">
+                                <i class="bi bi-globe info-icon"></i>
+                                <div class="info-label">Idioma</div>
+                                <div class="info-value">{{ livro.idioma }}</div>
                             </div>
                         </div>
                         {% endif %}
@@ -73,7 +67,7 @@
             </div>
         </div>
 
-        <!-- Coluna Direita - Informações do Livro -->
+        <!-- Coluna das Informações -->
         <div class="col-lg-8">
             {% if messages %}
             <div class="row mb-4">
@@ -81,9 +75,7 @@
                     {% for message in messages %}
                     <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %} alert-dismissible fade show">
                         {{ message }}
-                        <button type="button" class="close" data-dismiss="alert">
-                            <span>&times;</span>
-                        </button>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                     {% endfor %}
                 </div>
@@ -91,163 +83,127 @@
             {% endif %}
 
             <!-- Cabeçalho do Livro -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h1 class="display-5 mb-3">{{ livro.titulo }}</h1>
-                    <h4 class="text-muted mb-4">por {{ livro.autor }}</h4>
-
-                    <!-- Sistema de classificação -->
-                    <div class="rating-section mb-4" data-livro-id="{{ livro.id }}" data-rating="{{ livro.classificacao|default_if_none:0 }}">
-                        <div class="stars d-flex align-items-center">
-                            <div class="star-rating">
-                                {% for i in "12345" %}
-                                <i class="bi bi-star star-icon" data-rating="{{ forloop.counter }}"></i>
-                                {% endfor %}
-                            </div>
-                            <span class="rating-text ms-2"></span>
-                        </div>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <!-- Informações do Livro -->
-                    <div class="row g-4">
-                        {% if livro.editora %}
-                        <div class="col-md-6">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-building me-2 text-primary"></i>
-                                <div>
-                                    <small class="text-muted d-block">Editora</small>
-                                    <span class="fw-bold">{{ livro.editora }}</span>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        {% if livro.data_publicacao %}
-                        <div class="col-md-6">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-calendar3 me-2 text-primary"></i>
-                                <div>
-                                    <small class="text-muted d-block">Publicação</small>
-                                    <span class="fw-bold">{{ livro.data_publicacao }}</span>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        {% if livro.categoria %}
-                        <div class="col-md-6">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-tag me-2 text-primary"></i>
-                                <div>
-                                    <small class="text-muted d-block">Categoria</small>
-                                    <span class="fw-bold">{{ livro.categoria }}</span>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        {% if livro.isbn %}
-                        <div class="col-md-6">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-upc me-2 text-primary"></i>
-                                <div>
-                                    <small class="text-muted d-block">ISBN</small>
-                                    <span class="fw-bold">{{ livro.isbn }}</span>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
+            <div class="book-header">
+                <h1 class="book-title">{{ livro.titulo }}</h1>
+                <h4 class="book-author">por {{ livro.autor }}</h4>
             </div>
 
-            <!-- Sinopse -->
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="card-title mb-4">
-                        <i class="bi bi-book-half me-2 text-primary"></i>
-                        Sobre o Livro
-                    </h4>
-                    <p class="card-text">{{ livro.descricao|default:"Descrição não disponível"|linebreaks }}</p>
+            <!-- Sistema de Classificação -->
+            <div class="rating-section" data-livro-id="{{ livro.id }}" data-rating="{{ livro.classificacao|default_if_none:0 }}">
+                <h5 class="text-muted mb-2">Sua Avaliação</h5>
+                <div class="d-flex align-items-center">
+                    <div class="star-rating">
+                        {% for i in "12345" %}
+                        <i class="bi bi-star star-icon" data-rating="{{ forloop.counter }}" role="button" tabindex="0"></i>
+                        {% endfor %}
+                    </div>
+                    <span class="rating-text"></span>
                 </div>
+                <!-- Área para mensagens de feedback -->
+                <div class="rating-messages mt-2"></div>
+            </div>
+
+            <!-- Detalhes do Livro -->
+            <div class="row g-4">
+                {% if livro.editora %}
+                <div class="col-md-6">
+                    <div class="info-card">
+                        <i class="bi bi-building info-icon"></i>
+                        <div class="info-label">Editora</div>
+                        <div class="info-value">{{ livro.editora }}</div>
+                    </div>
+                </div>
+                {% endif %}
+                {% if livro.data_publicacao %}
+                <div class="col-md-6">
+                    <div class="info-card">
+                        <i class="bi bi-calendar3 info-icon"></i>
+                        <div class="info-label">Publicação</div>
+                        <div class="info-value">{{ livro.data_publicacao }}</div>
+                    </div>
+                </div>
+                {% endif %}
+                {% if livro.categoria %}
+                <div class="col-md-6">
+                    <div class="info-card">
+                        <i class="bi bi-tag info-icon"></i>
+                        <div class="info-label">Categoria</div>
+                        <div class="info-value">{{ livro.categoria }}</div>
+                    </div>
+                </div>
+                {% endif %}
+                {% if livro.isbn %}
+                <div class="col-md-6">
+                    <div class="info-card">
+                        <i class="bi bi-upc info-icon"></i>
+                        <div class="info-label">ISBN</div>
+                        <div class="info-value">{{ livro.isbn }}</div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Descrição do Livro -->
+            <div class="book-description">
+                <h4 class="description-title">
+                    <i class="bi bi-book-half"></i> Sobre o Livro
+                </h4>
+                <p>{{ livro.descricao|default:"Descrição não disponível"|linebreaks }}</p>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal de Compartilhamento -->
-<div class="modal fade" id="shareModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">
-                    <i class="bi bi-share"></i> Compartilhar Livro
-                </h5>
-                <button type="button" class="close text-white" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="modal-body p-4">
-                <div class="text-center mb-4">
-                    <img src="{{ livro.imagem }}"
-                         alt="{{ livro.titulo }}"
-                         class="share-preview-image mb-3"
-                         style="max-height: 200px; width: auto;">
-                    <h5 class="mb-2">{{ livro.titulo }}</h5>
-                    <p class="text-muted mb-4">por {{ livro.autor }}</p>
-                </div>
-
-                <div class="share-buttons d-grid gap-3">
-                    <button class="btn btn-outline-primary share-btn w-100 d-flex align-items-center justify-content-center" data-platform="facebook">
-                        <i class="bi bi-facebook me-2"></i> Compartilhar no Facebook
-                    </button>
-                    <button class="btn btn-outline-dark share-btn w-100 d-flex align-items-center justify-content-center" data-platform="twitter">
-                        <i class="bi bi-twitter-x me-2"></i> Compartilhar no X
-                    </button>
-                    <button class="btn btn-outline-success share-btn w-100 d-flex align-items-center justify-content-center" data-platform="whatsapp">
-                        <i class="bi bi-whatsapp me-2"></i> Compartilhar no WhatsApp
-                    </button>
-                    <button class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center" id="copyLinkBtn">
-                        <i class="bi bi-link-45deg me-2"></i> Copiar Link
-                    </button>
-                </div>
-            </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                    <i class="bi bi-x"></i> Fechar
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal de Confirmação de Exclusão -->
-<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+<!-- Modal de Compartilhar -->
+<div class="modal fade custom-modal" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Confirmar Exclusão</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
+                <h5 class="modal-title" id="shareModalLabel">Compartilhar Livro</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>Tem certeza que deseja remover "<strong>{{ livro.titulo }}</strong>" da sua estante?</p>
-                <p class="text-muted small">Esta ação não pode ser desfeita.</p>
+                <p>Compartilhe "{{ livro.titulo }}" nas redes sociais:</p>
+                <div class="share-buttons">
+                    <button class="btn btn-outline-primary share-btn" data-platform="facebook">
+                        <i class="bi bi-facebook"></i> Facebook
+                    </button>
+                    <button class="btn btn-outline-info share-btn" data-platform="twitter">
+                        <i class="bi bi-twitter"></i> Twitter
+                    </button>
+                    <button class="btn btn-outline-success share-btn" data-platform="whatsapp">
+                        <i class="bi bi-whatsapp"></i> WhatsApp
+                    </button>
+                </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                <!-- Adicionado data-livro-id explicitamente -->
-                <button type="button"
-                        class="btn btn-danger"
-                        id="confirmDelete"
-                        data-livro-id="{{ livro.id }}"
-                        data-bs-dismiss="modal">
-                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                    Remover
-                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Deletar -->
+<div class="modal fade custom-modal" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirmar Exclusão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="deleteForm" method="POST" action="{% url 'excluir_livro' livro.id %}" data-redirect="{% url 'profile' %}">
+                    {% csrf_token %}
+                    <p>Tem certeza que deseja remover "<strong>{{ livro.titulo }}</strong>" da sua estante?</p>
+                    <p class="text-muted small">Esta ação não pode ser desfeita.</p>
+                    <div class="modal-footer border-0 px-0 pb-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">
+                            <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                            Remover
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -255,5 +211,16 @@
 {% endblock %}
 
 {% block extra_js %}
-    <script src="{% static 'js/book_detail.js' %}"></script>
+{{ block.super }}
+
+<!-- Sistema de Rating -->
+<script src="{% static 'js/book_detail.js' %}"></script>
+
+<!-- Gerenciador de Modais -->
+<script type="module">
+    import { BookModalManager } from "{% static 'js/book-modal-manager.js' %}";
+    document.addEventListener('DOMContentLoaded', () => {
+        new BookModalManager();
+    });
+</script>
 {% endblock %}

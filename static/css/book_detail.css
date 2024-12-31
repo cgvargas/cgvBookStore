@@ -1,133 +1,200 @@
-/* Reset de estilos do modal */
-.modal-backdrop {
-    z-index: 1040;
+/* Estilos modernos para a página de detalhes do livro */
+.book-details-container {
+    background-color: #f8f9fa;
+    border-radius: 20px;
+    padding: 2rem;
+    margin-top: 2rem;
 }
 
-.modal {
-    z-index: 1050;
-    position: fixed;
-    top: 0;
-    left: 0;
+/* Estilo padrão para capa do livro */
+.book-cover-container {
+    position: relative;
+    width: 300px;
+    height: 450px;
+    margin: 0 auto;
+    perspective: 1000px;
+}
+
+.book-cover {
     width: 100%;
     height: 100%;
-    overflow: hidden;
-    outline: 0;
-}
-
-.modal-content {
-    z-index: 1060;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    pointer-events: auto;
-    background-color: #fff;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: 0.3rem;
-    outline: 0;
-}
-
-.modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #000;
-    opacity: 0.5;
-    z-index: 1500 !important;
-}
-
-.modal {
-    z-index: 1600 !important;
-}
-
-.modal-content {
-    z-index: 1700 !important;
-}
-
-.modal-dialog {
-    position: relative;
-    width: auto;
-    margin: 0.5rem;
-    pointer-events: none;
-}
-
-@media (min-width: 576px) {
-    .modal-dialog {
-        max-width: 500px;
-        margin: 1.75rem auto;
-    }
-}
-
-body.modal-open {
-    overflow: hidden;
-    padding-right: 0 !important;
-}
-
-/* Estilos para o modal de compartilhamento */
-.share-preview-image {
+    object-fit: cover;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.share-buttons .btn {
-    padding: 12px 20px;
-    font-size: 1rem;
+    box-shadow:
+        -6px 6px 8px rgba(0,0,0,0.1),
+        0 2px 4px rgba(0,0,0,0.15);
+    transform: perspective(1000px) rotateY(5deg);
     transition: all 0.3s ease;
 }
 
-.share-buttons .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+.book-cover:hover {
+    transform: perspective(1000px) rotateY(15deg);
 }
 
-.share-buttons .btn i {
-    font-size: 1.2rem;
+/* Cabeçalho do livro */
+.book-header {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
-/* Estilo específico para o botão do X (Twitter) */
-.share-buttons .btn[data-platform="twitter"] {
-    background-color: white;
-    border-color: #000;
-    color: #000;
+.book-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
 }
 
-.share-buttons .btn[data-platform="twitter"]:hover {
-    background-color: #000;
-    color: white;
+.book-author {
+    font-size: 1.25rem;
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+}
+
+/* Seção de ações */
+.book-actions {
+    display: flex;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.action-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.action-btn i {
+    font-size: 1.1rem;
+}
+
+/* Cards de informação */
+.info-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    height: 100%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease;
+}
+
+.info-card:hover {
+    transform: translateY(-3px);
+}
+
+.info-icon {
+    font-size: 1.5rem;
+    color: #ff6600;
+    margin-bottom: 1rem;
+}
+
+.info-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+}
+
+.info-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
 }
 
 /* Sistema de avaliação */
+.rating-section {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
 .star-rating {
     display: inline-flex;
-    gap: 5px;
+    gap: 0.25rem;
 }
 
 .star-icon {
-    font-size: 24px;
+    font-size: 1.75rem;
     cursor: pointer;
-    transition: color 0.2s ease;
+    color: #e0e0e0;
+    transition: all 0.2s ease;
 }
 
+.star-icon.active,
 .star-icon:hover {
+    color: #ffd700;
     transform: scale(1.1);
 }
 
-/* Cores para diferentes níveis de avaliação */
-.rating-bad .bi-star-fill {
-    color: #dc3545;
+/* Descrição do livro */
+.book-description {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-.rating-good .bi-star-fill {
-    color: #ffc107;
+.description-title {
+    font-size: 1.5rem;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.rating-excellent .bi-star-fill {
-    color: #28a745;
+/* Modais */
+.custom-modal .modal-content {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
-.rating-text {
+.custom-modal .modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    border-radius: 15px 15px 0 0;
+    padding: 1.5rem;
+}
+
+.custom-modal .modal-title {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.custom-modal .modal-body {
+    padding: 2rem;
+}
+
+.custom-modal .modal-footer {
+    border-top: 1px solid rgba(0,0,0,0.05);
+    padding: 1rem 1.5rem;
+}
+
+/* Botões de compartilhamento */
+.share-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.share-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
     font-weight: 500;
-    transition: color 0.2s ease;
+    transition: all 0.2s ease;
+}
+
+.share-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }

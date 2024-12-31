@@ -17,24 +17,18 @@
                 {% for message in messages %}
                     {% if 'success' in message.tags %}
                     <div class="alert alert-success mb-2">
-                        <i class="bi bi-check-circle me-2"></i>{{ message }}
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                        <i class="bi bi-check-circle mr-2"></i>{{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                     {% elif 'error' in message.tags %}
                     <div class="alert alert-danger mb-2">
-                        <i class="bi bi-exclamation-circle me-2"></i>{{ message }}
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                        <i class="bi bi-exclamation-circle mr-2"></i>{{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                     {% elif 'warning' in message.tags %}
                     <div class="alert alert-warning mb-2">
-                        <i class="bi bi-exclamation-triangle me-2"></i>{{ message }}
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                        <i class="bi bi-exclamation-triangle mr-2"></i>{{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                     {% endif %}
                 {% endfor %}
@@ -44,38 +38,25 @@
                 <div class="row mb-2">
                     <div class="col-md-6">
                         <div class="form-group mb-2">
-                            <label for="id_nome" class="mb-1">Nome</label>
-                            <input type="text" class="form-control form-control-sm" id="id_nome" name="nome" required>
-                            {% if form.nome.errors %}
-                                <div class="text-danger small">{{ form.nome.errors }}</div>
-                            {% endif %}
+                            <label for="id_nome" class="form-label">Nome</label>
+                            {{ form.nome }}
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group mb-2">
-                            <label for="id_email" class="mb-1">Email</label>
-                            <input type="email" class="form-control form-control-sm" id="id_email" name="email" required>
-                            {% if form.email.errors %}
-                                <div class="text-danger small">{{ form.email.errors }}</div>
-                            {% endif %}
+                            <label for="id_email" class="form-label">Email</label>
+                            {{ form.email }}
                         </div>
                     </div>
                 </div>
 
                 <div class="form-group mb-2">
-                    <label for="id_assunto" class="mb-1">Assunto</label>
-                    <input type="text" class="form-control form-control-sm" id="id_assunto" name="assunto" required>
-                    {% if form.assunto.errors %}
-                        <div class="text-danger small">{{ form.assunto.errors }}</div>
-                    {% endif %}
+                    <label for="id_assunto" class="form-label">Assunto</label>
+                    {{ form.assunto }}
                 </div>
-
                 <div class="form-group mb-2">
-                    <label for="id_mensagem" class="mb-1">Mensagem</label>
-                    <textarea class="form-control form-control-sm" id="id_mensagem" name="mensagem" rows="4" required></textarea>
-                    {% if form.mensagem.errors %}
-                        <div class="text-danger small">{{ form.mensagem.errors }}</div>
-                    {% endif %}
+                    <label for="id_mensagem" class="form-label">Mensagem</label>
+                    {{ form.mensagem }}
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-sm">Enviar</button>
@@ -88,15 +69,15 @@
             <div class="contact-info mb-4">
                 <h3 class="mb-3">Informações de Contato</h3>
                 <div class="d-flex align-items-center mb-2">
-                    <i class="bi bi-envelope-fill me-2"></i>
+                    <i class="bi bi-envelope-fill mr-2"></i>
                     <span>cg.bookstore.online@gmail.com</span>
                 </div>
                 <div class="d-flex align-items-center mb-2">
-                    <i class="bi bi-clock-fill me-2"></i>
+                    <i class="bi bi-clock-fill mr-2"></i>
                     <span>Segunda a Sexta: 9h às 18h</span>
                 </div>
                 <div class="d-flex align-items-center">
-                    <i class="bi bi-geo-alt-fill me-2"></i>
+                    <i class="bi bi-geo-alt-fill mr-2"></i>
                     <span>Nilópolis, RJ - Brasil</span>
                 </div>
             </div>
@@ -138,33 +119,34 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
 {% block extra_js %}
+<!-- Adicionar jQuery -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script>
-$(document).ready(function() {
-    console.log('Script loaded'); // Debug
+document.addEventListener('DOMContentLoaded', function() {
+    const alerts = document.querySelectorAll('.alert');
+    console.log('Número de alertas:', alerts.length);
 
-    // Verificar se há mensagens
-    var hasMessages = $('.alert').length;
-    console.log('Número de alertas:', hasMessages); // Debug
+    alerts.forEach(alert => {
+        alert.classList.add('show');
+    });
 
-    // Configurar alertas
-    $('.alert').addClass('show');
-
-    // Auto-fechar após 5 segundos
     setTimeout(function() {
-        $('.alert').fadeOut('slow', function() {
-            $(this).remove();
+        alerts.forEach(alert => {
+            alert.classList.remove('show');
+            alert.addEventListener('transitionend', () => alert.remove());
         });
     }, 5000);
 
-    // Fechar ao clicar no botão
-    $('.btn-close').on('click', function() {
-        $(this).closest('.alert').fadeOut('slow', function() {
-            $(this).remove();
+    document.querySelectorAll('.btn-close').forEach(button => {
+        button.addEventListener('click', function() {
+            const alert = this.closest('.alert');
+            alert.style.opacity = '0';
+            alert.addEventListener('transitionend', () => alert.remove());
         });
     });
 });
 </script>
-{% endblock %}
 {% endblock %}

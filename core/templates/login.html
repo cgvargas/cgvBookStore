@@ -43,4 +43,21 @@
         </div>
     </div>
 </div>
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Verificar se estamos na página de login
+    if (document.querySelector('form[action*="login"]')) {
+        const form = document.querySelector('form[action*="login"]');
+
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                // Aqui você pode adicionar validações específicas do login se necessário
+                // O formulário será enviado normalmente via POST
+            });
+        }
+    }
+});
+</script>
+{% endblock %}
 {% endblock %}

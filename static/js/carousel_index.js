@@ -1,32 +1,37 @@
-function slideBooks(containerId, direction) {
+// carousel_index.js
+window.slideBooks = function(containerId, direction) {
     const container = document.getElementById(`${containerId}-container`);
-    const scrollAmount = 200; // Ajuste este valor conforme necessário
+    if (!container) return;
 
-    if (direction === 'prev') {
-        container.scrollLeft -= scrollAmount;
-    } else {
-        container.scrollLeft += scrollAmount;
-    }
+    const scrollAmount = 220; // 180px (max-width do card) + 40px (gap)
+    const currentScroll = container.scrollLeft;
+    const newScroll = direction === 'prev' ?
+        currentScroll - scrollAmount :
+        currentScroll + scrollAmount;
+
+    container.scrollTo({
+        left: newScroll,
+        behavior: 'smooth'
+    });
 }
 
+// Inicialização quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', function() {
     ['destaque', 'vendidos'].forEach(containerId => {
         const container = document.getElementById(`${containerId}-container`);
-        const prevBtn = container.parentElement.querySelector('.prev');
-        const nextBtn = container.parentElement.querySelector('.next');
+        if (!container) return;
 
-        // Verifica se há overflow
-        if (container.scrollWidth <= container.clientWidth) {
-            prevBtn.style.display = 'none';
-            nextBtn.style.display = 'none';
-        }
+        // Atualiza estados dos botões durante o scroll
+        container.addEventListener('scroll', function() {
+            const prevBtn = container.parentElement.querySelector('.prev');
+            const nextBtn = container.parentElement.querySelector('.next');
 
-        // Atualiza visibilidade dos botões ao rolar
-        container.addEventListener('scroll', () => {
-            prevBtn.style.opacity = container.scrollLeft <= 0 ? '0.5' : '1';
-            nextBtn.style.opacity =
-                container.scrollLeft >= container.scrollWidth - container.clientWidth
-                ? '0.5' : '1';
+            if (prevBtn) {
+                prevBtn.disabled = container.scrollLeft <= 0;
+            }
+            if (nextBtn) {
+                nextBtn.disabled = container.scrollLeft >= (container.scrollWidth - container.clientWidth - 5);
+            }
         });
     });
 });

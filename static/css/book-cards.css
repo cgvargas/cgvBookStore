@@ -1,0 +1,101 @@
+/* Estilos comuns para todos os livros */
+.book-card {
+    flex: 0 0 auto;
+    width: 180px;
+    margin: 0 10px;
+    transition: transform 0.3s ease;
+}
+
+.book-card:hover {
+    transform: translateY(-5px);
+}
+
+.book-card:hover .book-cover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Posicionamento dos elementos dentro do card */
+.book-container {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding: 20px 0;
+    gap: 20px;
+    -ms-overflow-style: none;  /* IE e Edge */
+    scrollbar-width: none;     /* Firefox */
+}
+
+.book-container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari e Opera */
+}
+
+/* Botões de navegação do slider */
+.slider-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.slider-btn:hover {
+    background: #f8f9fa;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.slider-btn.prev {
+    left: -20px;
+}
+
+.slider-btn.next {
+    right: -20px;
+}
+
+.slider-btn:disabled {
+    opacity: 0;
+    cursor: default;
+}
+
+/* Rating stars */
+.book-rating {
+    margin-top: 5px;
+}
+
+.stars {
+    display: flex;
+    gap: 2px;
+}
+
+.bi-star-fill, .bi-star {
+    font-size: 12px;
+}
+
+/* Badge de score para recomendações */
+.recommendation-score {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1;
+}
+
+.recommendation-score .badge {
+    padding: 6px 10px;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Container da capa do livro */
+.book-container .book-card .card {
+    background: transparent;
+    border: none;
+}

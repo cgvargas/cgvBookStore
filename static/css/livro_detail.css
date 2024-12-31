@@ -1,0 +1,180 @@
+/* Card Principal */
+.book-detail-card {
+    display: flex;
+    flex-wrap: wrap;
+    background-color: #f8f9fa;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    gap: 2rem; /* Espaçamento entre as colunas */
+}
+
+/* Colunas do card principal */
+.book-detail-card .col-lg-4,
+.book-detail-card .col-lg-8 {
+    flex: 1 1 100%;
+    max-width: 100%;
+}
+
+/* Ajustar o espaçamento entre imagem e texto */
+.book-detail-card .col-lg-4 {
+    margin-right: 2rem; /* Espaço entre a imagem e as informações */
+}
+
+@media (min-width: 768px) {
+    .book-detail-card .col-lg-4 {
+        flex: 1 1 300px;
+        max-width: 300px;
+    }
+    .book-detail-card .col-lg-8 {
+        flex: 2;
+    }
+}
+
+/* Ajuste da Imagem Principal */
+.book-image-wrapper {
+    width: 100%;
+    height: auto;
+    max-width: 300px;
+    overflow: hidden;
+    border-radius: 10px;
+    margin: 0 auto;
+}
+
+.book-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.book-image-wrapper img:hover {
+    transform: scale(1.05);
+}
+
+/* Cards para Informações */
+.book-details {
+    margin-top: 1.5rem; /* Distância do título para os detalhes */
+}
+
+.book-details .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5rem; /* Espaçamento entre os cards */
+}
+
+.info-item {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.info-item i {
+    font-size: 1.5rem;
+    color: #007bff;
+    margin-bottom: 0.5rem;
+}
+
+/* Outros Livros da Categoria */
+.related-book-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #fff;
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.related-book-card:hover {
+    transform: translateY(-5px);
+}
+
+.related-book-card .book-thumbnail {
+    width: 180px;
+    height: 270px;
+    overflow: hidden;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+}
+
+.related-book-card .book-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.related-book-card .book-thumbnail img:hover {
+    transform: scale(1.05);
+}
+
+.related-book-card .book-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.related-book-card .book-author {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.75rem;
+}
+
+.related-book-card .btn-details {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #fff;
+    background-color: #007bff;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.related-book-card .btn-details:hover {
+    background-color: #0056b3;
+}
+
+/* Nova Tag de Categoria */
+.book-category-tag {
+    margin-top: 1rem;
+    display: flex;
+    gap: 1rem;
+}
+
+/* Nova Tag de Categoria */
+.book-category-tag {
+    margin-top: 1rem;
+    display: flex;
+    gap: 1rem;
+}
+
+/* Categoria 'Em Destaque' */
+.category-tag.featured-only {
+    background-color: #ffc107; /* Amarelo para Em Destaque */
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+/* Categoria 'Mais Vendido' */
+.category-tag.bestseller-only {
+    background-color: #28a745; /* Verde para Mais Vendido */
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 1rem;
+}

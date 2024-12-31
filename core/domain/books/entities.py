@@ -10,13 +10,15 @@ from django.core.cache import cache
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils import timezone
+from core.domain.users.entities import CustomUser
 
 logger = logging.getLogger(__name__)
 
 
 class Book(models.Model):
-    """Core entity representing a book in the system."""
+    """Entidade principal que representa um livro no sistema."""
 
+    id = models.CharField(max_length=255, primary_key=True)  # Identifica alfanumérico p/ suportar casos c/ 'otfECQAAQBAJ'
     titulo = models.CharField(max_length=200)
     autor = models.CharField(max_length=100)
     descricao = models.TextField()
@@ -51,7 +53,7 @@ class Book(models.Model):
 
 
 class BookCache(models.Model):
-    """Entity for caching book information from external sources."""
+    """Entidade para armazenar em cache informações de livros de fontes externas."""
 
     book_id = models.CharField(max_length=200, unique=True)
     titulo = models.CharField(max_length=200)
@@ -69,12 +71,12 @@ class BookCache(models.Model):
     dados_json = models.TextField(null=True, blank=True)
 
     class Meta:
-        indexes = [
-            models.Index(fields=['book_id', 'data_cache']),
-        ]
         verbose_name = 'Cache de Livro'
         verbose_name_plural = 'Cache de Livros'
-        db_table = 'core_livrocache'  # Mantém compatibilidade com banco existente
+        db_table = 'core_livrocache'  # Importante!
+        indexes = [
+            models.Index(fields=['book_id', 'data_cache']),
+        ]  # Mantém compatibilidade com banco existente
 
     @classmethod
     def get_book(cls, book_id):
@@ -185,7 +187,7 @@ class BookCache(models.Model):
 
 
 class BookShelf(models.Model):
-    """Entity representing a book in a user's bookshelf."""
+    """Entidade que representa um livro na estante de um usuário."""
 
     TIPO_CHOICES = [
         ('favorito', 'Favorito'),
@@ -194,7 +196,7 @@ class BookShelf(models.Model):
         ('lido', 'Lido'),
     ]
 
-    usuario = models.ForeignKey('core.domain.users.entities.User', on_delete=models.CASCADE)
+    usuario = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     livro_id = models.CharField(max_length=100, blank=True, null=True)
     tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
     titulo = models.CharField(max_length=255)
@@ -241,3 +243,4 @@ class BookShelf(models.Model):
     def tem_capa(self):
         """Verifica se o livro tem uma capa válida"""
         return bool(self.capa and not self.capa.endswith('default-book-cover.jpg'))
+

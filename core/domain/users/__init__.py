@@ -1,3 +1,3 @@
-from .entities import User, ActivityHistory
+from .entities import CustomUser, ActivityHistory
 
-__all__ = ['User', 'ActivityHistory']
+__all__ = ['CustomUser', 'ActivityHistory']

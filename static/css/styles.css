@@ -4,7 +4,7 @@
 */
 
 /* ==========================================================================
-   1. Variáveis CSS (Custom Properties)
+   Variáveis CSS (Custom Properties)
    ========================================================================== */
 :root {
     /* Cores */
@@ -45,7 +45,7 @@
 }
 
 /* ==========================================================================
-   2. Reset e Configurações Básicas
+   Reset e Configurações Básicas
    ========================================================================== */
 * {
     margin: 0;
@@ -60,7 +60,7 @@ body {
 }
 
 /* ==========================================================================
-   3. Layout e Containers
+   Layout e Containers
    ========================================================================== */
 .container {
     max-width: none;
@@ -111,18 +111,74 @@ body {
 }
 
 /* ==========================================================================
-   4. Navbar e Navegação
+   Navbar e Navegação
    ========================================================================== */
 .navbar {
+    padding: 0.5rem 0;
     background-color: var(--dark-bg);
-    padding: 10px 20px;
 }
 
-.navbar-nav .nav-link {
-    color: var(--white);
-    margin-right: 15px;
-    font-size: 1rem;
-    transition: color var(--transition-default);
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    margin-left: 0;
+}
+
+.navbar-collapse {
+    margin-left: auto !important;
+    width: auto !important;
+    justify-content: flex-end !important;
+}
+
+.navbar > .container-fluid {
+    padding-right: 0;
+    justify-content: flex-start;
+}
+
+.navbar-nav {
+   margin-left: auto;
+   margin-right: 2rem; /* Aumenta margem direita */
+   gap: 2rem; /* Aumenta espaço entre links */
+}
+
+.navbar-brand {
+    margin-right: auto;
+    padding-left: 0;
+}
+
+.nav-link {
+    position: relative;
+    padding: 0.5rem 0.8rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
+    white-space: nowrap;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--orange);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+    width: 100%;
+}
+
+@media (max-width: 991.98px) {
+    .navbar-nav {
+        padding: 1rem 0;
+    }
+
+    .nav-link::after {
+        display: none;
+    }
 }
 
 .navbar-nav .nav-link:hover {
@@ -138,10 +194,18 @@ body {
     width: auto;
 }
 
-.navbar-brand .store-name {
-    font-size: 1.5rem;
-    color: var(--orange);
-    font-weight: bold;
+/* Estilo do título da loja */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap');
+
+.store-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.7rem;
+    background: linear-gradient(45deg, var(--orange) 30%, var(--yellow) 90%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+    letter-spacing: -0.5px;
 }
 
 /* Linha decorativa */
@@ -156,7 +220,7 @@ body {
 }
 
 /* ==========================================================================
-   5. Componentes do Perfil do Usuário
+   Componentes do Perfil do Usuário
    ========================================================================== */
 /* Card de Perfil */
 .user-profile-card {
@@ -280,7 +344,7 @@ body {
 }
 
 /* ==========================================================================
-   6. Componentes de Livros e Prateleiras
+   Componentes de Livros e Prateleiras
    ========================================================================== */
 /* Slider de Livros */
 .book-slider {
@@ -318,6 +382,15 @@ body {
 .book-card {
     flex: 0 0 auto;
     width: clamp(90px, 10vw, 120px);
+}
+
+/* Ajuste na imagem da capa do livro */
+.book-cover {
+    max-height: 400px !important;
+    width: auto;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
 }
 
 .book-card img {
@@ -364,7 +437,7 @@ body {
 }
 
 /* ==========================================================================
-   7. Footer Styling
+   Footer Styling
    ========================================================================== */
 .footer {
     background-color: var(--dark-bg);
@@ -465,6 +538,8 @@ body {
 }
 
 .footer-links li {
+    list-style-type: none; /* Remove os pontos da lista */
+    padding-left: 0; /* Remove o recuo à esquerda da lista */
     margin-bottom: 12px;
 }
 
@@ -880,8 +955,9 @@ body {
 
     /* Navbar */
     .navbar-nav {
-        text-align: center;
-    }
+    margin-left: auto;
+    gap: 1rem;
+}
 
     .navbar-nav .nav-link {
         margin: 5px 0;

@@ -5,6 +5,53 @@
     padding: 2rem 0;
 }
 
+/* Estilo específico para livros na página de perfil */
+.profile-container .book-cover {
+    position: relative;
+    width: 140px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 4px 8px 8px 4px;
+    box-shadow:
+        -6px 6px 8px -4px rgba(0,0,0,0.1),
+        0 2px 4px rgba(0,0,0,0.15);
+    transform: perspective(800px) rotateY(2deg);
+    transition: transform 0.3s ease;
+}
+
+/* Efeito da página dobrada específico para o perfil */
+.profile-container .book-cover::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.1) 50%);
+    border-bottom-left-radius: 4px;
+    box-shadow: -2px 2px 3px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+    pointer-events: none;
+}
+
+/* Efeito hover específico para o perfil */
+.profile-container .book-card:hover .book-cover {
+    transform: perspective(800px) rotateY(8deg);
+}
+
+.profile-container .book-card:hover .book-cover::after {
+    width: 24px;
+    height: 24px;
+}
+
+/* Sobrescrever estilos globais do book-cover apenas na página de perfil */
+.profile-container .book-cover {
+    max-height: unset !important;
+    width: 140px !important;
+    object-fit: cover !important;
+    margin: 0 !important;
+}
+
 /* ==========================================================================
    2. Card do Perfil do Usuário
    ========================================================================== */
@@ -13,9 +60,9 @@
     border-radius: 16px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
     overflow: hidden;
-    position: sticky;  /* Mudança aqui */
-    top: 20px;        /* Distância do topo ao fixar */
-    max-height: calc(100vh - 40px); /* Altura máxima considerando as margens */
+    position: sticky;
+    top: 20px;
+    max-height: calc(100vh - 40px);
 }
 
 /* Área da capa */
@@ -153,81 +200,9 @@
     gap: 5px;
 }
 
-/* Ajustes do Slider */
-.profile-container .book-slider {
-    display: flex;
-    align-items: center;
-    position: relative;
-    padding: 0 3rem;
-    margin: 1.5rem 0 3rem;
-    min-height: 280px;
-}
-
-.profile-container .book-container {
-    display: flex;
-    gap: 1.5rem;
-    overflow-x: hidden; /* Mudado de auto para hidden */
-    scroll-behavior: smooth;
-    padding: 1rem 0.5rem;
-    flex-grow: 1;
-    width: calc(100% - 6rem); /* Ajusta a largura considerando os botões */
-}
-
-.profile-container .book-card {
-    flex: 0 0 140px; /* Define largura fixa */
-    min-width: 140px;
-    transition: transform 0.2s ease;
-    margin-right: 30px; /* Espaçamento entre cards */
-}
-
-/* Botões do Slider mais visíveis */
-.profile-container .slider-btn {
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 2;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    opacity: 1;
-}
-
-.profile-container .slider-btn:hover {
-    background: #f8f9fa;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.profile-container .slider-btn.prev {
-    left: 0;
-}
-
-.profile-container .slider-btn.next {
-    right: 0;
-}
-
-/* Ocultar scrollbar mas manter funcionalidade */
-.profile-container .book-container::-webkit-scrollbar {
-    display: none;
-}
-
-.profile-container .book-container {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
-
 /* ==========================================================================
-   4. Modal de Gerenciamento de Livros
+   3. Modal de Gerenciamento
    ========================================================================== */
-
-/* Estilo do Modal e Scrollbar */
 .shelf-manager-modal .modal-body {
     max-height: 70vh;
     overflow-y: auto;
@@ -252,105 +227,7 @@
     background: #555;
 }
 
-/* Layout base */
-.content-header {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    padding: 2rem 0;
-    margin-bottom: 2rem;
-}
-
-/* Container dos livros */
-.books-container > div {
-    background: transparent;
-    border-radius: 12px;
-    margin-bottom: 1.5rem;
-    transition: all 0.3s ease;
-}
-
-.books-container > div:hover {
-    transform: translateX(5px);
-    background: #f8f9fa;
-}
-
-/* Layout do livro */
-.book-content {
-    display: flex;
-    padding: 1.5rem;
-    gap: 1.5rem;
-    align-items: flex-start;
-}
-
-.book-cover {
-    width: 80px;
-    height: 120px;
-    object-fit: cover;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-/* Detalhes do livro */
-.book-details {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.book-title {
-    margin: 0;
-    color: #1a1a1a;
-    font-size: 1.1rem;
-    font-weight: 600;
-    line-height: 1.4;
-}
-
-.book-author {
-    margin: 0;
-    color: #666;
-    font-size: 0.95rem;
-}
-
-/* Botões de ação */
-.book-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 0.5rem;
-}
-
-.transferir-livro-btn, .excluir-livro-btn {
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.transferir-livro-btn {
-    border: 1px solid #0d6efd;
-    background: transparent;
-    color: #0d6efd;
-}
-
-.transferir-livro-btn:hover {
-    background: #0d6efd;
-    color: white;
-}
-
-.excluir-livro-btn {
-    border: 1px solid #dc3545;
-    background: transparent;
-    color: #dc3545;
-}
-
-.excluir-livro-btn:hover {
-    background: #dc3545;
-    color: white;
-}
-
-/* Estado vazio */
+/* Estado Vazio */
 .empty-shelf {
     text-align: center;
     padding: 3rem 1rem;
@@ -372,65 +249,9 @@
     margin: 0;
 }
 
-/* Estilos de livros */
-.book-card.clickable {
-    cursor: pointer;
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-
-.book-card.clickable:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.book-card .card {
-    height: 100%;
-}
-
-.book-card img {
-    height: 200px;
-    object-fit: cover;
-    width: 100%;
-}
-
-/* Estilo para preservar cliques em botões dentro do card */
-.book-card .book-actions {
-    position: relative;
-    z-index: 2;
-}
-
-/* Adiciona sistema de ranking aos livros das prateleiras */
-.book-rating {
-    margin-top: 0.25rem;
-}
-
-.book-rating .stars {
-    font-size: 0.8rem;
-    display: flex;
-    gap: 2px;
-    justify-content: center;
-}
-
-.book-rating .bi-star-fill.text-danger {
-    color: #dc3545;
-}
-
-.book-rating .bi-star-fill.text-warning {
-    color: #ffc107;
-}
-
-.book-rating .bi-star-fill.text-success {
-    color: #28a745;
-}
-
-.book-rating .bi-star {
-    opacity: 0.5;
-}
-
 /* ==========================================================================
-   5.  Estilos para a seção de recomendações
+   4. Seção de Recomendações - Cabeçalho
    ========================================================================== */
-
 .section-recomendacoes {
     border-left: 4px solid #ffc107;
     padding-left: 1rem;
@@ -438,84 +259,12 @@
     background: linear-gradient(to right, rgba(255,193,7,0.1), transparent);
 }
 
-.recommendation-score {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 2;
-}
-
-.recommendation-score .badge {
-    padding: 0.5em 0.7em;
-    font-size: 0.8rem;
-}
-
-.recommendation-reasons {
-    margin-top: 0.5rem;
-}
-
-.recommendation-reasons .badge {
-    font-size: 0.7rem;
-    padding: 0.3em 0.6em;
-}
-
-/* Animação para o botão de atualizar */
+/* Animação de Loading */
 @keyframes spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
 
-.refreshing {
+.animate-spin {
     animation: spin 1s linear infinite;
 }
-
-.recommendation-card {
-    transition: transform 0.2s;
-}
-
-.recommendation-card:hover {
-    transform: translateY(-5px);
-}
-
-.recommendation-card img.book-cover {
-    width: 100%;
-    height: 240px; /* ou o tamanho que preferir */
-    object-fit: cover;
-    border-radius: 8px;
-}
-
-.recommendation-card .card-body {
-    padding: 1rem;
-}
-
-.recommendation-score {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 2;
-}
-
-.recommendation-card a {
-    display: block;
-    transition: transform 0.2s;
-}
-
-.recommendation-card a:hover {
-    transform: translateY(-5px);
-    text-decoration: none;
-}
-
-.recommendation-card img.book-cover {
-    width: 100%;
-    height: 240px;
-    object-fit: cover;
-    border-radius: 8px;
-}
-
-.recommendation-score {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 2;
-}
-

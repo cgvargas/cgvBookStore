@@ -4,6 +4,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/profile.css' %}?v=2">
+<link rel="stylesheet" href="{% static 'css/book-cards.css' %}">
 {% endblock %}
 
 {% block title %}Perfil - {{ user.nome_completo }}{% endblock %}
@@ -64,7 +65,7 @@
                     </a>
 
                     <div class="secondary-actions">
-                        <button class="btn btn-light btn-sm" data-toggle="modal" data-target="#editProfileModal">
+                        <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-target="#editProfileModal">
                             <i class="bi bi-pencil"></i> Editar
                         </button>
                         <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm">
@@ -118,86 +119,131 @@
         </div>
 
         <!-- Conteúdo principal -->
-        <div class="col-md-9">
-            <!-- Favoritos -->
+       <div class="col-md-9">
+           <!-- Favoritos -->
             <div class="section-title section-favoritos position-relative">
                 <h4 class="d-flex justify-content-between align-items-center m-0">
-                    <span><i class="bi bi-star"></i> Favoritos</span>
+                    <span class="fs-5">
+                        <i class="bi bi-star-half text-primary me-2"></i>
+                        Favorito
+                    </span>
                     <div>
-                        <span class="badge bg-primary rounded-pill me-2">{{ favoritos.count }}</span>
-                        <!-- Aqui está a mudança -->
-                        <button class="btn btn-sm btn-outline-secondary" onclick="shelfManager.openShelfManager('favorito')">
-                            Gerenciar
+                        <span class="badge bg-primary rounded-pill mr-2">{{ favoritos.count }}</span>
+                        <button class="btn btn-sm btn-outline-secondary gerenciar-btn" data-tipo-prateleira="favorito">
+                            <i class="bi bi-gear"></i> Gerenciar
                         </button>
                     </div>
                 </h4>
             </div>
             <div class="book-slider">
-                <button class="slider-btn prev" onclick="window.slideBooks('favoritos', 'prev')">
+                <button class="slider-btn prev" type="button" disabled>
                     <i class="bi bi-chevron-left"></i>
                 </button>
                 <div class="book-container" id="favoritos-container">
                     {% for livro in favoritos %}
+                    <!-- Template para os livros nas prateleiras -->
                     <div class="book-card" data-livro-id="{{ livro.id }}">
-                        <div class="card border-0 bg-transparent">
-                            <img src="{{ livro.capa }}" alt="{{ livro.titulo }}" loading="lazy">
-                            <div class="card-body p-2">
-                                <h6 class="card-title small mb-0 text-truncate">{{ livro.titulo }}</h6>
-                                <p class="card-text small text-muted text-truncate">{{ livro.autor }}</p>
-                                <div class="book-rating small">
-                                    <div class="stars">
-                                        {% if livro.classificacao %}
-                                            {% for i in "12345" %}
-                                                {% if forloop.counter <= livro.classificacao %}
-                                                    <i class="bi bi-star-fill {% if livro.classificacao <= 2 %}text-danger{% elif livro.classificacao <= 3 %}text-warning{% else %}text-success{% endif %}"></i>
-                                                {% else %}
+                        {% if livro.is_google_book %}
+                            <a href="{% url 'detalhes_livro_google' livro.livro_id %}" class="text-decoration-none">
+                        {% else %}
+                            <a href="{% url 'detalhes_livro_numerico' livro.id %}" class="text-decoration-none">
+                        {% endif %}
+                            <div class="card">
+                                <div class="position-relative">
+                                    <img src="{{ livro.capa }}"
+                                         alt="{{ livro.titulo }}"
+                                         loading="lazy"
+                                         onerror="this.src='/static/images/capa-indisponivel.svg'"
+                                         class="book-cover">
+                                    {% if livro.classificacao %}
+                                        <div class="recommendation-score">
+                                            <span class="badge {% if livro.classificacao <= 2 %}bg-danger{% elif livro.classificacao <= 3 %}bg-primary{% else %}bg-success{% endif %}">
+                                                <i class="bi bi-star-fill"></i>
+                                                {{ livro.classificacao }}.0
+                                            </span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="card-body p-2">
+                                    <h6 class="card-title small mb-0 text-truncate text-dark">{{ livro.titulo }}</h6>
+                                    <p class="card-text small text-muted text-truncate">{{ livro.autor }}</p>
+                                    <div class="book-rating small">
+                                        <div class="stars">
+                                            {% if livro.classificacao %}
+                                                {% for i in "12345" %}
+                                                    {% if forloop.counter <= livro.classificacao %}
+                                                        <i class="bi bi-star-fill {% if livro.classificacao <= 2 %}text-danger{% elif livro.classificacao <= 3 %}text-warning{% else %}text-success{% endif %}"></i>
+                                                    {% else %}
+                                                        <i class="bi bi-star text-muted"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% else %}
+                                                {% for i in "12345" %}
                                                     <i class="bi bi-star text-muted"></i>
-                                                {% endif %}
-                                            {% endfor %}
-                                        {% else %}
-                                            {% for i in "12345" %}
-                                                <i class="bi bi-star text-muted"></i>
-                                            {% endfor %}
-                                            <small class="text-muted ms-1">(Sem avaliação)</small>
-                                        {% endif %}
+                                                {% endfor %}
+                                                <small class="text-muted ms-1">(Sem avaliação)</small>
+                                            {% endif %}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                     {% empty %}
                     <p class="text-muted">Ainda não favoritou nenhum livro.</p>
                     {% endfor %}
                 </div>
-                <button class="slider-btn next" onclick="slideBooks('favoritos', 'next')">
+                <button class="slider-btn next" type="button">
                     <i class="bi bi-chevron-right"></i>
                 </button>
             </div>
 
-            <!-- Lendo -->
-            <div class="section-title section-lendo position-relative">
-                <h4 class="d-flex justify-content-between align-items-center m-0">
-                    <span><i class="bi bi-book-half"></i> Lendo</span>
-                    <div>
-                        <span class="badge bg-success rounded-pill me-2">{{ lendo.count }}</span>
-                        <!-- Aqui está a mudança -->
-                        <button class="btn btn-sm btn-outline-secondary" onclick="window.shelfManager.openShelfManager('lendo')">
-                            Gerenciar
-                        </button>
-                    </div>
-                </h4>
-            </div>
-            <div class="book-slider">
-                <button class="slider-btn prev" onclick="window.slideBooks('lendo', 'prev')">
-                    <i class="bi bi-chevron-left"></i>
-                </button>
-                <div class="book-container" id="lendo-container">
-                    {% for livro in lendo %}
-                    <div class="book-card" data-livro-id="{{ livro.id }}">
-                        <div class="card border-0 bg-transparent">
-                            <img src="{{ livro.capa }}" alt="{{ livro.titulo }}" loading="lazy">
+           <!-- Lendo -->
+           <div class="section-title section-lendo position-relative">
+           <h4 class="d-flex justify-content-between align-items-center m-0">
+                <span class="fs-5">
+                    <i class="bi bi-book-half text-success me-2"></i>
+                    Lendo
+                </span>
+                <div>
+                    <span class="badge bg-primary rounded-pill mr-2">{{ lendo.count }}</span>
+                    <button class="btn btn-sm btn-outline-secondary gerenciar-btn" data-tipo-prateleira="lendo">
+                        <i class="bi bi-gear"></i> Gerenciar
+                    </button>
+                </div>
+           </h4>
+       </div>
+       <div class="book-slider">
+            <button class="slider-btn prev" type="button" disabled>
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="book-container" id="lendo-container">
+                {% for livro in lendo %}
+                <!-- Template para os livros nas prateleiras -->
+                <div class="book-card" data-livro-id="{{ livro.id }}">
+                    {% if livro.is_google_book %}
+                        <a href="{% url 'detalhes_livro_google' livro.livro_id %}" class="text-decoration-none">
+                    {% else %}
+                        <a href="{% url 'detalhes_livro_numerico' livro.id %}" class="text-decoration-none">
+                    {% endif %}
+                        <div class="card">
+                            <div class="position-relative">
+                                <img src="{{ livro.capa }}"
+                                     alt="{{ livro.titulo }}"
+                                     loading="lazy"
+                                     onerror="this.src='/static/images/capa-indisponivel.svg'"
+                                     class="book-cover">
+                                {% if livro.classificacao %}
+                                    <div class="recommendation-score">
+                                        <span class="badge {% if livro.classificacao <= 2 %}bg-danger{% elif livro.classificacao <= 3 %}bg-primary{% else %}bg-success{% endif %}">
+                                            <i class="bi bi-star-fill"></i>
+                                            {{ livro.classificacao }}.0
+                                        </span>
+                                    </div>
+                                {% endif %}
+                            </div>
                             <div class="card-body p-2">
-                                <h6 class="card-title small mb-0 text-truncate">{{ livro.titulo }}</h6>
+                                <h6 class="card-title small mb-0 text-truncate text-dark">{{ livro.titulo }}</h6>
                                 <p class="card-text small text-muted text-truncate">{{ livro.autor }}</p>
                                 <div class="book-rating small">
                                     <div class="stars">
@@ -219,127 +265,174 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    {% empty %}
-                    <p class="text-muted">Ainda não está lendo nenhum livro.</p>
-                    {% endfor %}
+                    </a>
                 </div>
-                <button class="slider-btn next" onclick="slideBooks('lendo', 'next')">
-                    <i class="bi bi-chevron-right"></i>
-                </button>
-            </div>
+               {% empty %}
+               <p class="text-muted">Ainda há nenhum livro na prateleira.</p>
+               {% endfor %}
+           </div>
+           <button class="slider-btn next" type="button">
+               <i class="bi bi-chevron-right"></i>
+           </button>
+       </div>
 
-            <!-- Vou Ler -->
-            <div class="section-title section-vou-ler position-relative">
-                <h4 class="d-flex justify-content-between align-items-center m-0">
-                    <span><i class="bi bi-bookmark"></i> Vou Ler</span>
+           <!-- Vou Ler -->
+           <div class="section-title section-vou_ler position-relative">
+               <h4 class="d-flex justify-content-between align-items-center m-0">
+                    <span class="fs-5">
+                        <i class="bi bi-bookmark-plus text-info me-2"></i>
+                        Vou ler
+                    </span>
                     <div>
-                        <span class="badge bg-info rounded-pill me-2">{{ vou_ler.count }}</span>
-                        <!-- Aqui está a mudança -->
-                        <button class="btn btn-sm btn-outline-secondary" onclick="window.shelfManager.openShelfManager('vou_ler')">
-                            Gerenciar
+                        <span class="badge bg-primary rounded-pill mr-2">{{ vou_ler.count }}</span>
+                        <button class="btn btn-sm btn-outline-secondary gerenciar-btn" data-tipo-prateleira="vou_ler">
+                            <i class="bi bi-gear"></i> Gerenciar
                         </button>
                     </div>
-                </h4>
-            </div>
-            <div class="book-slider">
-                <button class="slider-btn prev" onclick="window.slideBooks('vou_ler', 'prev')">
+               </h4>
+           </div>
+           <div class="book-slider">
+                <button class="slider-btn prev" type="button" disabled>
                     <i class="bi bi-chevron-left"></i>
                 </button>
                 <div class="book-container" id="vou_ler-container">
                     {% for livro in vou_ler %}
+                    <!-- Template para os livros nas prateleiras -->
                     <div class="book-card" data-livro-id="{{ livro.id }}">
-                        <div class="card border-0 bg-transparent">
-                            <img src="{{ livro.capa }}" alt="{{ livro.titulo }}" loading="lazy">
-                            <div class="card-body p-2">
-                                <h6 class="card-title small mb-0 text-truncate">{{ livro.titulo }}</h6>
-                                <p class="card-text small text-muted text-truncate">{{ livro.autor }}</p>
-                                <div class="book-rating small">
-                                    <div class="stars">
-                                        {% if livro.classificacao %}
-                                            {% for i in "12345" %}
-                                                {% if forloop.counter <= livro.classificacao %}
-                                                    <i class="bi bi-star-fill {% if livro.classificacao <= 2 %}text-danger{% elif livro.classificacao <= 3 %}text-warning{% else %}text-success{% endif %}"></i>
-                                                {% else %}
+                        {% if livro.is_google_book %}
+                            <a href="{% url 'detalhes_livro_google' livro.livro_id %}" class="text-decoration-none">
+                        {% else %}
+                            <a href="{% url 'detalhes_livro_numerico' livro.id %}" class="text-decoration-none">
+                        {% endif %}
+                            <div class="card">
+                                <div class="position-relative">
+                                    <img src="{{ livro.capa }}"
+                                         alt="{{ livro.titulo }}"
+                                         loading="lazy"
+                                         onerror="this.src='/static/images/capa-indisponivel.svg'"
+                                         class="book-cover">
+                                    {% if livro.classificacao %}
+                                        <div class="recommendation-score">
+                                            <span class="badge {% if livro.classificacao <= 2 %}bg-danger{% elif livro.classificacao <= 3 %}bg-primary{% else %}bg-success{% endif %}">
+                                                <i class="bi bi-star-fill"></i>
+                                                {{ livro.classificacao }}.0
+                                            </span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="card-body p-2">
+                                    <h6 class="card-title small mb-0 text-truncate text-dark">{{ livro.titulo }}</h6>
+                                    <p class="card-text small text-muted text-truncate">{{ livro.autor }}</p>
+                                    <div class="book-rating small">
+                                        <div class="stars">
+                                            {% if livro.classificacao %}
+                                                {% for i in "12345" %}
+                                                    {% if forloop.counter <= livro.classificacao %}
+                                                        <i class="bi bi-star-fill {% if livro.classificacao <= 2 %}text-danger{% elif livro.classificacao <= 3 %}text-warning{% else %}text-success{% endif %}"></i>
+                                                    {% else %}
+                                                        <i class="bi bi-star text-muted"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% else %}
+                                                {% for i in "12345" %}
                                                     <i class="bi bi-star text-muted"></i>
-                                                {% endif %}
-                                            {% endfor %}
-                                        {% else %}
-                                            {% for i in "12345" %}
-                                                <i class="bi bi-star text-muted"></i>
-                                            {% endfor %}
-                                            <small class="text-muted ms-1">(Sem avaliação)</small>
-                                        {% endif %}
+                                                {% endfor %}
+                                                <small class="text-muted ms-1">(Sem avaliação)</small>
+                                            {% endif %}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
-                    {% empty %}
-                    <p class="text-muted">Nenhum livro na lista de leitura futura.</p>
-                    {% endfor %}
-                </div>
-                <button class="slider-btn next" onclick="slideBooks('vou_ler', 'next')">
-                    <i class="bi bi-chevron-right"></i>
-                </button>
-            </div>
+               {% empty %}
+               <p class="text-muted">Ainda não há nenhum livro na prateleira.</p>
+               {% endfor %}
+           </div>
+           <button class="slider-btn next" type="button">
+               <i class="bi bi-chevron-right"></i>
+           </button>
+       </div>
 
-            <!-- Lidos -->
-            <div class="section-title section-lidos position-relative">
+           <!-- Lido -->
+            <div class="section-title section-lido position-relative">
                 <h4 class="d-flex justify-content-between align-items-center m-0">
-                    <span><i class="bi bi-check2-circle"></i> Lidos</span>
+                    <span class="fs-5">
+                        <i class="bi bi-check-circle-fill text-secondary me-2"></i>
+                        Lido
+                    </span>
                     <div>
-                        <span class="badge bg-secondary rounded-pill me-2">{{ lidos.count }}</span>
-                        <!-- Aqui está a mudança -->
-                        <button class="btn btn-sm btn-outline-secondary" onclick="window.shelfManager.openShelfManager('lido')">
-                            Gerenciar
+                        <span class="badge bg-primary rounded-pill mr-2">{{ lidos.count }}</span>
+                        <button class="btn btn-sm btn-outline-secondary gerenciar-btn" data-tipo-prateleira="lido">
+                            <i class="bi bi-gear"></i> Gerenciar
                         </button>
                     </div>
                 </h4>
             </div>
             <div class="book-slider">
-                <button class="slider-btn prev" onclick="window.slideBooks('lidos', 'prev')">
+                <button class="slider-btn prev" type="button" disabled>
                     <i class="bi bi-chevron-left"></i>
                 </button>
                 <div class="book-container" id="lidos-container">
                     {% for livro in lidos %}
+                    <!-- Template para os livros nas prateleiras -->
                     <div class="book-card" data-livro-id="{{ livro.id }}">
-                        <div class="card border-0 bg-transparent">
-                            <img src="{{ livro.capa }}" alt="{{ livro.titulo }}" loading="lazy">
-                            <div class="card-body p-2">
-                                <h6 class="card-title small mb-0 text-truncate">{{ livro.titulo }}</h6>
-                                <p class="card-text small text-muted text-truncate">{{ livro.autor }}</p>
-                                <div class="book-rating small">
-                                    <div class="stars">
-                                        {% if livro.classificacao %}
-                                            {% for i in "12345" %}
-                                                {% if forloop.counter <= livro.classificacao %}
-                                                    <i class="bi bi-star-fill {% if livro.classificacao <= 2 %}text-danger{% elif livro.classificacao <= 3 %}text-warning{% else %}text-success{% endif %}"></i>
-                                                {% else %}
+                        {% if livro.is_google_book %}
+                            <a href="{% url 'detalhes_livro_google' livro.livro_id %}" class="text-decoration-none">
+                        {% else %}
+                            <a href="{% url 'detalhes_livro_numerico' livro.id %}" class="text-decoration-none">
+                        {% endif %}
+                            <div class="card">
+                                <div class="position-relative">
+                                    <img src="{{ livro.capa }}"
+                                         alt="{{ livro.titulo }}"
+                                         loading="lazy"
+                                         onerror="this.src='/static/images/capa-indisponivel.svg'"
+                                         class="book-cover">
+                                    {% if livro.classificacao %}
+                                        <div class="recommendation-score">
+                                            <span class="badge {% if livro.classificacao <= 2 %}bg-danger{% elif livro.classificacao <= 3 %}bg-primary{% else %}bg-success{% endif %}">
+                                                <i class="bi bi-star-fill"></i>
+                                                {{ livro.classificacao }}.0
+                                            </span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="card-body p-2">
+                                    <h6 class="card-title small mb-0 text-truncate text-dark">{{ livro.titulo }}</h6>
+                                    <p class="card-text small text-muted text-truncate">{{ livro.autor }}</p>
+                                    <div class="book-rating small">
+                                        <div class="stars">
+                                            {% if livro.classificacao %}
+                                                {% for i in "12345" %}
+                                                    {% if forloop.counter <= livro.classificacao %}
+                                                        <i class="bi bi-star-fill {% if livro.classificacao <= 2 %}text-danger{% elif livro.classificacao <= 3 %}text-warning{% else %}text-success{% endif %}"></i>
+                                                    {% else %}
+                                                        <i class="bi bi-star text-muted"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% else %}
+                                                {% for i in "12345" %}
                                                     <i class="bi bi-star text-muted"></i>
-                                                {% endif %}
-                                            {% endfor %}
-                                        {% else %}
-                                            {% for i in "12345" %}
-                                                <i class="bi bi-star text-muted"></i>
-                                            {% endfor %}
-                                            <small class="text-muted ms-1">(Sem avaliação)</small>
-                                        {% endif %}
+                                                {% endfor %}
+                                                <small class="text-muted ms-1">(Sem avaliação)</small>
+                                            {% endif %}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                     {% empty %}
-                    <p class="text-muted">Nenhum livro lido registrado.</p>
+                    <p class="text-muted">Ainda não há nenhum livro na prateleira.</p>
                     {% endfor %}
                 </div>
-                <button class="slider-btn next" onclick="slideBooks('lidos', 'next')">
+                <button class="slider-btn next" type="button">
                     <i class="bi bi-chevron-right"></i>
                 </button>
             </div>
-        </div>
-    </div>
+       </div>
+   </div>
 </div>
 
 <!-- Seção de Recomendações -->
@@ -347,7 +440,7 @@
     <h4 class="d-flex justify-content-between align-items-center m-0">
         <span><i class="bi bi-lightbulb"></i> Recomendações para Você</span>
         <div>
-            <span class="badge bg-warning rounded-pill me-2">{{ recomendacoes|length }}</span>
+            <span class="badge bg-warning rounded-pill mr-2">{{ recomendacoes|length }}</span>
             <button class="btn btn-sm btn-outline-warning" id="refreshRecommendations">
                 <i class="bi bi-arrow-clockwise"></i> Atualizar
             </button>
@@ -357,8 +450,8 @@
 <div class="book-slider">
     <div class="book-container" id="recomendacoes-container">
         {% for livro in recomendacoes %}
-        <div class="book-card recommendation-card" data-livro-id="{{ livro.id }}">
-            <a href="{% url 'google_book_detail' livro_id=livro.id %}" class="text-decoration-none">
+        <div class="book-card" data-livro-id="{{ livro.id }}">
+            <a href="{% if livro.is_google_book %}{% url 'google_book_detail' livro.id %}{% else %}{% url 'detalhes_livro_numerico' livro.id %}{% endif %}" class="text-decoration-none">
                 <div class="card border-0 bg-transparent">
                     <div class="position-relative">
                         {% if livro.capa %}
@@ -394,85 +487,6 @@
         {% endfor %}
     </div>
 </div>
-<!-- Modal para gerenciamento -->
-<div class="modal fade shelf-manager-modal" id="shelfModal" tabindex="-1" aria-labelledby="shelfModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <!-- Cabeçalho do Modal -->
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title" id="shelfModalLabel">Gerenciar Prateleira</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <!-- Corpo do Modal -->
-            <div class="modal-body py-3">
-                <div class="shelf-books">
-                    <!-- ‘Item’ do Livro -->
-                    <div class="card d-flex flex-row align-items-center">
-                        {% if livro.capa %}
-                            <img src="{{ livro.capa }}" alt="{{ livro.titulo }}" class="book-cover rounded">
-                        {% else %}
-                            <div class="book-cover-placeholder">
-                                <i class="bi bi-book"></i>
-                            </div>
-                        {% endif %}
-                        <div class="card-body">
-                            <h6 class="card-title">Nome do Livro</h6>
-                            <p class="card-text">Descrição ou informações adicionais do livro.</p>
-                            <div class="btn-group-vertical">
-                                <button class="btn btn-primary transferir-livro-btn">
-                                    <i class="bi bi-arrow-right-circle"></i> Transferir
-                                </button>
-                                <button class="btn excluir-livro-btn">
-                                    <i class="bi bi-trash"></i> Excluir
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Adicione mais itens de livros aqui -->
-                </div>
-            </div>
-
-            <!-- Rodapé do Modal -->
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal de Transferência -->
-<div class="modal fade" id="transferModal" tabindex="-1" aria-labelledby="transferModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Transferir Livro</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-                <div class="modal-body d-flex flex-column align-items-center">
-                    <p>Para qual prateleira você deseja transferir "<span id="livroTitulo"></span>"?</p>
-                    <div class="d-flex flex-wrap justify-content-center">
-                        <button class="btn btn-outline-primary transferir-para mr-3 mb-2" data-tipo="favorito">
-                            <i class="bi bi-star"></i> Favoritos
-                        </button>
-                        <button class="btn btn-outline-success transferir-para mr-3 mb-2" data-tipo="lendo">
-                            <i class="bi bi-book-half"></i> Lendo
-                        </button>
-                        <button class="btn btn-outline-info transferir-para mr-3 mb-2" data-tipo="vou_ler">
-                            <i class="bi bi-bookmark"></i> Vou Ler
-                        </button>
-                        <button class="btn btn-outline-secondary transferir-para mb-2" data-tipo="lido">
-                            <i class="bi bi-check2-circle"></i> Lidos
-                        </button>
-                    </div>
-                </div>
-
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Modal de Edição de Perfil -->
 <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
@@ -480,9 +494,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="editProfileModalLabel">Editar Perfil</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                <form id="editProfileForm" method="POST">
@@ -500,7 +512,7 @@
                         <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
                     </div>
                     <div class="text-right">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn btn-primary">Salvar Alterações</button>
                     </div>
                 </form>
@@ -602,24 +614,114 @@
         </div>
     </div>
 </div>
+
+<!-- Modal de Gerenciamento de Prateleira -->
+<div class="modal fade" id="shelfModal" tabindex="-1" aria-labelledby="shelfModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="shelfModalLabel">Gerenciar Prateleira</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- O conteúdo será carregado dinamicamente -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Transferência -->
+<div class="modal fade" id="transferModal" tabindex="-1" aria-labelledby="transferModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="transferModalLabel">Transferir Livro</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Selecione a nova prateleira:</p>
+                <div class="list-group">
+                    <button class="list-group-item list-group-item-action transferir-para" data-tipo="favorito">
+                        Favoritos
+                    </button>
+                    <button class="list-group-item list-group-item-action transferir-para" data-tipo="lendo">
+                        Lendo
+                    </button>
+                    <button class="list-group-item list-group-item-action transferir-para" data-tipo="vou_ler">
+                        Vou Ler
+                    </button>
+                    <button class="list-group-item list-group-item-action transferir-para" data-tipo="lido">
+                        Lidos
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
-<!-- Primeiro carregamos as bibliotecas base -->
+<!-- Primeiro carregamos o Bootstrap Bundle (que inclui Popper.js) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+
+<!-- Depois carregamos as bibliotecas base -->
 <script src="{% static 'js/csrf-setup.js' %}"></script>
 
-<!-- Depois carregamos os ‘scripts’ da aplicação -->
+<!-- Depois carregamos o profile.js atualizado -->
 <script src="{% static 'js/profile.js' %}"></script>
-<script src="{% static 'js/book-interaction.js' %}"></script>
 
-<!-- Por último, inicializamos o gerenciador de estante -->
+<!-- Carregamos o script de recomendações -->
+<script src="{% static 'js/recommendations.js' %}"></script>
+
+<!-- Script de inicialização -->
 <script type="module">
-    import { initializeShelfManager } from "{% static 'js/shelf-manager.js' %}";
-    document.addEventListener('DOMContentLoaded', () => {
+    import createShelfManager from '/static/js/shelf-manager.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        console.log('DOM Carregado, iniciando setup...');
+
+        // Espera o Bootstrap estar disponível
+        if (typeof bootstrap === 'undefined') {
+            console.error('Bootstrap não está carregado!');
+            return;
+        }
+
         const modalElement = document.getElementById('shelfModal');
-        if (modalElement) {
-            window.shelfModal = new bootstrap.Modal(modalElement);
-            window.shelfManager = initializeShelfManager(window.shelfModal);
+        if (!modalElement) {
+            console.error('Elemento do modal não encontrado!');
+            return;
+        }
+
+        try {
+            const modalInstance = new bootstrap.Modal(modalElement);
+            console.log('Modal instanciado com sucesso');
+
+            window.shelfManager = createShelfManager(modalInstance);
+            console.log('ShelfManager criado e atribuído a window.shelfManager');
+
+            // Adiciona listeners aos botões
+            document.querySelectorAll('[data-tipo-prateleira]').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const tipo = button.dataset.tipoPrateleira;
+                    console.log('Clique no botão gerenciar detectado para:', tipo);
+                    if (window.shelfManager) {
+                        window.shelfManager.openShelfManager(tipo);
+                    } else {
+                        console.error('ShelfManager não inicializado!');
+                    }
+                });
+            });
+
+        } catch (error) {
+            console.error('Erro ao inicializar:', error);
         }
     });
 </script>

@@ -1,56 +1,85 @@
-<!-- templates/livro_detail (detalhes do livro da página inicial) -->
+<!-- templates/livro_detail.html -->
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}{{ livro.titulo }} - Detalhes{% endblock %}
 
 {% block content %}
-<div class="container">
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/livro_detail.css' %}">
+{% endblock %}
+
+<div class="container py-5">
     <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mt-3">
+    <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'index' %}">Início</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'index' %}" class="text-decoration-none">Início</a></li>
             <li class="breadcrumb-item active" aria-current="page">{{ livro.titulo }}</li>
         </ol>
     </nav>
 
-    <!-- Detalhes do Livro -->
-    <div class="row mt-4">
-        <!-- Imagem do Livro -->
-        <div class="col-md-5">
-            <div class="card border-0">
-                <img src="{{ livro.imagem.url }}" 
-                     class="card-img-top" 
-                     alt="Capa de {{ livro.titulo }}" 
-                     style="height: 600px; width: 100%; object-fit: cover;">
+    <!-- Card Principal -->
+    <div class="book-detail-card">
+        <div class="row g-0">
+            <!-- Coluna da Imagem -->
+            <div class="col-lg-4">
+                <div class="book-image-wrapper">
+                    <img src="{{ livro.imagem.url }}"
+                         class="book-cover-image"
+                         alt="Capa de {{ livro.titulo }}">
+                </div>
             </div>
-        </div>
 
-        <!-- Informações do Livro -->
-        <div class="col-md-7">
-            <div class="card border-0" style="background-color: #F9F9F9;">
-                <div class="card-body">
-                    <h1 class="card-title mb-4">{{ livro.titulo }}</h1>
-                    <h4 class="text-muted mb-4">{{ livro.autor }}</h4>
+            <!-- Coluna das Informações -->
+            <div class="col-lg-8">
+                <div class="book-info-wrapper">
+                    <div class="book-header">
+                        <h1 class="book-title">{{ livro.titulo }}</h1>
+                        <h2 class="book-author">{{ livro.autor }}</h2>
 
-                    <div class="mb-4">
-                        <h5 class="text-primary mb-3">Sobre o Livro</h5>
-                        <p class="card-text">{{ livro.descricao }}</p>
+                        <!-- Nova Tag de Categoria -->
+                        <div class="book-category-tag">
+                            {% if livro.destaque and livro.mais_vendido %}
+                                <span class="category-tag featured-only">Em Destaque</span>
+                                <span class="category-tag bestseller-only">Mais Vendido</span>
+                            {% elif livro.destaque %}
+                                <span class="category-tag featured-only">Em Destaque</span>
+                            {% elif livro.mais_vendido %}
+                                <span class="category-tag bestseller-only">Mais Vendido</span>
+                            {% endif %}
+                        </div>
                     </div>
 
-                    <div class="mb-4">
-                        <h5 class="text-primary mb-3">Informações Adicionais</h5>
-                        <p><strong>Data de Publicação:</strong> {{livro.data_publicacao|date: "d/m/Y"}}</p>
-                        <p><strong>Visualizações:</strong> {{livro.visualizacoes}}</p>
-                        {% if livro.categoria %}
-                            <p><strong>Categoria:</strong> {{ livro.categoria }}</p>
-                        {% endif %}
-                        {% if livro.destaque %}
-                            <span class="badge badge-success">Em Destaque</span>
-                        {% endif %}
-                        {% if livro.mais_vendido %}
-                            <span class="badge badge-warning">Mais Vendido</span>
-                        {% endif %}
-                    </div>
+
+                    <div class="book-details">
+                        <div class="detail-section">
+                            <h3 class="section-title">Sobre o Livro</h3>
+                            <p class="book-description">{{ livro.descricao }}</p>
+                        </div>
+
+                        <div class="detail-section">
+                            <h3 class="section-title">Informações</h3>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <i class="bi bi-calendar3"></i>
+                                    <span class="info-label">Publicação</span>
+                                    <span class="info-value">{{ livro.data_publicacao|date:"d/m/Y" }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="bi bi-eye"></i>
+                                    <span class="info-label">Visualizações</span>
+                                    <span class="info-value">{{ livro.visualizacoes }}</span>
+                                </div>
+                                {% if livro.categoria %}
+                                <div class="info-item">
+                                    <i class="bi bi-bookmark"></i>
+                                    <span class="info-label">Categoria</span>
+                                    <span class="info-value">{{ livro.categoria }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -59,49 +88,37 @@
 
     <!-- Livros Relacionados -->
     {% if livros_relacionados %}
-    <div class="mt-5">
-        <h1 class="text-center" style="margin-bottom: 90px; font-size: 3rem;">
+    <section class="related-books">
+        <h2 class="section-title text-center">
             {% if livro.categoria %}
                 Outros Livros da Categoria
             {% else %}
                 Outros Livros em Destaque
             {% endif %}
-        </h1>
-        <div class="row">
+        </h2>
+
+        <div class="row g-4">
             {% for livro_rel in livros_relacionados %}
-                <div class="col-md-4 mb-4">
-                    <div class="card">
+            <div class="col-md-4">
+                <div class="related-book-card">
+                    <div class="book-thumbnail">
                         <img src="{{ livro_rel.imagem.url }}"
-                             class="card-img-top"
-                             alt="Capa de {{ livro_rel.titulo }}"
-                             style="height: 500px; width: 100%; object-fit: cover;">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ livro_rel.titulo }}</h5>
-                            <p class="card-text">Autor: {{ livro_rel.autor }}</p>
-                            <p class="card-text">{{ livro_rel.descricao|truncatewords:20 }}</p>
-                            <a href="{% url 'livro_detail' livro_rel.id %}" class="btn btn-primary">Ver Detalhes</a>
-                        </div>
+                             alt="Capa de {{ livro_rel.titulo }}">
+                    </div>
+                    <div class="book-content">
+                        <h3 class="book-title">{{ livro_rel.titulo }}</h3>
+                        <p class="book-author">{{ livro_rel.autor }}</p>
+                        <p class="book-preview">{{ livro_rel.descricao|truncatewords:20 }}</p>
+                        <a href="{% url 'livro_detail' livro_rel.id %}" class="btn-details">
+                            Ver Detalhes
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
                     </div>
                 </div>
+            </div>
             {% endfor %}
         </div>
-    </div>
-
-    {% if user.is_superuser %}
-    <div class="card mt-4">
-        <div class="card-body">
-            <h5 class="card-title">Debug Info</h5>
-            <pre>
-    ID: {{ livro.id }}
-    Título: {{ livro.titulo }}
-    Autor: {{ livro.autor }}
-    Editora: {{ livro.editora|default:"N/A" }}
-    Páginas: {{ livro.numero_paginas|default:"N/A" }}
-    Data: {{ livro.data_lancamento|default:"N/A" }}
-    Idioma: {{ livro.idioma|default:"N/A" }}
-    Categoria: {{ livro.categoria|default:"N/A" }}
-            </pre>
-        </div>
-    </div>
+    </section>
     {% endif %}
+</div>
 {% endblock %}

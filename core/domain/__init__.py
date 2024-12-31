@@ -1,6 +1,6 @@
 # core/domain/__init__.py
 from .books import Book, BookCache, BookShelf
-from .users import User, ActivityHistory
+from .users import CustomUser, ActivityHistory
 from .media import ExternalURL, YouTubeVideo
 from .contact import Contact
 
@@ -11,7 +11,7 @@ __all__ = [
     'BookShelf',
 
     # Users domain
-    'User',
+    'CustomUser',
     'ActivityHistory',
 
     # Media domain

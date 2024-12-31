@@ -3,6 +3,12 @@
 {% block title %}{{ livro.titulo }} - Detalhes{% endblock %}
 
 {% block content %}
+{% if debug %}
+<script>
+    console.log('Livro ID:', '{{ livro_id }}');
+    console.log('Livro:', {{ livro|safe }});
+</script>
+{% endif %}
 <!-- Breadcrumb -->
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
@@ -24,7 +30,7 @@
 
                 <!-- Botão para adicionar à estante -->
                 <div class="mt-3">
-                    <button class="btn btn-primary w-100" id="addToShelfBtn" type="button" data-toggle="modal" data-target="#addToShelfModal">
+                    <button class="btn btn-primary w-100" id="addToShelfBtn" type="button" data-bs-toggle="modal" data-bs-target="#addToShelfModal">
                         <i class="bi bi-bookmark-plus"></i> Adicionar à Estante
                     </button>
                 </div>
@@ -93,16 +99,14 @@
 </div>
 
 <!-- Modal -->
-<div class="modal fade" id="addToShelfModal" tabindex="-1" role="dialog" aria-labelledby="addToShelfModalLabel" aria-hidden="true">
+<div class="modal fade" id="addToShelfModal" tabindex="-1" aria-labelledby="addToShelfModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="addToShelfModalLabel">
                     <i class="bi bi-bookmark-plus"></i> Adicionar à Estante
                 </h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <!-- Informações do Livro -->
@@ -130,9 +134,9 @@
                 <hr>
 
                 <!-- Formulário -->
-                <form method="post" action="{% url 'adicionar_estante' livro.id %}" id="addToShelfForm">
+                <form method="post" action="{% url 'adicionar_estante' livro_id %}" id="addToShelfForm">
                     {% csrf_token %}
-                    <input type="hidden" name="livro_id" value="{{ livro.id }}">
+                    <input type="hidden" name="livro_id" value="{{ livro_id }}">
                     <input type="hidden" name="titulo" value="{{ livro.titulo }}">
                     <input type="hidden" name="autor" value="{{ livro.autor }}">
                     <input type="hidden" name="capa" value="{{ livro.imagem }}">
@@ -170,7 +174,7 @@
                 </form>
             </div>
             <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="bi bi-x"></i> Fechar
                 </button>
             </div>
@@ -180,24 +184,107 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Script carregado');
+    const addToShelfModal = document.getElementById('addToShelfModal');
+    if (addToShelfModal) {
+        const modal = new bootstrap.Modal(addToShelfModal);
 
-    // Log para verificar se o botão existe
-    const addButton = document.getElementById('addToShelfBtn');
-    console.log('Botão encontrado:', addButton);
+        // Criar div para mensagens
+        const messageDiv = document.createElement('div');
+        messageDiv.id = 'shelfMessage';
+        messageDiv.style.display = 'none';
+        addToShelfModal.querySelector('.modal-body').insertBefore(messageDiv, addToShelfModal.querySelector('.modal-body').firstChild);
 
-    // Log para verificar se o modal existe
-    const modal = document.getElementById('addToShelfModal');
-    console.log('Modal encontrado:', modal);
+        // Função para mostrar mensagens
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('shelfMessage');
+            messageDiv.className = `alert alert-${type} mb-3`;
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+        }
 
-    // Verificar os cliques nos botões do formulário
-    const form = document.getElementById('addToShelfForm');
-    if(form) {
-        form.addEventListener('submit', function(e) {
-            console.log('Formulário sendo enviado');
-            // Opcional: adicionar lógica adicional antes do envio
+        // 3. Manipulação do Formulário
+        const addToShelfForm = document.getElementById('addToShelfForm');
+        if (addToShelfForm) {
+            const formButtons = addToShelfForm.querySelectorAll('button[type="submit"][name="tipo"]');
+            formButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    // Desabilitar todos os botões durante o envio
+                    formButtons.forEach(btn => btn.disabled = true);
+
+                    const tipoValue = this.value;
+                    const formData = new FormData(addToShelfForm);
+                    formData.append('tipo', tipoValue);
+
+                    fetch(addToShelfForm.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        },
+                        credentials: 'same-origin'
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            showMessage(data.message, 'success');
+                            setTimeout(() => {
+                                window.location.href = data.redirect_url || '/profile/';
+                            }, 1500);
+                        } else {
+                            showMessage(data.message || 'Erro ao adicionar livro', 'danger');
+                            formButtons.forEach(btn => btn.disabled = false);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro:', error);
+                        showMessage('Erro ao processar a requisição: ' + error.message, 'danger');
+                        formButtons.forEach(btn => btn.disabled = false);
+                    });
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showMessage(data.message, 'success');
+                            setTimeout(() => {
+                                window.location.href = data.redirect_url || '/profile/';
+                            }, 1500);
+                        } else {
+                            showMessage(data.message, 'danger');
+                            // Reabilitar os botões em caso de erro
+                            formButtons.forEach(btn => btn.disabled = false);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro:', error);
+                        showMessage('Erro ao processar a requisição', 'danger');
+                        // Reabilitar os botões em caso de erro
+                        formButtons.forEach(btn => btn.disabled = false);
+                    });
+                });
+            });
+        }
+
+        // Limpar mensagens quando o modal é fechado
+        addToShelfModal.addEventListener('hidden.bs.modal', function() {
+            const messageDiv = document.getElementById('shelfMessage');
+            if (messageDiv) {
+                messageDiv.style.display = 'none';
+                messageDiv.textContent = '';
+            }
+            // Reabilitar todos os botões quando o modal é fechado
+            if (addToShelfForm) {
+                const formButtons = addToShelfForm.querySelectorAll('button[type="submit"][name="tipo"]');
+                formButtons.forEach(btn => btn.disabled = false);
+            }
         });
-    });
+    }
 });
 </script>
 {% endblock %}

@@ -1,3 +1,6 @@
+// book_detail.js
+console.log('=== Executando book_detail.js ===');
+
 // Função de utilidade para obter cookie CSRF
 function getCookie(name) {
     var cookieValue = null;
@@ -25,58 +28,6 @@ function showAlert(type, message, container) {
     container.parentElement.appendChild(alert);
 }
 
-// Sistema de Exclusão
-function initDeleteSystem() {
-    const deleteButton = document.getElementById('confirmDelete');
-    if (!deleteButton) return;
-
-    deleteButton.addEventListener('click', function(e) {
-        e.preventDefault();
-
-        const livroId = this.getAttribute('data-livro-id');
-        const spinner = this.querySelector('.spinner-border');
-
-        if (!livroId) {
-            console.error('ID do livro não encontrado');
-            return;
-        }
-
-        // Desabilita o botão e mostra o spinner
-        this.disabled = true;
-        spinner.classList.remove('d-none');
-
-        // Faz a requisição AJAX
-        fetch(`/livros/excluir/${livroId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Erro na resposta do servidor');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.status === 'success') {
-                $('#deleteModal').modal('hide');
-                window.location.href = '/profile/';
-            }
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            alert('Erro ao tentar remover o livro. Por favor, tente novamente.');
-        })
-        .finally(() => {
-            // Reabilita o botão e esconde o spinner
-            this.disabled = false;
-            spinner.classList.add('d-none');
-        });
-    });
-}
-
 // Sistema de Avaliação
 function initRatingSystem() {
     const starContainer = document.querySelector('.star-rating');
@@ -89,7 +40,7 @@ function initRatingSystem() {
     let tempRating = currentRating;
     let isStarClicked = false;
 
-    saveButton.className = 'btn btn-primary btn-sm ms-2 save-rating-btn d-none';
+    saveButton.className = 'btn btn-primary btn-sm ml-2 save-rating-btn d-none';
     saveButton.innerHTML = '<i class="bi bi-check2"></i> Salvar';
     starContainer.parentElement.appendChild(saveButton);
 
@@ -159,40 +110,39 @@ function initRatingSystem() {
     });
 
     // Salvar classificação
-    saveButton.addEventListener('click', () => {
+    saveButton.addEventListener('click', async () => {
         const livroId = document.querySelector('.rating-section').dataset.livroId;
 
-        fetch(`/livros/${livroId}/classificar/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ classificacao: tempRating })
-        })
-        .then(response => response.json())
-        .then(data => {
-            saveButton.classList.add('d-none');
-            showAlert('success', 'Classificação salva com sucesso!', starContainer);
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
-        })
-        .catch(error => {
+        try {
+            const response = await fetch(`/livros/${livroId}/classificar/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({ 'classificacao': tempRating })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                saveButton.classList.add('d-none');
+                showAlert('success', 'Classificação salva com sucesso!', starContainer);
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                throw new Error(data.message || 'Erro ao salvar classificação');
+            }
+        } catch (error) {
+            console.error('Erro:', error);
             showAlert('danger', 'Erro ao salvar a classificação.', starContainer);
-        });
+        }
     });
 }
 
 // Inicialização quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', function() {
-    // Inicializa os sistemas
+    console.log('DOM carregado, inicializando sistema de rating...');
     initRatingSystem();
-    initDeleteSystem();
-
-    // Inicializa os modais Bootstrap
-    if (typeof bootstrap !== 'undefined') {
-        const modals = document.querySelectorAll('.modal');
-        modals.forEach(modal => new bootstrap.Modal(modal));
-    }
 });

@@ -1,4 +1,4 @@
-# core/domain/recommendations/entities.py
+# core/domain/recommendations/contact.py
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import Dict, Optional

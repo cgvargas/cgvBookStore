@@ -1,50 +1,53 @@
 <!-- core/templates/partials/shelf_form.html -->
 {% load static %}
 
-{% block content %}
-<div class="container">
-    <div class="books-container">
+<div class="container-fluid px-4">
+    <div class="row g-4">
         {% if livros %}
             {% for livro in livros %}
-            <div>
-                <div class="book-content">
-                    <div>
-                        <img src="{{ livro.capa }}"
-                             alt="{{ livro.titulo }}"
-                             class="book-cover">
-                    </div>
+            <div class="col-12">
+                <div class="book-item card" data-livro-id="{{ livro.id }}">
+                    <div class="card-body d-flex gap-3">
+                        <div class="book-image" style="min-width: 100px; width: 100px;">
+                            <img src="{{ livro.capa|default:'/static/images/default-book-cover.jpg' }}"
+                                 alt="{{ livro.titulo }}"
+                                 class="img-fluid rounded"
+                                 style="width: 100px; height: 150px; object-fit: cover;">
+                        </div>
 
-                    <div class="book-details">
-                        <h3 class="book-title">{{ livro.titulo }}</h3>
-                        <p class="book-author">{{ livro.autor }}</p>
+                        <div class="book-details flex-grow-1">
+                            <h5 class="card-title mb-2">{{ livro.titulo }}</h5>
+                            <p class="card-text text-muted mb-3">{{ livro.autor }}</p>
 
-                        <div class="book-actions">
-                            <button class="transferir-livro-btn"
-                                    type="button"
-                                    data-livro-id="{{ livro.id }}"
-                                    data-livro-titulo="{{ livro.titulo }}"
-                                    data-tipo-atual="{{ tipo }}">
-                                <i class="bi bi-arrow-left-right"></i>
-                                Transferir
-                            </button>
+                            <div class="d-flex gap-2">
+                                <button class="transferir-livro-btn btn btn-outline-primary btn-sm"
+                                        type="button"
+                                        data-livro-id="{{ livro.id }}"
+                                        data-livro-titulo="{{ livro.titulo }}"
+                                        data-tipo-atual="{{ tipo }}">
+                                    <i class="bi bi-arrow-left-right"></i>
+                                    Transferir
+                                </button>
 
-                            <button class="excluir-livro-btn"
-                                    type="button"
-                                    data-livro-id="{{ livro.id }}">
-                                <i class="bi bi-trash"></i>
-                                Excluir
-                            </button>
+                                <button class="excluir-livro-btn btn btn-outline-danger btn-sm"
+                                        type="button"
+                                        data-livro-id="{{ livro.id }}">
+                                    <i class="bi bi-trash"></i>
+                                    Excluir
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            {% empty %}
-            <div class="empty-shelf">
-                <i class="bi bi-book"></i>
-                <p>Nenhum livro encontrado nesta prateleira.</p>
-            </div>
             {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="empty-shelf text-center py-5">
+                    <i class="bi bi-book display-4 text-muted"></i>
+                    <p class="mt-3 text-muted">Nenhum livro encontrado nesta prateleira.</p>
+                </div>
+            </div>
         {% endif %}
     </div>
 </div>
-{% endblock %}

@@ -7,7 +7,7 @@
         <div class="toast-header bg-success text-white">
             <i class="bi bi-check-circle mr-2"></i>
             <strong class="mr-auto">Sucesso!</strong>
-            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+            <button type="button" class="ml-2 mb-1 close" data-bs-dismiss="toast" aria-label="Close">
                 <span aria-hidden="true" class="text-white">&times;</span>
             </button>
         </div>
@@ -21,7 +21,7 @@
         <div class="toast-header bg-danger text-white">
             <i class="bi bi-exclamation-circle mr-2"></i>
             <strong class="mr-auto">Erro</strong>
-            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+            <button type="button" class="ml-2 mb-1 close" data-bs-dismiss="toast" aria-label="Close">
                 <span aria-hidden="true" class="text-white">&times;</span>
             </button>
         </div>
@@ -41,9 +41,7 @@
             {% for message in messages %}
                 <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show">
                     {{ message }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             {% endfor %}
         </div>
@@ -55,18 +53,11 @@
             <!-- Nome Completo -->
             <div class="form-group mb-3">
                 <label for="nome_completo">Nome Completo *</label>
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">
-                            <i class="bi bi-person"></i>
-                        </span>
-                    </div>
-                    <input type="text" name="{{ form.nome_completo.html_name }}"
-                           id="nome_completo"
-                           class="form-control {% if form.nome_completo.errors %}is-invalid{% endif %}"
-                           value="{{ form.nome_completo.value|default:'' }}"
-                           required>
-                </div>
+                <input type="text" name="{{ form.nome_completo.html_name }}"
+                       id="nome_completo"
+                       class="form-control {% if form.nome_completo.errors %}is-invalid{% endif %}"
+                       value="{{ form.nome_completo.value|default:'' }}"
+                       required>
                 {% if form.nome_completo.errors %}
                 <div class="invalid-feedback" style="display: block;">
                     {{ form.nome_completo.errors|join:", " }}
@@ -77,18 +68,11 @@
             <!-- Username -->
             <div class="form-group mb-3">
                 <label for="username">Usuário *</label>
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">
-                            <i class="bi bi-at"></i>
-                        </span>
-                    </div>
-                    <input type="text" name="{{ form.username.html_name }}"
-                           id="username"
-                           class="form-control {% if form.username.errors %}is-invalid{% endif %}"
-                           value="{{ form.username.value|default:'' }}"
-                           required>
-                </div>
+                <input type="text" name="{{ form.username.html_name }}"
+                       id="username"
+                       class="form-control {% if form.username.errors %}is-invalid{% endif %}"
+                       value="{{ form.username.value|default:'' }}"
+                       required>
                 {% if form.username.errors %}
                 <div class="invalid-feedback" style="display: block;">
                     {{ form.username.errors|join:", " }}
@@ -99,18 +83,11 @@
             <!-- Email -->
             <div class="form-group mb-3">
                 <label for="email">Email *</label>
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">
-                            <i class="bi bi-envelope"></i>
-                        </span>
-                    </div>
-                    <input type="email" name="{{ form.email.html_name }}"
-                           id="email"
-                           class="form-control {% if form.email.errors %}is-invalid{% endif %}"
-                           value="{{ form.email.value|default:'' }}"
-                           required>
-                </div>
+                <input type="email" name="{{ form.email.html_name }}"
+                       id="email"
+                       class="form-control {% if form.email.errors %}is-invalid{% endif %}"
+                       value="{{ form.email.value|default:'' }}"
+                       required>
                 {% if form.email.errors %}
                 <div class="invalid-feedback" style="display: block;">
                     {{ form.email.errors|join:", " }}
@@ -121,22 +98,10 @@
             <!-- Senha -->
             <div class="form-group mb-3">
                 <label for="password1">Senha *</label>
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">
-                            <i class="bi bi-lock"></i>
-                        </span>
-                    </div>
-                    <input type="password" name="{{ form.password1.html_name }}"
-                           id="password1"
-                           class="form-control {% if form.password1.errors %}is-invalid{% endif %}"
-                           required>
-                    <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" type="button" id="togglePassword1">
-                            <i class="bi bi-eye"></i>
-                        </button>
-                    </div>
-                </div>
+                <input type="password" name="{{ form.password1.html_name }}"
+                       id="password1"
+                       class="form-control {% if form.password1.errors %}is-invalid{% endif %}"
+                       required>
                 {% if form.password1.errors %}
                 <div class="invalid-feedback" style="display: block;">
                     {{ form.password1.errors|join:", " }}
@@ -145,24 +110,12 @@
             </div>
 
             <!-- Confirmar Senha -->
-            <div class="form-group mb-4">
+            <div class="form-group mb-3">
                 <label for="password2">Confirmar Senha *</label>
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">
-                            <i class="bi bi-lock-check"></i>
-                        </span>
-                    </div>
-                    <input type="password" name="{{ form.password2.html_name }}"
-                           id="password2"
-                           class="form-control {% if form.password2.errors %}is-invalid{% endif %}"
-                           required>
-                    <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" type="button" id="togglePassword2">
-                            <i class="bi bi-eye"></i>
-                        </button>
-                    </div>
-                </div>
+                <input type="password" name="{{ form.password2.html_name }}"
+                       id="password2"
+                       class="form-control {% if form.password2.errors %}is-invalid{% endif %}"
+                       required>
                 {% if form.password2.errors %}
                 <div class="invalid-feedback" style="display: block;">
                     {{ form.password2.errors|join:", " }}
@@ -172,9 +125,9 @@
 
             <!-- Termos de Uso -->
             <div class="form-group mb-4">
-                <div class="custom-control custom-checkbox">
-                    <input type="checkbox" class="custom-control-input" id="termsCheck" required>
-                    <label class="custom-control-label" for="termsCheck">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="termsCheck" required>
+                    <label class="form-check-label" for="termsCheck">
                         Eu concordo com os <a href="{% url 'termos_uso' %}" target="_blank">Termos de Uso</a> e
                         <a href="{% url 'politica_privacidade' %}" target="_blank">Política de Privacidade</a>
                     </label>
@@ -193,85 +146,104 @@
                 Já possui uma conta? <a href="{% url 'login' %}">Entrar</a>
             </p>
         </div>
-
     </div>
 </div>
 {% endblock %}
 
+
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Inicialização dos toasts (apenas uma vez)
-    $('.toast').toast({
-        animation: true,
-        autohide: true,
-        delay: 5000
-    });
-
-    // Toggle password visibility
-    function togglePasswordVisibility(inputId, buttonId) {
-        const input = document.getElementById(inputId);
-        const button = document.getElementById(buttonId);
-
-        button.addEventListener('click', function() {
-            if (input.type === 'password') {
-                input.type = 'text';
-                button.innerHTML = '<i class="bi bi-eye-slash"></i>';
-            } else {
-                input.type = 'password';
-                button.innerHTML = '<i class="bi bi-eye"></i>';
-            }
-        });
+    // Inicialização defensiva dos toasts
+    try {
+        if (typeof($.fn.toast) === 'function') {
+            $('.toast').toast({
+                animation: true,
+                autohide: true,
+                delay: 5000
+            });
+        } else {
+            console.warn('Bootstrap toast não está disponível');
+        }
+    } catch (error) {
+        console.error('Erro ao inicializar toasts:', error);
     }
+    // Verificar se estamos na página de registro antes de executar o código
+    if (document.querySelector('form[action*="register"]')) {
+        // Inicialização dos toasts
+        $('.toast').toast({
+            animation: true,
+            autohide: true,
+            delay: 5000
+        });
 
-    // Inicializa os toggle password buttons
-    togglePasswordVisibility('password1', 'togglePassword1');
-    togglePasswordVisibility('password2', 'togglePassword2');
+        // Toggle password visibility
+        function togglePasswordVisibility(inputId, buttonId) {
+            const input = document.getElementById(inputId);
+            const button = document.getElementById(buttonId);
 
-    // Form submission
-    const form = document.querySelector('form');
-    form.addEventListener('submit', function(event) {
-        event.preventDefault();
-
-        if (!document.getElementById('termsCheck').checked) {
-            $('#errorToast').find('.toast-body').text('Você deve concordar com os termos para continuar');
-            $('#errorToast').toast('show');
-            return;
+            if (input && button) {  // Verificar se os elementos existem
+                button.addEventListener('click', function() {
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        button.innerHTML = '<i class="bi bi-eye-slash"></i>';
+                    } else {
+                        input.type = 'password';
+                        button.innerHTML = '<i class="bi bi-eye"></i>';
+                    }
+                });
+            }
         }
 
-        // Envia o formulário via AJAX
-        fetch(form.action, {
-            method: 'POST',
-            body: new FormData(form),
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Mostra o toast de sucesso
-                $('#successToast').find('.toast-body').text(data.message);
-                $('#successToast').toast('show');
+        // Inicializa os toggle password buttons
+        togglePasswordVisibility('password1', 'togglePassword1');
+        togglePasswordVisibility('password2', 'togglePassword2');
 
-                // Redireciona após 2 segundos
-                setTimeout(() => {
-                    window.location.href = data.redirect_url;
-                }, 2000);
-            } else {
-                // Se houver erro(s), mostra no toast
-                const errorMessage = data.errors ? data.errors.join('\n') : data.error;
-                $('#errorToast').find('.toast-body').text(errorMessage);
-                $('#errorToast').toast('show');
-            }
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            $('#errorToast').find('.toast-body').text('Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente.');
-            $('#errorToast').toast('show');
-        });
-    });
+        // Form submission
+        const form = document.querySelector('form[action*="register"]');
+        if (form) {  // Verificar se o formulário existe
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                const termsCheck = document.getElementById('termsCheck');
+                if (!termsCheck || !termsCheck.checked) {
+                    $('#errorToast').find('.toast-body').text('Você deve concordar com os termos para continuar');
+                    $('#errorToast').toast('show');
+                    return;
+                }
+
+                // Envia o formulário via AJAX
+                fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                        // O X-CSRFToken será adicionado automaticamente pelo csrf-setup.js
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        $('#successToast').find('.toast-body').text(data.message);
+                        $('#successToast').toast('show');
+
+                        setTimeout(() => {
+                            window.location.href = data.redirect_url;
+                        }, 2000);
+                    } else {
+                        const errorMessage = data.errors ? data.errors.join('\n') : data.error;
+                        $('#errorToast').find('.toast-body').text(errorMessage);
+                        $('#errorToast').toast('show');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    $('#errorToast').find('.toast-body').text('Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente.');
+                    $('#errorToast').toast('show');
+                });
+            });
+        }
+    }
 });
 </script>
 {% endblock %}

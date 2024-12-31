@@ -2,19 +2,25 @@
 from typing import List, Optional
 from django.db import transaction
 from core.domain.recommendations.entities import BookRecommendation, UserPreference
-from ..models.recommendations import UserPreferences, LivroRecomendado
+from ..models.recommendations import NewUserPreferences, NewLivroRecomendado
 
 
 class DjangoRecommendationRepository:
+    def get_user_recommendations(self, user_id: int) -> List[NewLivroRecomendado]:
+        """Retorna as recomendações de livros para um usuário"""
+        return NewLivroRecomendado.objects.filter(
+            usuario_id=user_id
+        ).order_by('-score')
+
     def get_user_preferences(self, user_id: int) -> Optional[UserPreference]:
         try:
-            prefs = UserPreferences.objects.get(usuario_id=user_id)
+            prefs = NewUserPreferences.objects.get(usuario_id=user_id)
             return prefs.to_domain()
-        except UserPreferences.DoesNotExist:
+        except NewUserPreferences.DoesNotExist:
             return None
 
     def save_user_preferences(self, preferences: UserPreference) -> None:
-        UserPreferences.objects.update_or_create(
+        NewUserPreferences.objects.update_or_create(
             usuario_id=preferences.usuario_id,
             defaults={
                 'categorias_favoritas': preferences.categorias_favoritas,
@@ -26,11 +32,11 @@ class DjangoRecommendationRepository:
     @transaction.atomic
     def save_recommendations(self, user_id: int, recommendations: List[BookRecommendation]) -> None:
         # Remove recomendações antigas
-        LivroRecomendado.objects.filter(usuario_id=user_id).delete()
+        NewLivroRecomendado.objects.filter(usuario_id=user_id).delete()
 
         # Salva novas recomendações
-        LivroRecomendado.objects.bulk_create([
-            LivroRecomendado(
+        NewLivroRecomendado.objects.bulk_create([
+            NewLivroRecomendado(
                 usuario_id=user_id,
                 livro_id=rec.livro_id,
                 titulo=rec.titulo,
