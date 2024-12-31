@@ -5,8 +5,9 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import JsonResponse
 from django.urls import reverse
 
-from core.forms import ContatoForm, CustomUserCreationForm
-from core.utils.email_utils import enviar_email_contato
+from core.presentation.forms.contact.contact_form import ContatoForm  # Nova importação
+from core.forms import CustomUserCreationForm  # Mantido temporariamente
+from core.utils.email_utils import enviar_email_contato, logger
 
 # Importação dos repositories
 from core.infrastructure.persistence.django.repositories.books.book_repository import BookRepository
@@ -63,85 +64,98 @@ def index(request):
     try:
         # Obtendo os livros através dos repositories
         livros_destaque = book_repository.get_featured_books(
-            order_by=['-data_publicacao', 'titulo']
+            order_by=['-data_publicacao', 'titulo'],
+            limit=8
         )
         livros_mais_vendidos = book_repository.get_bestseller_books(
-            order_by=['titulo']
+            order_by=['titulo'],
+            limit=8
         )
 
-        # Configuração da paginação
-        paginator_destaque = Paginator(livros_destaque, 8)
-        paginator_vendidos = Paginator(livros_mais_vendidos, 8)
-
-        # Pegando a página da query string
-        page_destaque = request.GET.get('page_destaque', 1)
-        page_vendidos = request.GET.get('page_vendidos', 1)
-
-        # Paginação para livros em destaque
-        try:
-            livros_destaque_paginated = paginator_destaque.page(page_destaque)
-        except PageNotAnInteger:
-            livros_destaque_paginated = paginator_destaque.page(1)
-        except EmptyPage:
-            livros_destaque_paginated = paginator_destaque.page(paginator_destaque.num_pages)
-
-        # Paginação para livros mais vendidos
-        try:
-            livros_mais_vendidos_paginated = paginator_vendidos.page(page_vendidos)
-        except PageNotAnInteger:
-            livros_mais_vendidos_paginated = paginator_vendidos.page(1)
-        except EmptyPage:
-            livros_mais_vendidos_paginated = paginator_vendidos.page(paginator_vendidos.num_pages)
-
         # Obtendo URLs externas e vídeos através dos repositories
-        urls_externas = external_url_repository.get_all_urls()
-        videos_youtube = youtube_video_repository.get_all_videos()
+        try:
+            urls_externas = external_url_repository.get_all_urls()
+        except Exception as e:
+            logger.error(f"Erro ao buscar URLs externas: {str(e)}")
+            urls_externas = []
+
+        try:
+            videos_youtube = youtube_video_repository.get_all_videos()
+        except Exception as e:
+            logger.error(f"Erro ao buscar vídeos do YouTube: {str(e)}")
+            videos_youtube = []
 
         context = {
-            'livros_destaque': livros_destaque_paginated,
-            'livros_mais_vendidos': livros_mais_vendidos_paginated,
+            'livros_destaque': livros_destaque,
+            'livros_mais_vendidos': livros_mais_vendidos,
             'urls_externas': urls_externas,
             'videos_youtube': videos_youtube,
         }
 
         return render(request, 'index.html', context)
     except Exception as e:
+        logger.error(f"Erro na view index: {str(e)}")
         messages.error(request, 'Ocorreu um erro ao carregar a página inicial.')
-        return render(request, 'index.html', {})
+        return render(request, 'index.html', {
+            'livros_destaque': [],
+            'livros_mais_vendidos': [],
+            'urls_externas': [],
+            'videos_youtube': [],
+        })
 
 def sobre(request):
     return render(request, 'sobre.html')
 
+
+# core/views/general_views.py
 def contato(request):
+    logger.info("Método da requisição: %s", request.method)
+
     if request.method == 'POST':
+        # Log dos dados brutos do POST
+        logger.info("POST data: %s", dict(request.POST))
+
         form = ContatoForm(request.POST)
+        logger.info("Form criado com dados do POST")
+
+        # Log dos campos do formulário
+        logger.info("Campos do formulário: %s", form.fields.keys())
+
         if form.is_valid():
+            logger.info("Form é válido")
             try:
-                contato = contact_repository.save_contact(form.cleaned_data)
-                emails_enviados = enviar_email_contato(form.cleaned_data)
+                dados_contato = {
+                    'nome': form.cleaned_data['nome'],
+                    'email': form.cleaned_data['email'],
+                    'assunto': form.cleaned_data['assunto'],
+                    'mensagem': form.cleaned_data['mensagem']
+                }
+                logger.info("Dados limpos: %s", dados_contato)
+
+                # Salvar usando o repository
+                contato = contact_repository.save_contact(dados_contato)
+                logger.info("Contato salvo com sucesso: %s", contato)
+
+                # Tentar enviar email
+                emails_enviados = enviar_email_contato(dados_contato)
+                logger.info("Status do envio de email: %s", emails_enviados)
 
                 if emails_enviados:
-                    messages.success(
-                        request,
-                        'Mensagem enviada com sucesso! Verifique seu e-mail para confirmação.',
-                        extra_tags='contact success'
-                    )
+                    messages.success(request, 'Mensagem enviada com sucesso!', extra_tags='contact success')
                 else:
-                    messages.warning(
-                        request,
-                        'Sua mensagem foi recebida, mas houve um problema ao enviar o e-mail de confirmação.',
-                        extra_tags='contact warning'
-                    )
-
+                    messages.warning(request, 'Mensagem recebida, mas houve um problema com o email.',
+                                     extra_tags='contact warning')
                 return redirect('contato')
             except Exception as e:
-                messages.error(
-                    request,
-                    'Ocorreu um erro ao processar sua mensagem. Por favor, tente novamente.',
-                    extra_tags='contact error'
-                )
+                logger.error("Erro ao processar contato: %s", str(e), exc_info=True)
+                messages.error(request, 'Erro ao processar mensagem. Tente novamente.', extra_tags='contact error')
+        else:
+            logger.error("Erros de validação: %s", form.errors)
+            for field, errors in form.errors.items():
+                logger.error("Campo %s: %s", field, errors)
     else:
         form = ContatoForm()
+        logger.info("Novo formulário criado")
 
     return render(request, 'contato.html', {'form': form})
 

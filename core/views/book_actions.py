@@ -7,6 +7,7 @@ from django.template.loader import render_to_string
 from django.contrib import messages
 from ..api import google_books_api
 import logging
+from django.urls import reverse
 
 # Importação dos repositories
 from core.infrastructure.persistence.django.repositories.books.bookshelf_repository import BookShelfRepository
@@ -27,6 +28,11 @@ def adicionar_estante(request, livro_id):
         try:
             # Verifica se o livro já existe na estante
             if book_shelf_repository.book_exists_in_shelf(request.user, livro_id):
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': False,
+                        'message': 'Este livro já está em sua estante!'
+                    })
                 messages.warning(request, 'Este livro já está em sua estante!')
                 return redirect('google_book_detail', livro_id=livro_id)
 
@@ -44,12 +50,26 @@ def adicionar_estante(request, livro_id):
                 book_data=livro_info
             )
 
-            logger.debug(f"Livro salvo com sucesso: {estante_livro.id}")
+            logger.info(f"Livro {livro_id} adicionado com sucesso à estante")  # Log atualizado
+
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Livro adicionado com sucesso à sua estante!',
+                    'redirect_url': reverse('profile')
+                })
+
             messages.success(request, 'Livro adicionado com sucesso à sua estante!')
+            logger.info(f"Redirecionando para perfil após adicionar livro {livro_id}")  # Novo log
             return redirect('profile')
 
         except Exception as e:
             logger.error(f"Erro ao adicionar livro à estante: {str(e)}")
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Erro ao adicionar livro à estante.'
+                })
             messages.error(request, 'Erro ao adicionar livro à estante.')
             return redirect('google_book_detail', livro_id=livro_id)
 
@@ -75,20 +95,53 @@ def get_shelf_books(request, shelf_type):
     })
 
 
-@require_POST
 @login_required
+@require_POST
 def excluir_livro(request, livro_id):
     logger.info(f"Recebida requisição para excluir livro {livro_id}")
+
+    # Verificar se é uma requisição AJAX
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
     try:
         success = book_shelf_repository.delete_user_book(request.user, livro_id)
+
         if success:
             logger.info(f"Livro excluído com sucesso")
-            return JsonResponse({'status': 'success'})
+
+            if is_ajax:
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Livro excluído com sucesso',
+                    'redirect_url': reverse('profile')
+                })
+
+            messages.success(request, 'Livro excluído com sucesso')
+            return redirect('profile')
+
         else:
-            return JsonResponse({'status': 'error', 'message': 'Livro não encontrado'}, status=404)
+            logger.warning(f"Livro {livro_id} não encontrado")
+
+            if is_ajax:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Livro não encontrado',
+                }, status=404)
+
+            messages.error(request, 'Livro não encontrado')
+            return redirect('profile')
+
     except Exception as e:
         logger.error(f"Erro ao excluir livro: {str(e)}")
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+        if is_ajax:
+            return JsonResponse({
+                'success': False,
+                'message': str(e),
+            }, status=500)
+
+        messages.error(request, f'Erro ao excluir o livro: {str(e)}')
+        return redirect('profile')
 
 
 @require_POST

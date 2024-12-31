@@ -4,12 +4,13 @@ import logging
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
 from django.views.decorators.http import require_http_methods, require_POST
 from django.views.decorators.csrf import csrf_exempt
-
-from core.forms import LivroManualForm
+from core.presentation.forms.books.book_forms import LivroManualForm  # Nova localização
 from analytics.utils import register_book_view
 
 # Importação dos repositories
@@ -17,6 +18,7 @@ from core.infrastructure.persistence.django.repositories.books.book_repository i
 from core.infrastructure.persistence.django.repositories.books.book_cache_repository import BookCacheRepository
 from core.infrastructure.persistence.django.repositories.books.bookshelf_repository import BookShelfRepository
 from core.infrastructure.persistence.django.repositories.recommendation_repository import DjangoRecommendationRepository
+from core.infrastructure.persistence.django.repositories.users.user_repository import UserRepository
 
 ITEMS_PER_PAGE = 8
 logger = logging.getLogger(__name__)
@@ -38,6 +40,7 @@ def get_paginated_books(queryset, page_number):
     except EmptyPage:
         return paginator.page(paginator.num_pages)
 
+
 @login_required
 def profile(request):
     try:
@@ -53,7 +56,21 @@ def profile(request):
         livros_paginados = {}
         for tipo, page in estantes.items():
             queryset = book_shelf_repository.get_user_books_by_type(request.user, tipo)
-            livros_paginados[tipo] = get_paginated_books(queryset, page)
+            # Processa cada livro para determinar o tipo correto de URL
+            processed_queryset = []
+            for livro in queryset:
+                # Verifica se tem livro_id (indicando que é do Google Books)
+                if hasattr(livro, 'livro_id') and livro.livro_id:
+                    livro.is_google_book = True
+                    # Mantemos tanto o id quanto o livro_id
+                    livro.id = livro.id  # ID do registro na estante
+                    livro.livro_id = livro.livro_id  # ID do Google Books
+                else:
+                    livro.is_google_book = False
+                    # Para livros locais, usamos apenas o id
+                processed_queryset.append(livro)
+
+            livros_paginados[tipo] = get_paginated_books(processed_queryset, page)
 
         total_livros = book_shelf_repository.count_valid_user_books(request.user)
 
@@ -63,6 +80,9 @@ def profile(request):
 
         for rec in recomendacoes_raw:
             try:
+                if not rec.livro_id or not rec.livro_id.strip():
+                    continue  # Pula recomendações sem ID válido
+
                 livro_cache = book_cache_repository.get_book_by_id(rec.livro_id)
                 recomendacoes.append({
                     'id': rec.livro_id,
@@ -70,7 +90,8 @@ def profile(request):
                     'autor': rec.autor,
                     'categoria': rec.categoria,
                     'score': float(rec.score),
-                    'capa': livro_cache.imagem_url if livro_cache else None
+                    'capa': livro_cache.imagem_url if livro_cache else None,
+                    'is_google_book': True  # Recomendações sempre vêm do Google Books
                 })
             except Exception as e:
                 logger.warning(f"Livro {rec.livro_id} não encontrado no cache: {str(e)}")
@@ -91,6 +112,7 @@ def profile(request):
         logger.error(f"Erro na view profile: {str(e)}")
         messages.error(request, "Ocorreu um erro ao carregar o perfil.")
         return redirect('index')
+
 
 @login_required
 @require_http_methods(["POST"])
@@ -127,15 +149,17 @@ def adicionar_livro_manual(request):
             'error': str(e)
         })
 
+
 @login_required
 def editar_livro_manual(request, livro_id):
-    livro = book_shelf_repository.get_user_book_by_id(request.user, livro_id)
-    if not livro:
-        messages.error(request, "Livro não encontrado.")
-        return redirect('profile')
+    """View para editar um livro da estante"""
+    try:
+        livro = book_shelf_repository.get_user_books_by_id(request.user, livro_id)
+        if not livro:
+            messages.error(request, "Livro não encontrado.")
+            return redirect('profile')
 
-    if request.method == 'POST':
-        try:
+        if request.method == 'POST':
             form = LivroManualForm(request.POST, instance=livro)
             if form.is_valid():
                 livro_atualizado = book_shelf_repository.update_manual_book(
@@ -143,63 +167,80 @@ def editar_livro_manual(request, livro_id):
                     book_id=livro_id,
                     book_data=form.cleaned_data
                 )
-                messages.success(request, 'Livro atualizado com sucesso!')
-                return redirect('detalhes_livro', livro_id=livro_atualizado.id)
+
+                if livro_atualizado:
+                    messages.success(request, 'Livro atualizado com sucesso!')
+                    # Verifica se é um livro do Google Books ou um livro manual
+                    if hasattr(livro, 'livro_id') and livro.livro_id:
+                        return redirect('detalhes_livro_google', livro_id=livro.livro_id)
+                    else:
+                        return redirect('detalhes_livro_numerico', livro_id=livro.id)
+                else:
+                    messages.error(request, 'Erro ao atualizar o livro.')
             else:
                 messages.error(request, 'Por favor, corrija os erros no formulário.')
-        except Exception as e:
-            messages.error(request, f'Erro ao atualizar o livro: {str(e)}')
-            logger.error(f"Erro ao atualizar livro: {str(e)}")
 
-    form = LivroManualForm(instance=livro)
-    return render(request, 'editar_livro.html', {
-        'form': form,
-        'livro': livro
-    })
-
-@login_required
-@require_http_methods(["POST"])
-def excluir_livro(request, livro_id):
-    try:
-        success = book_shelf_repository.delete_user_book(request.user, livro_id)
-        if success:
-            return JsonResponse({
-                'success': True,
-                'message': 'Livro removido com sucesso!'
-            })
-        return JsonResponse({
-            'success': False,
-            'error': 'Livro não encontrado'
+        form = LivroManualForm(instance=livro)
+        return render(request, 'editar_livro.html', {
+            'form': form,
+            'livro': livro,
+            'is_google_book': bool(getattr(livro, 'livro_id', None))
         })
+
     except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': str(e)
-        })
+        logger.error(f"Erro ao editar livro: {str(e)}")
+        messages.error(request, f'Erro ao atualizar o livro: {str(e)}')
+        return redirect('profile')
+
 
 @login_required
-def update_profile_photo(request):
-    if request.method == 'POST' and request.FILES.get('profile_photo'):
-        try:
-            updated_user = book_repository.update_user_profile_photo(
-                user=request.user,
-                photo=request.FILES['profile_photo']
-            )
+@require_POST
+@transaction.atomic  # Adiciona atomicidade à operação
+def excluir_livro(request, livro_id):
+    """View para excluir um livro da estante"""
+    try:
+        logger.info(f"Recebida requisição para excluir livro {livro_id}")
+
+        # Tenta excluir o livro
+        success = book_shelf_repository.delete_user_book(request.user, livro_id)
+
+        if success:
+            logger.info(f"Livro {livro_id} excluído com sucesso")
             return JsonResponse({
                 'success': True,
-                'message': 'Foto atualizada com sucesso!',
-                'image_url': updated_user.profile_image.url
+                'message': 'Livro excluído com sucesso',
+                'redirect_url': reverse('profile')
             })
-        except Exception as e:
-            logger.error(f"Erro ao atualizar foto: {str(e)}")
+        else:
+            logger.warning(f"Livro {livro_id} não encontrado")
             return JsonResponse({
                 'success': False,
-                'error': 'Erro ao atualizar a foto.'
-            })
-    return JsonResponse({
-        'success': False,
-        'error': 'Requisição inválida.'
-    })
+                'error': 'Livro não encontrado ou já foi excluído'
+            }, status=404)
+
+    except Exception as e:
+        logger.error(f"Erro ao excluir livro {livro_id}: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': 'Erro ao excluir o livro'
+        }, status=500)
+
+
+def update_profile_photo(request):
+    if request.method == "POST":
+        try:
+            user = request.user
+            photo = request.FILES.get('profile_photo')
+
+            if not photo:
+                return JsonResponse({"success": False, "message": "Nenhuma foto enviada."})
+
+            user_repository = UserRepository()
+            user_repository.update_user_profile_photo(user, photo)
+
+            return JsonResponse({"success": True, "message": "Foto de perfil atualizada com sucesso."})
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)})
 
 @login_required
 def delete_profile_photo(request):
@@ -283,49 +324,84 @@ def verificar_livro_existente(request):
         'message': 'Livro não encontrado na sua estante.'
     })
 
+
 @login_required
 def detalhes_livro(request, livro_id):
-    livro = book_shelf_repository.get_user_book_by_id(request.user, livro_id)
-    if not livro:
-        messages.error(request, "Livro não encontrado.")
+    """View para mostrar detalhes de um livro da estante"""
+    try:
+        livro = book_shelf_repository.get_user_books_by_id(request.user, livro_id)
+
+        if not livro:
+            messages.error(request, "Livro não encontrado.")
+            return redirect('profile')
+
+        # Registra a visualização
+        try:
+            register_book_view(livro.titulo, request.user)
+        except Exception as e:
+            logger.warning(f"Erro ao registrar visualização do livro {livro_id}: {str(e)}")
+
+        # Adiciona a URL correta para edição
+        edit_url = reverse('editar_livro_manual_google', args=[livro_id]) if hasattr(livro,
+                                                                                     'livro_id') and livro.livro_id else reverse(
+            'editar_livro_manual', args=[livro.id])
+
+        context = {
+            'livro': {
+                'id': livro.id,
+                'livro_id': livro.livro_id,
+                'titulo': livro.titulo,
+                'autor': livro.autor,
+                'capa': livro.capa,
+                'descricao': livro.sinopse,
+                'editora': livro.editora,
+                'data_publicacao': livro.data_lancamento,
+                'numero_paginas': livro.numero_paginas,
+                'isbn': livro.isbn,
+                'idioma': livro.idioma,
+                'categoria': livro.categoria,
+                'classificacao': livro.classificacao,
+                'tipo': livro.get_tipo_display(),
+                'data_adicao': livro.data_adicao,
+                'notas_pessoais': livro.notas_pessoais,
+                'edit_url': edit_url
+            }
+        }
+        return render(request, 'detalhes_livros.html', context)
+    except Exception as e:
+        logger.error(f"Erro ao buscar detalhes do livro {livro_id}: {str(e)}")
+        messages.error(request, "Ocorreu um erro ao carregar os detalhes do livro.")
         return redirect('profile')
 
-    try:
-        register_book_view(livro.titulo, request.user)
-    except Exception as e:
-        logger.warning(f"Erro ao registrar visualização do livro {livro_id}: {str(e)}")
 
-    context = {
-        'livro': {
-            'id': livro.id,
-            'titulo': livro.titulo,
-            'autor': livro.autor,
-            'imagem': livro.capa,
-            'descricao': livro.sinopse,
-            'editora': livro.editora,
-            'data_publicacao': livro.data_lancamento,
-            'numero_paginas': livro.numero_paginas,
-            'isbn': livro.isbn,
-            'idioma': livro.idioma,
-            'categoria': livro.categoria,
-            'preco': getattr(livro, 'preco', None),
-            'moeda': 'BRL',
-            'classificacao': livro.classificacao
-        }
-    }
-    return render(request, 'detalhes_livros.html', context)
-
-@csrf_exempt
+@login_required
 @require_POST
 def salvar_classificacao(request, livro_id):
+    """View para salvar a classificação de um livro"""
     try:
-        classificacao = int(request.POST.get('classificacao'))
-        if not 1 <= classificacao <= 5:
+        # Get the rating from POST data, with proper error handling
+        try:
+            classificacao = request.POST.get('classificacao')
+            if not classificacao:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Classificação não fornecida'
+                }, status=400)
+
+            classificacao = int(classificacao)
+            if not 1 <= classificacao <= 5:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'A classificação deve ser entre 1 e 5'
+                }, status=400)
+        except (TypeError, ValueError) as e:
+            logger.error(f"Erro ao converter classificação: {str(e)}")
             return JsonResponse({
                 'success': False,
-                'message': 'A classificação deve ser entre 1 e 5'
+                'message': 'Classificação inválida'
             }, status=400)
 
+        # Update rating in database
         success = book_shelf_repository.update_book_rating(
             user=request.user,
             book_id=livro_id,
@@ -337,6 +413,7 @@ def salvar_classificacao(request, livro_id):
                 'success': True,
                 'message': 'Classificação salva com sucesso!'
             })
+
         return JsonResponse({
             'success': False,
             'message': 'Livro não encontrado'
@@ -346,5 +423,5 @@ def salvar_classificacao(request, livro_id):
         logger.error(f"Erro ao salvar classificação: {str(e)}")
         return JsonResponse({
             'success': False,
-            'message': str(e)
+            'message': 'Erro ao salvar classificação'
         }, status=500)

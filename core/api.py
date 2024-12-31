@@ -191,7 +191,7 @@ class GoogleBooksAPI:
 
             cached_book = cache.get(cache_key)
             if cached_book:
-                logger.info(f"Detalhes do livro {livro_id} recuperados do cache")
+                # logger.info(f"Detalhes do livro {livro_id} recuperados do cache")
                 return cached_book
 
             try:

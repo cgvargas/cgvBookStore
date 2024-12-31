@@ -3,6 +3,7 @@ import logging
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 from ..api import google_books_api
 from .utils import _processar_resultados_google_books, _ordenar_resultados, _paginar_resultados
 from analytics.utils import register_book_view
@@ -25,26 +26,20 @@ def livro_detail(request, livro_id):
             messages.error(request, 'Livro não encontrado.')
             return redirect('index')
 
-        logger.debug(f"""
-        Detalhes do livro encontrado:
-        ID: {livro_id}
-        Título: {livro.titulo}
-        Autor: {livro.autor}
-        Editora: {getattr(livro, 'editora', 'N/A')}
-        Páginas: {getattr(livro, 'numero_paginas', 'N/A')}
-        Data: {getattr(livro, 'data_publicacao', 'N/A')}
-        Idioma: {getattr(livro, 'idioma', 'N/A')}
-        """)
+        # Incrementa visualizações
+        livro.incrementar_visualizacoes()
 
-        livros_relacionados = book_repository.get_featured_books(
-            exclude_id=livro.id,
-            limit=3
+        # Busca livros relacionados
+        livros_relacionados = book_repository.get_related_books(
+            book_id=livro_id,
+            categoria=livro.categoria
         )
 
         context = {
             'livro': livro,
             'livros_relacionados': livros_relacionados,
         }
+
         return render(request, 'livro_detail.html', context)
     except Exception as e:
         logger.error(f"Erro ao buscar detalhes do livro {livro_id}: {str(e)}")
@@ -80,7 +75,7 @@ def buscar_livro(request):
                 resultados = _paginar_resultados(resultados, page)
             else:
                 logger.warning(f"Nenhum resultado encontrado para '{termo_busca}'")
-                mensagem = f"Nenhum resultado encontrado para '{termo_busca}'. Deseja adicionar manualmente?"
+                mensagem = f"Nenhum resultado encontrado para {termo_busca}!"
                 sem_resultados = True
                 messages.info(request, mensagem, extra_tags='busca')
 
@@ -109,9 +104,13 @@ def google_book_detail(request, livro_id):
             messages.error(request, 'Não foi possível encontrar os detalhes deste livro.')
             return redirect('buscar_livro')
 
+        # Adiciona o livro_id explicitamente ao contexto e ao livro
+        livro['id'] = livro_id  # Garante que o ID está no dicionário do livro
         context = {
             'livro': livro,
-            'titulo_pagina': livro.get('titulo', 'Detalhes do Livro')
+            'livro_id': livro_id,  # ID separado no contexto
+            'titulo_pagina': livro.get('titulo', 'Detalhes do Livro'),
+            'debug': settings.DEBUG  # Agora podemos usar settings.DEBUG
         }
 
         return render(request, 'detalhe_livro_google.html', context)

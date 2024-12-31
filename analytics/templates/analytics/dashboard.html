@@ -46,7 +46,7 @@
             </div>
             <!-- Botões de Exportação -->
             <div class="btn-group export-buttons">
-                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <i class="bi bi-download"></i> Exportar
                 </button>
                 <div class="dropdown-menu">
@@ -70,7 +70,7 @@
     <!-- Métricas Cards -->
     <div class="row">
         <!-- Visitas Totais -->
-        <div class="col-xl-3 col-md-6 mb-4" data-toggle="modal" data-target="#visitDetailsModal">
+        <div class="col-xl-3 col-md-6 mb-4" data-bs-toggle="modal" data-target="#visitDetailsModal">
             <div class="card border-left-primary shadow h-100 py-2 metric-card">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
@@ -180,9 +180,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Detalhes de Visitas</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <!-- Cards de Resumo -->

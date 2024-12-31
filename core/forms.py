@@ -4,7 +4,12 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from .models import Contato, CustomUser, EstanteLivro
+import warnings
 
+warnings.warn(
+    "Este arquivo está deprecated. LivroManualForm foi movido para core.presentation.forms.books.book_forms",
+    DeprecationWarning
+)
 
 class ContatoForm(forms.ModelForm):
 

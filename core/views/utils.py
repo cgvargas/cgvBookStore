@@ -8,7 +8,10 @@ e fornecendo funcionalidades de apresentação.
 
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.templatetags.static import static
+from django.urls import reverse
 from django.utils.crypto import get_random_string
+
+from analytics.middleware.session_middleware import logger
 
 
 def _processar_resultados_google_books(resultados):
@@ -120,3 +123,14 @@ def safe_cache_key(key):
     random_suffix = get_random_string(8)
     return f"{random_suffix}_{(''.join(c for c in key if c.isalnum() or c in '-_'))}"
 
+
+# Função helper para determinar a URL correta (pode ser adicionada em utils.py)
+def get_book_detail_url(book):
+    """Helper function to determine the correct detail URL for a book"""
+    try:
+        if hasattr(book, 'livro_id') and book.livro_id:
+            return reverse('detalhes_livro_google', args=[book.livro_id])
+        return reverse('detalhes_livro_numerico', args=[book.id])
+    except Exception as e:
+        logger.error(f"Erro ao gerar URL para livro: {str(e)}")
+        return "#"  # fallback URL
